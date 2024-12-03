@@ -99,6 +99,8 @@ Have fun!
 
 # Domänenmodell {#section-domaenenmodell}
 
+![Das ist ein Titel](images/domaenenmodell.png)
+
 # Komponentenmodell {#section-komponentenmodell}
 
 # Glossar {#section-glossary}
