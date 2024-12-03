@@ -138,7 +138,8 @@ Man kann seine gekauften Wertpapiere verkaufen und erhällt dafür Geld auf dem 
 Das Depot zeigt die aktuellen gekauften Wertpapiere und ihren Kurs an. Dies ist die Übersichtsseite. Klickt man auf ein Wertpapier gelangt man zu 4.
 
 **Funktionalität:**
-- Anzeige aller Wertpapiere als Liste mit Unternehmens-Namen, Kürzel, Wert pro Wertpapier, %ige-Zunahme/-Fall der letzten x Minuten im Vergleich zu jetzt
+- Anzeige aller gekauften Wertpapiere als Liste mit Anzahl, Unternehmens-Namen, Kürzel, Wert pro Wertpapier, 
+  %ige-Zunahme/-Fall der letzten x Minuten im Vergleich zu jetzt
 -> Live-Update dieser Wertpapier-Werte
 
 ### 4. Darstellung ausgewählter Kurse
