@@ -29,7 +29,7 @@ Hier ganz schnell die wichtigsten Dinge zum Bearbeiten:
 Ein Link sieht folgendermaßen aus: [Miro](https://miro.com/app/board/uXjVLD6LLSw=/)
 
 Ein Bild/draw.io-Datei bindet man so ein:
-![Kategorien von Qualitätsanforderungen](images/example.drawio.png)
+![Kategorien von Qualitätsanforderungen](diagrams/example.png)
 
 Etwas **dick** macht man so.
 
