@@ -93,18 +93,26 @@ Have fun!
 
 ## Minimal Viable Product (MVP)
 
+### 0. Kontoverwaltung
+
+**Zweck:**
+Der Nutzer kann hier Kapitel auf sein Konto legen.
+
+**Funktionalität:**
+- Man kann einen Betrag x auf das Konto legen. Anzugeben ist: der Betrag der auf das Konto soll
+
 ### 1. Depotverwaltung
 
 **Zweck:**
-Der Nutzer kann hier Kapitel auf das Depot legen.
+Der Nutzer kann hier mit seinem Geld vom Konto Wertpapiere kaufen, die dann im Depot liegen.
 
 **Funktionalität:**
-  - Man kann einen Betrag x auf das Depot legen. Anzugeben ist: der Betrag der auf das Depot soll
+  - Man kann mit einem Betrag x Wertpapiere für das eigene Depot kaufen.
 
-### 2. Handelsmöglichkeiten
+### 2. Handelsmöglichkeiten für das Depot
 
 **Zweck:**
-Der Nutzer kann hier mit seinem hinterlegtem Kapitel Wertpapiere kaufen oder gekaufte Wertpapiere verkaufen.
+Der Nutzer kann hier mit seinem hinterlegtem Kapitel im Konto Wertpapiere kaufen oder gekaufte Wertpapiere verkaufen.
 
 #### 2.1 Buy-Orders
 
@@ -113,16 +121,16 @@ Man kann mit einem Betrag x Wertpapiere einer Firma kaufen.
 
 **Funktionalität:**
 - Angeben beim Kauf: Wertpapier-Stückzahl, wann ausführt werden soll (jetzt, Zeitpunkt x), Kosten des Kaufes (auf Basis aktueller Kurswerte)
-- nach Kauf verringert sich der Kapitalwert auf dem Depot (siehe 1.)
+- nach Kauf verringert sich der Geldwert im Konto (siehe 1.)
 
 #### 2.1 Sell-Orders
 
 **Zweck:**
-Man kann seine gekauften Wertpapiere verkaufen und erhällt dafür Kapitel im Depot.
+Man kann seine gekauften Wertpapiere verkaufen und erhällt dafür Geld auf dem Konto.
 
 **Funktionalität:**
 - Angeben beim Verkauf: Wertpapier-Stückzahl, wann ausführt werden soll (jetzt, Zeitpunkt x), Erlös des Kaufes (auf Basis aktueller Kurswerte)
-- nach Verkauf erhöht sich der Kapitalwert auf dem Depot (siehe 1.)
+- nach Verkauf erhöht sich der Geldwert im Konto (siehe 1.)
 
 ### 3. Depot
 
