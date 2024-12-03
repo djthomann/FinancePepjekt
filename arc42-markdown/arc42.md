@@ -43,9 +43,17 @@ Uns so sieht eine Tabelle aus:
 
 Have fun!
 
-# Bausteinsicht {#section-building-block-view}
+# Projekt-Mindestumfang {#section-projekt-mindestumfang}
 
+# Bewertungskriterien - Auf was lege ich Wert? {#section-bewertungskriterien}
 
+# Wesentliche funktionale Anforderungen {#section-nicht-anforderungen}
+
+# Wesentliche nicht funktionale Anforderungen {#section-nicht-fkt-anforderungen}
+
+# Domänenmodell {#section-domaenenmodell}
+
+# Komponentenmodell {#section-komponentenmodell}
 
 # Glossar {#section-glossary}
 
