@@ -202,9 +202,12 @@ Mehrere Nutzer können das System verwenden, mit jeweils eigenen Depots und indi
 
 # Domänenmodell {#section-domaenenmodell}
 
-![Das ist ein Titel](images/domaenenmodell.png)
+![Das ist ein Titel](diagrams/domaenenmodell.png)
 
 # Komponentenmodell {#section-komponentenmodell}
+![Komponentenmodell](diagrams/STACS_Finance_ComponentDiagramm.png)
+
+![Komponentenmodell_Interfaces](diagrams/STACS_Finance_Interfaces.png)
 
 # Glossar {#section-glossary}
 
