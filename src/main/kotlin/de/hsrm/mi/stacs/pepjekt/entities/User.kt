@@ -1,4 +1,4 @@
-package de.hsrm.mi.stacs.pepjekt.model
+package de.hsrm.mi.stacs.pepjekt.entities
 
 data class User(
     val name: String,

@@ -1,4 +1,4 @@
-package de.hsrm.mi.stacs.pepjekt.model
+package de.hsrm.mi.stacs.pepjekt.entities
 
 data class Stock(
     val symbol: String,
