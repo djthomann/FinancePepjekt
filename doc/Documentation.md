@@ -209,6 +209,8 @@ Mehrere Nutzer können das System verwenden, mit jeweils eigenen Depots und indi
 
 ![Komponentenmodell_Interfaces](diagrams/STACS_Finance_Interfaces.png)
 
+Als CRUD Repository verwenden wir R2DBC.
+
 # Glossar {#section-glossary}
 
 Die wesentlichen fachlichen und technischen Begriffe, die Stakeholder im
