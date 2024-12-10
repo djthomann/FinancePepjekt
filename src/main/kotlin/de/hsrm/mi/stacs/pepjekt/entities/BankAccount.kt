@@ -5,8 +5,9 @@ import org.springframework.data.relational.core.mapping.Table
 import java.math.BigDecimal
 
 @Table("bankaccount")
-class BankAccount(var currency: Currency) {
+data class BankAccount(
     @Id
-    var id: Long? = null
+    var id: Long? = null,
+    var currency: Currency,
     var balance: BigDecimal? = BigDecimal.ZERO
-}
+)

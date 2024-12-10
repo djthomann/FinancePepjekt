@@ -8,6 +8,7 @@ data class Order(
     @Id
     var id: Long? = null,
     val volume: Float,
-    val type: OrderType
+    val type: OrderType,
+    val investmentAccount: InvestmentAccount
 ) {
 }
