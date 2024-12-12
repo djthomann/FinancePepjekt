@@ -9,6 +9,7 @@ data class Order(
     var id: Long? = null,
     val volume: Float,
     val type: OrderType,
-    val investmentAccount: InvestmentAccount
+    val investmentAccount: InvestmentAccount,
+    val stock: Stock
 ) {
 }
