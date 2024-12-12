@@ -2,17 +2,19 @@ package de.hsrm.mi.stacs.pepjekt.services
 
 import de.hsrm.mi.stacs.pepjekt.entities.Quote
 import de.hsrm.mi.stacs.pepjekt.entities.Stock
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
 interface IStockService {
 
-    fun getStockBySymbol(symbol: String): Stock
+    fun getStockBySymbol(symbol: String): Mono<Stock>
 
-    fun calculateAveragePrice(symbol: String, from: LocalDateTime, to: LocalDateTime): BigDecimal
+    fun calculateAveragePrice(symbol: String, from: LocalDateTime, to: LocalDateTime): Mono<BigDecimal>
 
-    fun getStockHistory(symbol: String): List<Quote>
+    fun getStockHistory(symbol: String): Flux<Quote>
 
-    fun getStockHistory(symbol: String, from: LocalDateTime, to: LocalDateTime): List<Quote>
+    fun getStockHistory(symbol: String, from: LocalDateTime, to: LocalDateTime): Flux<Quote>
 
 }
