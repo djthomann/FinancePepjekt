@@ -11,12 +11,12 @@ interface IOrderService {
     fun placeBuyOrder(
         investmentAccountId: String, stockSymbol: String, volume: BigDecimal, executionTime:
         LocalDateTime
-    ): Mono<Void>
+    ): Mono<Order>
 
     fun placeSellOrder(
         investmentAccountId: String, stockSymbol: String, volume: BigDecimal, executionTime:
         LocalDateTime
-    ): Mono<Void>
+    ): Mono<Order>
 
     fun getOrdersByInvestmentAccount(investmentAccountId: String): Flux<Order>
 

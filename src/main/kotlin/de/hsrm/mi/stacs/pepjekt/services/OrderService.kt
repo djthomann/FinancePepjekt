@@ -27,9 +27,8 @@ class OrderService(
         stockSymbol: String,
         volume: BigDecimal,
         executionTime: LocalDateTime
-    ): Mono<Void> {
-        return operator.transactional(
-            Mono.zip(
+    ): Mono<Order> {
+        return Mono.zip(
                 investmentAccountRepository.findById(investmentAccountId.toLong()),
                 stockRepository.findBySymbol(stockSymbol)
             ).flatMap { tuple ->
@@ -41,8 +40,7 @@ class OrderService(
                     stock = stock
                 )
                 orderRepository.save(order).`as`(operator::transactional)
-            }.then()
-        )
+            }
     }
 
     override fun placeSellOrder(
@@ -50,9 +48,8 @@ class OrderService(
         stockSymbol: String,
         volume: BigDecimal,
         executionTime: LocalDateTime
-    ): Mono<Void> {
-        return operator.transactional(
-            Mono.zip(
+    ): Mono<Order> {
+        return Mono.zip(
                 investmentAccountRepository.findById(investmentAccountId.toLong()),
                 stockRepository.findBySymbol(stockSymbol)
             ).flatMap { tuple ->
@@ -64,8 +61,7 @@ class OrderService(
                     stock = stock
                 )
                 orderRepository.save(order).`as`(operator::transactional)
-            }.then()
-        )
+            }
     }
 
     override fun getOrdersByInvestmentAccount(investmentAccountId: String): Flux<Order> {
