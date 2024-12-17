@@ -48,12 +48,12 @@ class StockServiceTest {
 
     @Test
     fun `test calculateAveragePrice`() {
-        val from = LocalDateTime.now().minusDays(2)
+        val from = LocalDateTime.now().minusDays(50)
         val to = LocalDateTime.now()
 
         stockService.calculateAveragePrice("AAPL", from, to)
             .doOnNext { averagePrice ->
-                assert(averagePrice == BigDecimal(200))
+                assert(averagePrice.compareTo(BigDecimal("200.00")) == 0)
             }
             .subscribe()
     }
