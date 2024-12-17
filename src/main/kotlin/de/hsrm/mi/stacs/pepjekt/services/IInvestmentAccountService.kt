@@ -1,13 +1,14 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
-import de.hsrm.mi.stacs.pepjekt.entities.Stock
+import de.hsrm.mi.stacs.pepjekt.entities.InvestmentAccount
+import reactor.core.publisher.Mono
 import java.math.BigDecimal
 
 interface IInvestmentAccountService {
 
-    fun buyStock(investmentAccountId: Long, stockSymbol: String, volume: BigDecimal): Void
+    fun buyStock(investmentAccountId: Long, stockSymbol: String, volume: BigDecimal): Mono<InvestmentAccount>
 
-    fun sellStock(investmentAccountId: Long, stockSymbol: String, volume: BigDecimal): Void
+    fun sellStock(investmentAccountId: Long, stockSymbol: String, volume: BigDecimal): Mono<InvestmentAccount>
 
-    fun getPortfolio(userId: Long): Map<Stock, Float>
+    fun getInvestmentAccountPortfolio(userId: Long): Mono<InvestmentAccount>
 }
