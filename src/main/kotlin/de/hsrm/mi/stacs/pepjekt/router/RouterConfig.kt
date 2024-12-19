@@ -95,6 +95,7 @@ class RouterConfig {
         "/api".nest {
             POST("/post/buy/stock", orderHandler::postBuyStock)
             POST("/post/sell/stock", orderHandler::postSellStock)
+            GET("/get/orders", orderHandler::getOrders)
         }
     }
 }
