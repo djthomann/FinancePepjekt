@@ -85,7 +85,7 @@ class RouterConfig {
     }
 
     /**
-     * Defines the routes for order related functionalities such as placing buy or sell orders.
+     * Defines the routes for order related functionalities such as placing buy, sell orders or getting all orders of an investment account.
      *
      * @param orderHandler Handler for order operations.
      * @return Router with order endpoints.
