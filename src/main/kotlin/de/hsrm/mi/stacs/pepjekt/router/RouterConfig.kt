@@ -8,19 +8,24 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.server.router
 
+/**
+ * Configuration class for defining the main routes of the application.
+ * This class configures the routing of different API endpoints
+ * for bank account, investment account, stock, and order functionalities.
+ */
 @Configuration
 class RouterConfig {
 
-    /*
-    - eigene bank account balance anzeigen                  x
-    - anzeige eigener wertpapiere + werte                  x
-    - wertpapier aktuelle werte nach symbol / name                  x
-    - finde wertpapier nach symbol / name                  x
-    - aktueller wertpapier wert                  x
-    - tagestief + tageshoch wertpapier                  x
-    - neues wertpapiert kaufen (anzahl, zeitpunkt, summe)/ verkaufen (wertpapier symbol)                  x
+    /**
+     * Main router bean that configures all the endpoints related to bank account, investment account,
+     * stock, and order services.
+     *
+     * @param bankAccountHandler Handler for bank account related operations.
+     * @param investmentAccountHandler Handler for investment account related operations.
+     * @param stockHandler Handler for stock related operations.
+     * @param orderHandler Handler for order related operations.
+     * @return Configured main router with all nested routes.
      */
-
     @Bean
     fun mainRouter(bankAccountHandler: BankAccountHandler, investmentAccountHandler: InvestmentAccountHandler, stockHandler: StockHandler, orderHandler: OrderHandler) = router {
         add(bankAccountRouter(bankAccountHandler))
@@ -29,6 +34,12 @@ class RouterConfig {
         add(orderRouter(orderHandler))
     }
 
+    /**
+     * Defines the routes for bank account related functionalities.
+     *
+     * @param bankAccountHandler Handler for bank account operations.
+     * @return Router with bank account endpoints.
+     */
     @Bean
     fun bankAccountRouter(bankAccountHandler: BankAccountHandler) = router {
         "/api".nest {
@@ -36,6 +47,12 @@ class RouterConfig {
         }
     }
 
+    /**
+     * Defines the routes for investment account related functionalities.
+     *
+     * @param investmentAccountHandler Handler for investment account operations.
+     * @return Router with investment account endpoints.
+     */
     @Bean
     fun investmentAccountRouter(investmentAccountHandler: InvestmentAccountHandler) = router {
         "/api".nest {
@@ -43,6 +60,12 @@ class RouterConfig {
         }
     }
 
+    /**
+     * Defines the routes for stock related functionalities.
+     *
+     * @param stockHandler Handler for stock operations.
+     * @return Router with stock endpoints.
+     */
     @Bean
     fun stockRouter(stockHandler: StockHandler) = router {
         "/api".nest {
@@ -51,18 +74,24 @@ class RouterConfig {
             GET("/get/stock/by/symbol", stockHandler::getStockBySymbol)
             GET("/get/stock/by/name", stockHandler::getStockByName)
             GET("/get/current/stock/value", stockHandler::getCurrentStockValue) // by stock symbol
-            GET("get/stock/day-low", stockHandler::getStockDayLow)
-            GET("get/stock/day-high", stockHandler::getStockDayHigh)
-            GET("get/stock/history/by-symbol", stockHandler::getStockHistoryBySymbol)
-            GET("get/stock/history/by-name", stockHandler::getStockHistoryByName)
+            GET("/get/stock/day-low", stockHandler::getStockDayLow)
+            GET("/get/stock/day-high", stockHandler::getStockDayHigh)
+            GET("/get/stock/history/by-symbol", stockHandler::getStockHistoryBySymbol)
+            GET("/get/stock/history/by-name", stockHandler::getStockHistoryByName)
         }
     }
 
+    /**
+     * Defines the routes for order related functionalities such as placing buy or sell orders.
+     *
+     * @param orderHandler Handler for order operations.
+     * @return Router with order endpoints.
+     */
     @Bean
     fun orderRouter(orderHandler: OrderHandler) = router {
         "/api".nest {
-            POST("post/buy/stock", orderHandler::postBuyStock)
-            POST("post/sell/stock", orderHandler::postSellStock)
+            POST("/post/buy/stock", orderHandler::postBuyStock)
+            POST("/post/sell/stock", orderHandler::postSellStock)
         }
     }
 }
