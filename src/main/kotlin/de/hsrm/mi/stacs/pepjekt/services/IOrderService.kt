@@ -6,6 +6,12 @@ import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
+/**
+ * Interface for managing orders in an investment account.
+ *
+ * Provides methods to place buy and sell orders for stocks, as well as retrieving orders
+ * associated with an investment account.
+ */
 interface IOrderService {
 
     fun placeBuyOrder(

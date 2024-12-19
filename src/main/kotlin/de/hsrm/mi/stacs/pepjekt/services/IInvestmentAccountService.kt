@@ -1,13 +1,20 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
-import de.hsrm.mi.stacs.pepjekt.entities.Stock
+import de.hsrm.mi.stacs.pepjekt.entities.InvestmentAccount
+import reactor.core.publisher.Mono
 import java.math.BigDecimal
 
+/**
+ * Interface for managing investment account operations.
+ *
+ * Provides methods for buying and selling stocks in an investment account, as well as retrieving
+ * the portfolio details of an investment account.
+ */
 interface IInvestmentAccountService {
 
-    fun buyStock(investmentAccountId: Long, stockSymbol: String, volume: BigDecimal): Void
+    fun buyStock(investmentAccountId: Long, stockSymbol: String, volume: BigDecimal): Mono<InvestmentAccount>
 
-    fun sellStock(investmentAccountId: Long, stockSymbol: String, volume: BigDecimal): Void
+    fun sellStock(investmentAccountId: Long, stockSymbol: String, volume: BigDecimal): Mono<InvestmentAccount>
 
-    fun getPortfolio(userId: Long): Map<Stock, Float>
+    fun getInvestmentAccountPortfolio(userId: Long): Mono<InvestmentAccount>
 }
