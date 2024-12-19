@@ -10,6 +10,13 @@ import reactor.kotlin.core.util.function.component1
 import reactor.kotlin.core.util.function.component2
 import java.math.BigDecimal
 
+/**
+ * Service for managing investment accounts, including buying and selling stocks,
+ * as well as retrieving account portfolios.
+ *
+ * This service interacts with investment account and stock repositories, ensuring
+ * transactional integrity for financial operations.
+ */
 @Service
 class InvestmentAccountService(
     val operator: TransactionalOperator, // injected by spring
@@ -17,6 +24,14 @@ class InvestmentAccountService(
     val stockRepository: IStockRepository
 ) : IInvestmentAccountService {
 
+    /**
+     * Buys a stock and updates the investment account portfolio and bank account accordingly.
+     *
+     * @param investmentAccountId the ID of the investment account making the purchase
+     * @param stockSymbol the symbol of the stock to purchase
+     * @param volume the volume of the stock to purchase
+     * @return a [Mono] emitting the updated [InvestmentAccount] or an error if any operation fails
+     */
     override fun buyStock(investmentAccountId: Long, stockSymbol: String, volume: BigDecimal): Mono<InvestmentAccount> {
         // get investment account, get stock by stockSymbol, buy stock -> less money on bankaccount
         return Mono.zip(
@@ -38,6 +53,14 @@ class InvestmentAccountService(
         }
     }
 
+    /**
+     * Sells a stock and updates the investment account portfolio and bank account balance.
+     *
+     * @param investmentAccountId the ID of the investment account making the sale
+     * @param stockSymbol the symbol of the stock to sell
+     * @param volume the volume of the stock to sell
+     * @return a [Mono] emitting the updated [InvestmentAccount] or an error if any operation fails
+     */
     override fun sellStock(
         investmentAccountId: Long,
         stockSymbol: String,
@@ -62,6 +85,12 @@ class InvestmentAccountService(
         }
     }
 
+    /**
+     * Retrieves the portfolio of an investment account by the user ID.
+     *
+     * @param userId the ID of the user whose investment account portfolio is to be retrieved
+     * @return a [Mono] emitting the [InvestmentAccount] containing the portfolio, or an error if not found
+     */
     override fun getInvestmentAccountPortfolio(userId: Long): Mono<InvestmentAccount> {
         return investmentAccountRepository.findByOwnerId(userId)
     }
