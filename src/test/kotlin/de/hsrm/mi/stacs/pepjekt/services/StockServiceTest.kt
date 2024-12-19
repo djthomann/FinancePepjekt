@@ -14,6 +14,12 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 import kotlin.test.Test
 
+/**
+ * Unit tests for the [StockService] class.
+ *
+ * This class ensures the proper functioning of the methods within the `StockService` class
+ * by testing various scenarios with mocked dependencies.
+ */
 class StockServiceTest {
 
     private val stockRepository: IStockRepository = mock(IStockRepository::class.java)
@@ -21,6 +27,10 @@ class StockServiceTest {
 
     private lateinit var stockService: StockService
 
+    /**
+     * Sets up test environment by initializing mocked repositories, defining their behaviors,
+     * and preparing test data for the Stock and Quote entities.
+     */
     @BeforeEach
     fun setUp() {
         val stock = Stock(symbol = "AAPL", description = "Apple Inc.", figi = "BBG000B9XRY4", currency = Currency.USD)
@@ -37,6 +47,9 @@ class StockServiceTest {
         `when`(quoteRepository.findByStock(stock)).thenReturn(Flux.fromIterable(quotes))
     }
 
+    /**
+     * Tests the [StockService.getStockBySymbol] method to ensure it retrieves the correct Stock entity by its symbol.
+     */
     @Test
     fun `test getStockBySymbol`() {
         stockService.getStockBySymbol("AAPL")
@@ -46,6 +59,10 @@ class StockServiceTest {
             .subscribe()
     }
 
+    /**
+     * Tests the [StockService.calculateAveragePrice] method to ensure the average price is calculated
+     * correctly over a given time range.
+     */
     @Test
     fun `test calculateAveragePrice`() {
         val from = LocalDateTime.now().minusDays(50)
@@ -58,6 +75,9 @@ class StockServiceTest {
             .subscribe()
     }
 
+    /**
+     * Tests the [StockService.getStockHistory] method to ensure all quotes for a stock are retrieved correctly.
+     */
     @Test
     fun `test getStockHistory`() {
         stockService.getStockHistory("AAPL")
@@ -69,6 +89,10 @@ class StockServiceTest {
             .subscribe()
     }
 
+    /**
+     * Tests the [StockService.getStockHistory] method with a time filter to ensure only quotes
+     * within the specified time range are retrieved.
+     */
     @Test
     fun `test getStockHistory with time filter`() {
         val from = LocalDateTime.now().minusDays(2)
@@ -82,5 +106,4 @@ class StockServiceTest {
             }
             .subscribe()
     }
-
 }

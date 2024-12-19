@@ -15,8 +15,15 @@ import java.math.BigDecimal
 import org.assertj.core.api.Assertions.assertThat
 import org.mockito.Mockito.*
 
+/**
+ * Unit tests for the [InvestmentAccountService] class.
+ *
+ * This class verifies the functionality of `InvestmentAccountService` methods using mocked dependencies
+ * for the repository and transaction operator.
+ */
 class InvestmentAccountServiceTest {
-    private val investmentAccountRepository: IInvestmentAccountRepository = mock(IInvestmentAccountRepository::class.java)
+    private val investmentAccountRepository: IInvestmentAccountRepository =
+        mock(IInvestmentAccountRepository::class.java)
     private val stockRepository: IStockRepository = mock(IStockRepository::class.java)
     private val operator: TransactionalOperator = mock(TransactionalOperator::class.java)
 
@@ -25,6 +32,9 @@ class InvestmentAccountServiceTest {
     private lateinit var investmentAccount: InvestmentAccount
     private lateinit var stock: Stock
 
+    /**
+     * Initializes the test environment by setting up mock data and dependencies.
+     */
     @BeforeEach
     fun setUp() {
         val stockSymbol = "AAPL"
@@ -46,6 +56,9 @@ class InvestmentAccountServiceTest {
         investmentAccountService = InvestmentAccountService(operator, investmentAccountRepository, stockRepository)
     }
 
+    /**
+     * Tests the [InvestmentAccountService.sellStock] method to ensure that selling stock updates the portfolio correctly.
+     */
     @Test
     fun `test sell stock`() {
         investmentAccountService.sellStock(1L, stock.symbol, BigDecimal(10))
@@ -56,6 +69,9 @@ class InvestmentAccountServiceTest {
             }
     }
 
+    /**
+     * Tests the [InvestmentAccountService.buyStock] method to ensure that buying stock updates the portfolio correctly.
+     */
     @Test
     fun `test buy stock`() {
         investmentAccountService.buyStock(1L, stock.symbol, BigDecimal(10))
@@ -66,10 +82,12 @@ class InvestmentAccountServiceTest {
             }
     }
 
+    /**
+     * Tests the [InvestmentAccountService.getInvestmentAccountPortfolio] method to ensure that it retrieves the correct investment account.
+     */
     @Test
     fun `test get investment account`() {
         investmentAccountService.getInvestmentAccountPortfolio(1L)
             .doOnNext { account -> assertThat(investmentAccount == account) }
     }
-
 }
