@@ -16,8 +16,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.mockito.Mockito.*
 
 class InvestmentAccountServiceTest {
-    private val investmentAccountRepository: IInvestmentAccountRepository =
-        mock(IInvestmentAccountRepository::class.java)
+    private val investmentAccountRepository: IInvestmentAccountRepository = mock(IInvestmentAccountRepository::class.java)
     private val stockRepository: IStockRepository = mock(IStockRepository::class.java)
     private val operator: TransactionalOperator = mock(TransactionalOperator::class.java)
 
