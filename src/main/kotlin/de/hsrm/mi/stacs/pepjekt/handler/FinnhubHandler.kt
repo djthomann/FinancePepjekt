@@ -3,6 +3,7 @@ package de.hsrm.mi.stacs.pepjekt.handler
 import de.hsrm.mi.stacs.pepjekt.controller.MarketStatusDTD
 import de.hsrm.mi.stacs.pepjekt.controller.QuoteDTD
 import jakarta.annotation.PostConstruct
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -22,6 +23,7 @@ class FinnhubHandler(
 
     private var isMarketOpen = true;
 
+    private val logger = LoggerFactory.getLogger(FinnhubHandler::class.java)
 
     /**
      * Fetches the Quote, depending on if the market is open or not. Is the market closed, the dummy finnhub webclient
@@ -33,6 +35,12 @@ class FinnhubHandler(
         } else {
             dummy_finnhub_webClient
         }
+
+        logger.info(
+            "Fetching StockQuote of symbol {} from {}",
+            symbol,
+            if (isMarketOpen) "finnhub_webclient" else "dummy_finnhub_webClient"
+        )
 
         return webClient.get()
             .uri { uriBuilder: UriBuilder ->
