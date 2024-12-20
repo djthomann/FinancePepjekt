@@ -14,16 +14,16 @@ class FinnhubController(
     private val token = "ct2r2bhr01qiurr42bq0ct2r2bhr01qiurr42bqg"
 
     @GetMapping("/stock")
-    fun getStockQuote(@RequestParam symbol: String): Mono<ResponseEntity<String>> {
-        val quoteMono: Mono<String> = finnhubHandler.fetchStockQuote(symbol, token)
+    fun getStockQuote(@RequestParam symbol: String): Mono<ResponseEntity<QuoteDTD>> {
+        val quoteMono: Mono<QuoteDTD> = finnhubHandler.fetchStockQuote(symbol, token)
         return quoteMono.map { response ->
             ResponseEntity.ok(response)
         }
     }
 
     @GetMapping("/market-status")
-    fun geteMarketStatus(@RequestParam exchange: String): Mono<ResponseEntity<String>> {
-        val marketStatusMono: Mono<String> = finnhubHandler.fetchMarketStatus(exchange, token)
+    fun geteMarketStatus(@RequestParam exchange: String): Mono<ResponseEntity<MarketStatusDTD>> {
+        val marketStatusMono: Mono<MarketStatusDTD> = finnhubHandler.fetchMarketStatus(exchange, token)
         return marketStatusMono.map { response ->
             ResponseEntity.ok(response)
         }
