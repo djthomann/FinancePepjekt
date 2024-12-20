@@ -26,4 +26,17 @@ class FinnhubHandler(
             .retrieve()
             .bodyToMono(String::class.java)
     }
+
+    fun fetchMarketStatus(exchange: String, token: String): Mono<String> {
+        return webClient.get()
+            .uri { uriBuilder: UriBuilder ->
+                uriBuilder.path("/stock/market-status")
+                    .queryParam("exchange", exchange)
+                    .queryParam("token", token)
+                    .build()
+            }
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .retrieve()
+            .bodyToMono(String::class.java)
+    }
 }
