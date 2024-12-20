@@ -11,11 +11,11 @@ import reactor.core.publisher.Mono
 class FinnhubController(
     private val finnhubHandler: FinnhubHandler
 ) {
-    private val token = "ct2r2bhr01qiurr42bq0ct2r2bhr01qiurr42bqg"
+
 
     @GetMapping("/stock")
     fun getStockQuote(@RequestParam symbol: String): Mono<ResponseEntity<QuoteDTD>> {
-        val quoteMono: Mono<QuoteDTD> = finnhubHandler.fetchStockQuote(symbol, token)
+        val quoteMono: Mono<QuoteDTD> = finnhubHandler.fetchStockQuote(symbol)
         return quoteMono.map { response ->
             ResponseEntity.ok(response)
         }
@@ -23,7 +23,7 @@ class FinnhubController(
 
     @GetMapping("/market-status")
     fun geteMarketStatus(@RequestParam exchange: String): Mono<ResponseEntity<MarketStatusDTD>> {
-        val marketStatusMono: Mono<MarketStatusDTD> = finnhubHandler.fetchMarketStatus(exchange, token)
+        val marketStatusMono: Mono<MarketStatusDTD> = finnhubHandler.fetchMarketStatus(exchange)
         return marketStatusMono.map { response ->
             ResponseEntity.ok(response)
         }

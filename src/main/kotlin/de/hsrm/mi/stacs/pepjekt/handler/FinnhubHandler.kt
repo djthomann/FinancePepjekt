@@ -2,6 +2,7 @@ package de.hsrm.mi.stacs.pepjekt.handler
 
 import de.hsrm.mi.stacs.pepjekt.controller.MarketStatusDTD
 import de.hsrm.mi.stacs.pepjekt.controller.QuoteDTD
+import jakarta.annotation.PostConstruct
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -13,16 +14,36 @@ import reactor.core.publisher.Mono
 class FinnhubHandler(
     webClientBuilder: WebClient.Builder
 ) {
-    private val finnhub_webClient = webClientBuilder.baseUrl("https://finnhub.io/api/v1").build()
-    private val dummy_finnhub_webClient = webClientBuilder.baseUrl("https://localhost:8081/api").build()
+    private final val token = "ct2r2bhr01qiurr42bq0ct2r2bhr01qiurr42bqg"
+    private final val exchange = "US"
 
-    fun fetchStockQuote(symbol: String, token: String): Mono<QuoteDTD> {
-        return finnhub_webClient.get()
+    private final val finnhub_webClient = webClientBuilder.baseUrl("https://finnhub.io/api/v1").build()
+    private final val dummy_finnhub_webClient = webClientBuilder.baseUrl("http://localhost:8081/api").build()
+
+    private var isMarketOpen = true;
+
+
+    /**
+     * Fetches the Quote, depending on if the market is open or not. Is the market closed, the dummy finnhub webclient
+     * will be triggered. If the market is open then finnhub itself.
+     */
+    fun fetchStockQuote(symbol: String): Mono<QuoteDTD> {
+        val webClient = if (isMarketOpen) {
+            finnhub_webClient
+        } else {
+            dummy_finnhub_webClient
+        }
+
+        return webClient.get()
             .uri { uriBuilder: UriBuilder ->
                 uriBuilder
                     .path("/quote")
                     .queryParam("symbol", symbol)
-                    .queryParam("token", token)
+                    .apply {
+                        if (isMarketOpen) {
+                            queryParam("token", token)
+                        }
+                    }
                     .build()
             }
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -30,7 +51,10 @@ class FinnhubHandler(
             .bodyToMono(QuoteDTD::class.java)
     }
 
-    fun fetchMarketStatus(exchange: String, token: String): Mono<MarketStatusDTD> {
+    /**
+     * Fetches the market Status
+     */
+    fun fetchMarketStatus(exchange: String): Mono<MarketStatusDTD> {
         return finnhub_webClient.get()
             .uri { uriBuilder: UriBuilder ->
                 uriBuilder.path("/stock/market-status")
@@ -41,5 +65,15 @@ class FinnhubHandler(
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .retrieve()
             .bodyToMono(MarketStatusDTD::class.java)
+    }
+
+    /**
+     * On Application start there is a marketOpen check
+     * */
+    @PostConstruct
+    fun init() {
+        fetchMarketStatus(exchange).doOnNext { marketStatus ->
+            isMarketOpen = marketStatus.isOpen
+        }.subscribe()
     }
 }
