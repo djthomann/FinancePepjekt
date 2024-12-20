@@ -24,7 +24,7 @@ CREATE TABLE stock
 
 CREATE TABLE finance_user
 (
-    id   BIGINT PRIMARY KEY,
+    id   SERIAL PRIMARY KEY,
     name VARCHAR(100)        NOT NULL,
     mail VARCHAR(255) UNIQUE NOT NULL
 );
@@ -33,7 +33,7 @@ CREATE TABLE finance_user
 
 CREATE TABLE quote
 (
-    id           BIGINT PRIMARY KEY,
+    id           SERIAL PRIMARY KEY,
     value        DECIMAL(18, 4) NOT NULL,
     timeStamp    TIMESTAMP      NOT NULL,
     stock_symbol VARCHAR(50)    NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE quote
 
 CREATE TABLE bankaccount
 (
-    id       BIGINT PRIMARY KEY,
+    id       SERIAL PRIMARY KEY,
     currency VARCHAR(3)                    NOT NULL, -- ISO 4217-Währungsstandard
     balance  DECIMAL(18, 4) DEFAULT 0.0000 NOT NULL
 );
@@ -53,7 +53,7 @@ CREATE TABLE bankaccount
 
 CREATE TABLE investmentaccount
 (
-    id              BIGINT PRIMARY KEY ,
+    id              SERIAL PRIMARY KEY,
     bank_account_id BIGINT,
     owner_id        BIGINT,
     FOREIGN KEY (bank_account_id) REFERENCES bankaccount (id) ON DELETE SET NULL,
@@ -62,7 +62,7 @@ CREATE TABLE investmentaccount
 
 CREATE TABLE investment_portfolio
 (
-    investment_account_id BIGINT      NOT NULL,
+    investment_account_id BIGINT NOT NULL,
     stock_symbol          VARCHAR(50) NOT NULL,
     quantity              FLOAT       NOT NULL,
     PRIMARY KEY (investment_account_id, stock_symbol),
@@ -75,7 +75,7 @@ CREATE TABLE investment_portfolio
 -- Tabelle erstellen
 CREATE TABLE stock_order
 (
-    id                    BIGINT PRIMARY KEY,
+    id                    SERIAL PRIMARY KEY,
     volume                FLOAT       NOT NULL,
     type                  VARCHAR(4)  NOT NULL CHECK (type IN ('BUY', 'SELL')),
     investment_account_id BIGINT      NOT NULL,
@@ -88,7 +88,7 @@ CREATE TABLE stock_order
 
 CREATE TABLE exchange
 (
-    id          BIGINT PRIMARY KEY,
+    id          SERIAL PRIMARY KEY,
     symbol      VARCHAR(50)  NOT NULL UNIQUE,
     description VARCHAR(255) NOT NULL
 );
