@@ -11,6 +11,9 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriBuilder
 import reactor.core.publisher.Mono
 
+/**
+ * Component that handles the connection and dataflow between finnhub ot the dummy one
+ */
 @Component
 class FinnhubHandler(
     webClientBuilder: WebClient.Builder

@@ -1,7 +1,5 @@
--- Zuordnungstabellen zuerst löschen, da sie auf andere Tabellen verweisen
 DROP TABLE IF EXISTS investment_portfolio;
 
--- Haupttabellen löschen
 DROP TABLE IF EXISTS stock_order;
 DROP TABLE IF EXISTS investmentaccount;
 DROP TABLE IF EXISTS exchange;
@@ -17,7 +15,7 @@ CREATE TABLE stock
     symbol      VARCHAR(50) PRIMARY KEY,
     description VARCHAR(255) NOT NULL,
     figi        VARCHAR(50)  NOT NULL,
-    currency    VARCHAR(3)   NOT NULL -- ISO 4217-Währungsstandard
+    currency    VARCHAR(3)   NOT NULL -- ISO 4217
 );
 
 ---------------------------------------User-------------------------------------------------------
@@ -45,7 +43,7 @@ CREATE TABLE quote
 CREATE TABLE bankaccount
 (
     id       SERIAL PRIMARY KEY,
-    currency VARCHAR(3)                    NOT NULL, -- ISO 4217-Währungsstandard
+    currency VARCHAR(3)                    NOT NULL, -- ISO 4217
     balance  DECIMAL(18, 4) DEFAULT 0.0000 NOT NULL
 );
 
