@@ -1,7 +1,3 @@
-# How to Start
-
-## David ist auch dabei!
-
 ### How to connect to DB:
 
 1. Go into Docker container
