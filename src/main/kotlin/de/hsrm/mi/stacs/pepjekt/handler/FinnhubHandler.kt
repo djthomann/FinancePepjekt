@@ -18,6 +18,8 @@ import reactor.core.publisher.Mono
 class FinnhubHandler(
     webClientBuilder: WebClient.Builder
 ) {
+
+    //TODO auslagern! Should not be inside of this class
     private final val token = "ct2r2bhr01qiurr42bq0ct2r2bhr01qiurr42bqg"
     private final val exchange = "US"
 

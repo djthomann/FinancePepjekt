@@ -1,5 +1,6 @@
 package de.hsrm.mi.stacs.pepjekt.controller
 
+//variables are defined from finnhub
 data class QuoteDTD(
     var c: Float,   // current Price
     var d: Float,   // change
