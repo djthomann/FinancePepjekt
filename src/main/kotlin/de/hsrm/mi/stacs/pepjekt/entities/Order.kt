@@ -3,7 +3,7 @@ package de.hsrm.mi.stacs.pepjekt.entities
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 
-@Table("order")
+@Table("stock_order")
 data class Order(
     @Id
     var id: Long? = null,
