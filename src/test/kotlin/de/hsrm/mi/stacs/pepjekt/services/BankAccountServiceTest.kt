@@ -13,6 +13,12 @@ import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import kotlin.test.Test
 
+/**
+ * Unit tests for the [BankAccountService] class.
+ *
+ * This class verifies the functionality of `BankAccountService` methods using mocked dependencies
+ * for the repository and transaction operator.
+ */
 class BankAccountServiceTest {
     private val investmentAccountRepository: IInvestmentAccountRepository =
         mock(IInvestmentAccountRepository::class.java)
@@ -22,6 +28,9 @@ class BankAccountServiceTest {
     private lateinit var bankAccount: BankAccount
     private lateinit var investmentAccount: InvestmentAccount
 
+    /**
+     * Initializes the test environment by setting up mock data and dependencies.
+     */
     @BeforeEach
     fun setUp() {
         bankAccount = BankAccount(
@@ -37,12 +46,18 @@ class BankAccountServiceTest {
         bankAccountService = BankAccountService(operator, investmentAccountRepository)
     }
 
+    /**
+     * Tests the [BankAccountService.getBalance] method to ensure it returns the correct balance.
+     */
     @Test
     fun `test getBalance with Data`() {
         bankAccountService.getBalance(1L)
             .doOnNext { balance -> assertThat(balance).isEqualTo(BigDecimal(150)) }
     }
 
+    /**
+     * Tests the [BankAccountService.deposit] method to ensure it correctly updates the balance.
+     */
     @Test
     fun `test deposit method`() {
         bankAccountService.deposit(1L, BigDecimal(50))
@@ -52,6 +67,9 @@ class BankAccountServiceTest {
         })
     }
 
+    /**
+     * Tests the [BankAccountService.withdraw] method to ensure it correctly updates the balance.
+     */
     @Test
     fun `test withdraw method`() {
         bankAccountService.withdraw(1L, BigDecimal(50))
@@ -60,5 +78,4 @@ class BankAccountServiceTest {
             bankAccount.balance == BigDecimal(100)
         })
     }
-
 }

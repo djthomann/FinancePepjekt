@@ -7,6 +7,12 @@ import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
+/**
+ * Interface for managing stock-related operations.
+ *
+ * Provides methods to retrieve stock information by symbol, calculate the average price of a stock
+ * over a specified period, and retrieve historical stock data.
+ */
 interface IStockService {
 
     fun getStockBySymbol(symbol: String): Mono<Stock>

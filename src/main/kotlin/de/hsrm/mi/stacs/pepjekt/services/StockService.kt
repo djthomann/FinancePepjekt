@@ -11,16 +11,38 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDateTime
 
+/**
+ * Service for managing stock-related operations, including retrieving stock information,
+ * calculating average prices, and accessing stock history.
+ *
+ * This service interacts with stock and quote repositories to perform database operations.
+ */
 @Service
 class StockService(
     val stockRepository: IStockRepository,
     val quoteRepository: IQuoteRepository
 ) : IStockService {
 
+
+    /**
+     * Retrieves a stock by its symbol.
+     *
+     * @param symbol the symbol of the stock to retrieve
+     * @return a [Mono] emitting the [Stock] corresponding to the symbol, or an error if not found
+     */
     override fun getStockBySymbol(symbol: String): Mono<Stock> {
         return stockRepository.findBySymbol(symbol)
     }
 
+
+    /**
+     * Calculates the average price of a stock within a given time range.
+     *
+     * @param symbol the symbol of the stock
+     * @param from the start of the time range
+     * @param to the end of the time range
+     * @return a [Mono] emitting the average price as a [BigDecimal], or zero if no quotes are found
+     */
     override fun calculateAveragePrice(symbol: String, from: LocalDateTime, to: LocalDateTime): Mono<BigDecimal> {
         return stockRepository.findBySymbol(symbol)
             .flatMap { stock ->
@@ -38,6 +60,12 @@ class StockService(
             }
     }
 
+    /**
+     * Retrieves the full historical quote data for a stock.
+     *
+     * @param symbol the symbol of the stock
+     * @return a [Flux] emitting the [Quote] instances associated with the stock
+     */
     override fun getStockHistory(symbol: String): Flux<Quote> {
         return stockRepository.findBySymbol(symbol)
             .flatMapMany { stock ->
@@ -45,6 +73,14 @@ class StockService(
             }
     }
 
+    /**
+     * Retrieves the historical quote data for a stock within a given time range.
+     *
+     * @param symbol the symbol of the stock
+     * @param from the start of the time range
+     * @param to the end of the time range
+     * @return a [Flux] emitting the [Quote] instances within the specified time range
+     */
     override fun getStockHistory(symbol: String, from: LocalDateTime, to: LocalDateTime): Flux<Quote> {
         return stockRepository.findBySymbol(symbol)
             .flatMapMany { stock ->
