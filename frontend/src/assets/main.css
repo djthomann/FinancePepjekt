@@ -21,18 +21,21 @@ body {
 #header-navigation {
   height: 80px;
   background-color: var(--main-color);
-
   display: flex;
   justify-content: space-between;
-  align-content: center;
+  align-items: center;
 }
 
 ul {
+  display: flex;
+  padding: 0;
+  margin: 0;
   align-items: center;
 }
 
 li {
   list-style-type: none;
+  margin-right: 15px;
 }
 
 a {
@@ -58,7 +61,6 @@ a {
 }
 
 #user li {
-  width: 100px;
   text-align: center;
 }
 
@@ -70,88 +72,16 @@ a {
 
 .buttons {
   height: 60px;
-  align-content: center;
   font-size: 16pt;
   background-color: transparent;
   border: none;
-  color: var(--font-color)
+  color: var(--font-color);
 }
 
 .buttons:hover {
   font-weight: bolder;
 }
 
-.lang-button {
-  color: var(--font-color)
-}
-
-.lang-button:hover {
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.single-language-button {
-  width: 60px;
-}
-
-#footer-navigation {
-  margin-top: 60px;
-  height: 60px;
-  background-color: var(--main-color);
-}
-
-.footer-button a {
-  color: var(--font-color);
-}
-
-#footer-buttons {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  padding: 0 40px;
-}
-
-#error-head {
-  background-color: var(--error-head-background-color);
-  border-radius: 10px 10px 0 0;
-
-  color: var(--font-color);
-  font-weight: bold;
-
-  margin: 10px 10px 0;
-  padding: 0 30px;
-  display: flex;
-  justify-content: space-between;
-}
-
-#error-body {
-  background-color: var(--error-body-background-color);
-
-  color: var(--error-background-font);
-
-  border-radius: 0 0 10px 10px;
-  margin: 0 10px;
-  padding: 20px 30px;
-  align-content: center;
-}
-
-#close-button {
-  height: 30px;
-  width: 30px;
-  font-size: 16pt;
-  border-radius: 50px;
-  border: none;
-  margin: 10px 0;
-  padding: 0;
-  background-color: var(--background-color);
-  color: var(--main-color);
-  float: right;
-}
-
-#close-button:hover {
-  font-weight: bolder;
-  box-shadow: 0 1px 6px var(--error-head-background-color-shadow);
-}
 
 .list-style {
   font-family: Arial, Helvetica, sans-serif;
@@ -159,13 +89,12 @@ a {
   border-collapse: collapse;
   width: auto;
   margin: 30px;
-  table-layout: auto; /* automatische Breitenanpassung der Tabelle */
+  table-layout: auto;
 }
 
 .list-style td, .list-style thead {
   border: 1px solid var(--border-color);
   padding: 8px;
-  /* white-space: nowrap; /* Verhindern von Zeilenumbrüchen */
 }
 
 .list-style tr:nth-child(even) {
