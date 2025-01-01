@@ -1,8 +1,8 @@
 <template>
       <div>
             <h1>Wertpapiere</h1>
-            <div id="suchfeld">
-                  <input v-model="suchfeld" placeholder="ISIN/Name" />
+            <div id="searchField">
+                  <input v-model="searchField" placeholder="ISIN/Name" />
                   <button class="details-button" @click="resetSearch">Reset</button>
                   <button class="details-button" @click="searchContent">Search</button>
             </div>

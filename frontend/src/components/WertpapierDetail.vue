@@ -6,7 +6,7 @@
             <p><strong>Beschreibung:</strong></p>
             <p>{{ stock.description }}</p>
 
-            <div class="purchase-section">
+            <div>
                   <button class="purchase-button" @click="purchase">Kaufen</button>
                   <button class="purchase-button" @click="sell">Verkaufen</button>
             </div>
