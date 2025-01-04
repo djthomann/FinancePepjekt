@@ -4,6 +4,7 @@ import de.hsrm.mi.stacs.pepjekt.controller.MarketStatusDTD
 import de.hsrm.mi.stacs.pepjekt.controller.QuoteDTD
 import jakarta.annotation.PostConstruct
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -12,15 +13,15 @@ import org.springframework.web.util.UriBuilder
 import reactor.core.publisher.Mono
 
 /**
- * Component that handles the connection and dataflow between finnhub ot the dummy one
+ * Component that handles the connection and dataflow between finnhub ot the dummy one. Finnhub token is needed.
  */
 @Component
 class FinnhubHandler(
     webClientBuilder: WebClient.Builder
 ) {
 
-    //TODO auslagern! Should not be inside of this class
-    private final val token = "ct2r2bhr01qiurr42bq0ct2r2bhr01qiurr42bqg"
+    @Value("\${token}")
+    private var token: String? = null
     private final val exchange = "US"
 
     private final val finnhub_webClient = webClientBuilder.baseUrl("https://finnhub.io/api/v1").build()
