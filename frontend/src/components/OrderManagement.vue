@@ -1,5 +1,5 @@
 <template>
-      <div>
+      <div class="stock-purchase">
             <h2>{{ stock.name }} - Detailansicht</h2>
             <p><strong>ISIN:</strong> {{ stock.isin }}</p>
             <p><strong>Aktueller Wert:</strong> {{ stock.currentValue }} €</p>
@@ -31,3 +31,7 @@ function purchase() {
 }
 
 </script>
+
+<style lang="scss">
+@use "./style.scss";
+</style>
