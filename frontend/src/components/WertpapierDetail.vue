@@ -1,17 +1,17 @@
 <template>
-      <div>
+        <div class="stock-detail">
             <h2>{{ stock.name }} - Detailansicht</h2>
             <p><strong>ISIN:</strong> {{ stock.isin }}</p>
             <p><strong>Aktueller Wert:</strong> {{ stock.currentValue }} €</p>
             <p><strong>Beschreibung:</strong></p>
             <p>{{ stock.description }}</p>
 
-            <div>
+            <div class="purchase-buttons">
                   <button class="purchase-button" @click="purchase">Kaufen</button>
                   <button class="purchase-button" @click="sell">Verkaufen</button>
             </div>
 
-            <div>
+            <div class="stock-info-section">
                   <h2>Im Besitz</h2>
                   <table>
                         <tbody>
@@ -37,7 +37,7 @@
                   </table>
             </div>
 
-            <div>
+            <div class="stock-info-section">
                   <h2>Kurse</h2>
                   <table>
                         <tbody>
@@ -52,8 +52,7 @@
                         </tbody>
                   </table>
             </div>
-
-      </div>
+        </div>
 </template>
 
 <script lang="ts" setup>
@@ -70,3 +69,8 @@ function purchase(){
 }
 
 </script>
+
+<style lang="scss">
+@use "./style.scss";
+</style>
+
