@@ -1,11 +1,11 @@
 <template>
-      <div>
-            <div>
-                  <div>
+      <div class="invest-depot">
+            <div class="header">
+                  <div class="title">
                         <h1>InvestDepot</h1>
                         <p>Hans Mustermann</p>
                   </div>
-                  <div>
+                  <div class="total-value">
                         <p>Depotwert: <strong>{{ totalValue }} €</strong></p>
                   </div>
             </div>
@@ -56,3 +56,7 @@ export default {
 };
 
 </script>
+
+<style lang="scss">
+@use "./style.scss";
+</style>

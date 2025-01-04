@@ -1,0 +1,101 @@
+.invest-depot {
+  font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+
+  .header, > div:first-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+
+    .title, h1 {
+      font-size: 28px;
+      color: #333;
+      margin: 0;
+    }
+
+    p {
+      font-size: 16px;
+      color: #666;
+      margin: 5px 0 0;
+    }
+
+    .total-value {
+      p {
+        font-size: 18px;
+        color: #333;
+
+        strong {
+          font-size: 24px;
+          color: #007bff;
+        }
+      }
+    }
+  }
+
+  #searchField {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .details-button {
+      padding: 8px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: #0056b3;
+      }
+    }
+  }
+
+  h2 {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 15px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f8f9fa;
+      font-weight: bold;
+      color: #333;
+    }
+
+    td {
+      color: #555;
+    }
+
+    .positive {
+      color: #28a745;
+    }
+
+    .negative {
+      color: #dc3545;
+    }
+  }
+}

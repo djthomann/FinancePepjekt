@@ -1,4 +1,5 @@
 <template>
+  <div class="invest-depot">
       <div>
             <h1>Wertpapiere</h1>
             <div id="searchField">
@@ -30,6 +31,7 @@
                   </tbody>
             </table>
       </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -51,3 +53,7 @@ function searchContent() {
 }
 
 </script>
+
+<style lang="scss">
+@use "./style.scss";
+</style>
