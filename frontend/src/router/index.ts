@@ -1,21 +1,38 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import DepotUebersicht from '@/components/PortfolioOverview.vue'
+import WertpapierUebersicht from '@/components/StockOverview.vue'
+import WertpapierDetail from '@/components/StockDetail.vue'
+import OrderManagement from '@/components/OrderManagement.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
-      name: 'home',
-      component: HomeView,
+      path: '/depot-uebersicht',
+      name: 'depot-uebersicht',
+      component: DepotUebersicht,
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue'),
+      path: '/wertpapier-uebersicht',
+      name: 'wertpapier-uebersicht',
+      component: WertpapierUebersicht,
+    },
+    {
+      path: '/wertpapier-detail',
+      name: 'wertpapier-detail',
+      component: WertpapierDetail,
+    },
+    {
+      path: '/order-management',
+      name: 'order-management',
+      component: OrderManagement,
+    },
+    {
+      path: '',
+      redirect: (to: any) => {
+        const { hash, params, query } = to
+        return '/depot-uebersicht'
+      },
     },
   ],
 })
