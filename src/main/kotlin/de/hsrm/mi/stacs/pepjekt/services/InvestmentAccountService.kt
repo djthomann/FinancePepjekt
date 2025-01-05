@@ -1,11 +1,15 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
 import de.hsrm.mi.stacs.pepjekt.entities.InvestmentAccount
+import de.hsrm.mi.stacs.pepjekt.entities.PortfolioEntry
+import de.hsrm.mi.stacs.pepjekt.repositories.IBankAccountRepository
 import de.hsrm.mi.stacs.pepjekt.repositories.IInvestmentAccountRepository
+import de.hsrm.mi.stacs.pepjekt.repositories.IPortfolioEntryRepository
 import de.hsrm.mi.stacs.pepjekt.repositories.IStockRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.core.util.function.component1
 import reactor.kotlin.core.util.function.component2
 import java.math.BigDecimal
@@ -21,7 +25,8 @@ import java.math.BigDecimal
 class InvestmentAccountService(
     val operator: TransactionalOperator, // injected by spring
     val investmentAccountRepository: IInvestmentAccountRepository,
-    val stockRepository: IStockRepository
+    val portfolioEntryRepository: IPortfolioEntryRepository,
+    val bankAccountRepository: IBankAccountRepository,
 ) : IInvestmentAccountService {
 
     /**
@@ -33,25 +38,52 @@ class InvestmentAccountService(
      * @return a [Mono] emitting the updated [InvestmentAccount] or an error if any operation fails
      */
     override fun buyStock(investmentAccountId: Long, stockSymbol: String, volume: BigDecimal): Mono<InvestmentAccount> {
-        // get investment account, get stock by stockSymbol, buy stock -> less money on bankaccount
-        return Mono.zip(
-            investmentAccountRepository.findById(investmentAccountId),
-            stockRepository.findById(stockSymbol)
-        ).flatMap { tuple ->
-            val (investmentAccount, stock) = tuple
-            if (investmentAccount.portfolio.containsKey(stock)) {
-                // add new stock
-                investmentAccount.portfolio[stock] = volume.toFloat()
-            } else {
-                // add value to existing stock
-                investmentAccount.portfolio[stock]?.let { currentVolume ->
-                    investmentAccount.portfolio[stock] = currentVolume.plus(volume.toFloat())
+        return investmentAccountRepository.findById(investmentAccountId)
+            .flatMap { investmentAccount ->
+                if (investmentAccount.bankAccountId == null) {
+                    return@flatMap Mono.error<InvestmentAccount>(IllegalArgumentException("No bank account linked to the investment account"))
                 }
+
+                portfolioEntryRepository.findByInvestmentAccountIdAndStockSymbol(investmentAccountId, stockSymbol)
+                    .flatMap { existingEntry ->
+                        // Update the existing entry
+                        val updatedQuantity = existingEntry.quantity + volume.toDouble()
+                        val updatedEntry = existingEntry.copy(quantity = updatedQuantity)
+                        portfolioEntryRepository.save(updatedEntry).`as`(operator::transactional)
+                    }
+                    .switchIfEmpty(
+                        // Create a new entry if none exists
+                        portfolioEntryRepository.save(
+                            PortfolioEntry(
+                                id = null,
+                                investmentAccountId = investmentAccountId,
+                                stockSymbol = stockSymbol,
+                                quantity = volume.toDouble()
+                            )
+                        ).`as`(operator::transactional)
+                    )
+                    .flatMap {
+                        // Update the balance in the linked bank account
+                        bankAccountRepository.findById(investmentAccount.bankAccountId)
+                    }
+                    .flatMap { bankAccount ->
+                        val updatedBalance = bankAccount.balance.minus(volume)
+                        if (updatedBalance < BigDecimal.ZERO) {
+                            return@flatMap Mono.error<InvestmentAccount>(
+                                IllegalArgumentException(
+                                    "Insufficient balance " +
+                                            "in the bank account"
+                                )
+                            )
+                        }
+
+                        val updatedBankAccount = bankAccount.copy(balance = updatedBalance)
+                        bankAccountRepository.save(updatedBankAccount).`as`(operator::transactional)
+                    }
+                    .thenReturn(investmentAccount)
             }
-            investmentAccount.bankAccount?.balance?.minus(volume)
-            investmentAccountRepository.save(investmentAccount).`as`(operator::transactional)
-        }
     }
+
 
     /**
      * Sells a stock and updates the investment account portfolio and bank account balance.
@@ -66,23 +98,45 @@ class InvestmentAccountService(
         stockSymbol: String,
         volume: BigDecimal
     ): Mono<InvestmentAccount> {
-        // get investment account, get stock by stockSymbol, sell stock -> more money on bank account, less in investment account stock
-        return Mono.zip(
-            investmentAccountRepository.findById(investmentAccountId),
-            stockRepository.findById(stockSymbol)
-        ).flatMap { tuple ->
-            val (investmentAccount, stock) = tuple
-            investmentAccount.portfolio[stock]?.let { currentVolume ->
-                val newVolume = currentVolume.minus(volume.toFloat())
-                if (newVolume > 0) {
-                    investmentAccount.portfolio[stock] = newVolume
-                } else {
-                    investmentAccount.portfolio.remove(stock)
+        return investmentAccountRepository.findById(investmentAccountId)
+            .flatMap { investmentAccount ->
+                if (investmentAccount.bankAccountId == null) {
+                    return@flatMap Mono.error<InvestmentAccount>(IllegalArgumentException("No bank account linked to the investment account"))
                 }
-                investmentAccount.bankAccount?.balance?.plus(volume)
+
+                portfolioEntryRepository.findByInvestmentAccountIdAndStockSymbol(investmentAccountId, stockSymbol)
+                    .flatMap { existingEntry ->
+                        if (existingEntry == null) {
+                            return@flatMap Mono.error<InvestmentAccount>(IllegalArgumentException("Stock not found in portfolio"))
+                        }
+
+                        val newQuantity = existingEntry.quantity - volume.toDouble()
+                        if (newQuantity < 0) {
+                            return@flatMap Mono.error<InvestmentAccount>(IllegalArgumentException("Insufficient stock quantity to sell"))
+                        }
+
+                        // Update existing entry or create a new one with 0 quantity (effectively removing)
+                        val updatedEntry: PortfolioEntry
+                        if (newQuantity > 0) {
+                            updatedEntry = existingEntry.copy(quantity = newQuantity)
+                        } else {
+                            return@flatMap portfolioEntryRepository.delete(existingEntry).`as`(operator::transactional)
+                                .then(Mono.just(investmentAccount))
+                        }
+
+                        portfolioEntryRepository.save(updatedEntry).`as`(operator::transactional)
+                    }
+                    .flatMap {
+                        // Update the balance in the linked bank account
+                        bankAccountRepository.findById(investmentAccount.bankAccountId)
+                    }
+                    .flatMap { bankAccount ->
+                        val updatedBalance = bankAccount.balance.plus(volume)
+                        val updatedBankAccount = bankAccount.copy(balance = updatedBalance)
+                        bankAccountRepository.save(updatedBankAccount).`as`(operator::transactional)
+                    }
+                    .thenReturn(investmentAccount)
             }
-            investmentAccountRepository.save(investmentAccount).`as`(operator::transactional)
-        }
     }
 
     /**
@@ -92,6 +146,6 @@ class InvestmentAccountService(
      * @return a [Mono] emitting the [InvestmentAccount] containing the portfolio, or an error if not found
      */
     override fun getInvestmentAccountPortfolio(userId: Long): Mono<InvestmentAccount> {
-        return investmentAccountRepository.findByOwnerId(userId)
+        return investmentAccountRepository.findByUserId(userId)
     }
 }

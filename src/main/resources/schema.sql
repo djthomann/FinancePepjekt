@@ -1,5 +1,4 @@
-DROP TABLE IF EXISTS investment_portfolio;
-
+DROP TABLE IF EXISTS portfolio_entry;
 DROP TABLE IF EXISTS stock_order;
 DROP TABLE IF EXISTS investmentaccount;
 DROP TABLE IF EXISTS exchange;
@@ -58,7 +57,7 @@ CREATE TABLE investmentaccount
     FOREIGN KEY (owner_id) REFERENCES finance_user (id) ON DELETE SET NULL
 );
 
-CREATE TABLE investment_portfolio
+CREATE TABLE portfolio_entry
 (
     investment_account_id BIGINT NOT NULL,
     stock_symbol          VARCHAR(50) NOT NULL,

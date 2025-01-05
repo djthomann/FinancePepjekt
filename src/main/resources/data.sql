@@ -30,7 +30,7 @@ VALUES (1, 1), -- Verknüpft mit Bankkonto ID 1 und Benutzer ID 1
 -- Verknüpft mit Bankkonto ID 3 und Benutzer ID 3
 
 -- Portfolio
-INSERT INTO investment_portfolio (investment_account_id, stock_symbol, quantity)
+INSERT INTO portfolio_entry (investment_account_id, stock_symbol, quantity)
 VALUES (1, 'AAPL', 50.5),
        (1, 'TSLA', 10.0),
        (2, 'GOOGL', 5.0),
