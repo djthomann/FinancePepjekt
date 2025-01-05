@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import DepotUebersicht from '@/components/DepotUebersicht.vue'
-import WertpapierUebersicht from '@/components/WertpapierUebersicht.vue'
-import WertpapierDetail from '@/components/WertpapierDetail.vue'
+import DepotUebersicht from '@/components/PortfolioOverview.vue'
+import WertpapierUebersicht from '@/components/StockOverview.vue'
+import WertpapierDetail from '@/components/StockDetail.vue'
 import OrderManagement from '@/components/OrderManagement.vue'
 
 const router = createRouter({
