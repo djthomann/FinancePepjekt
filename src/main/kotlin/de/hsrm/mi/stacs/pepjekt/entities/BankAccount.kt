@@ -9,5 +9,5 @@ data class BankAccount(
     @Id
     var id: Long? = null,
     var currency: Currency,
-    var balance: BigDecimal? = BigDecimal.ZERO
+    var balance: BigDecimal = BigDecimal.ZERO
 )
