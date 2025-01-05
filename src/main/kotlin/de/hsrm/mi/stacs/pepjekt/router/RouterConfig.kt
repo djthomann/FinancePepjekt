@@ -43,7 +43,7 @@ class RouterConfig {
     @Bean
     fun bankAccountRouter(bankAccountHandler: BankAccountHandler) = router {
         "/api".nest {
-            GET("/get/balance", bankAccountHandler::getBalance)
+            GET("/balance", bankAccountHandler::getBalance)
         }
     }
 
@@ -56,9 +56,9 @@ class RouterConfig {
     @Bean
     fun investmentAccountRouter(investmentAccountHandler: InvestmentAccountHandler) = router {
         "/api".nest {
-            GET("/get/portfolio", investmentAccountHandler::getPortfolio)
-            POST("/post/stock/buy", investmentAccountHandler::buyStock)
-            POST("/post/stock/sell", investmentAccountHandler::sellStock)
+            GET("/portfolio", investmentAccountHandler::getPortfolio)
+            POST("/stock/buy", investmentAccountHandler::buyStock)
+            POST("/stock/sell", investmentAccountHandler::sellStock)
         }
     }
 
@@ -71,16 +71,16 @@ class RouterConfig {
     @Bean
     fun stockRouter(stockHandler: StockHandler) = router {
         "/api".nest {
-            GET("/get/stock-details/by/symbol", stockHandler::getStockDetailsBySymbol)
-            GET("/get/stock-details/by/name", stockHandler::getStockDetailsByName)
-            GET("/get/stock/by/symbol", stockHandler::getStockBySymbol)
-            GET("/get/stock/by/name", stockHandler::getStockByName)
-            GET("/get/current/stock/value", stockHandler::getCurrentStockValue) // by stock symbol
-            GET("/get/stock/day-low", stockHandler::getStockDayLow)
-            GET("/get/stock/day-high", stockHandler::getStockDayHigh)
-            GET("/get/stock/history/by-symbol", stockHandler::getStockHistoryBySymbol)
-            GET("/get/stock/history/by-name", stockHandler::getStockHistoryByName)
-            GET("/get/stock/average-price", stockHandler::getStockAveragePrice)
+            GET("/stock-details/symbol", stockHandler::getStockDetailsBySymbol)
+            GET("/stock-details/name", stockHandler::getStockDetailsByName)
+            GET("/stock/by/symbol", stockHandler::getStockBySymbol)
+            GET("/stock/by/name", stockHandler::getStockByName)
+            GET("/current/stock/value", stockHandler::getCurrentStockValue) // by stock symbol
+            GET("/stock/day-low", stockHandler::getStockDayLow)
+            GET("/stock/day-high", stockHandler::getStockDayHigh)
+            GET("/stock/history/symbol", stockHandler::getStockHistoryBySymbol)
+            GET("/stock/history/name", stockHandler::getStockHistoryByName)
+            GET("/stock/average-price", stockHandler::getStockAveragePrice)
         }
     }
 
@@ -93,9 +93,9 @@ class RouterConfig {
     @Bean
     fun orderRouter(orderHandler: OrderHandler) = router {
         "/api".nest {
-            POST("/post/buy/stock", orderHandler::postBuyStock)
-            POST("/post/sell/stock", orderHandler::postSellStock)
-            GET("/get/orders", orderHandler::getOrders)
+            POST("/buy/stock", orderHandler::postBuyStock)
+            POST("/sell/stock", orderHandler::postSellStock)
+            GET("/orders", orderHandler::getOrders)
         }
     }
 }
