@@ -35,19 +35,21 @@
 </template>
 
 <script lang="ts" setup>
-import {ref} from 'vue';
-import {useRouter} from "vue-router";
+import {onMounted, ref} from 'vue';
+import {useRouter, useRoute} from "vue-router";
 import {Currency, OrderType} from '@/types/types.ts';
 import type {Order} from '@/types/types.ts'
 
 const router = useRouter()
+const route = useRoute();
+const investmentAccountId = route.params.investmentAccountId
 const orders = ref<Order[]>([{
   id: 1,
   volume: 100.5,
   type: OrderType.BUY,
   stock: {
     symbol: 'AAPL',
-    description: 'Apple Inc.',
+    description: 'Apple Inc., default data',
     figi: 'BBG000B9XRY4',
     currency: Currency.USD
   }
@@ -58,12 +60,24 @@ const orders = ref<Order[]>([{
     type: OrderType.SELL,
     stock: {
       symbol: 'GOOGL',
-      description: 'Alphabet Inc.',
+      description: 'Alphabet Inc., default data',
       figi: 'BBG009S39JX6',
       currency: Currency.USD
     }
   }
 ])
+
+onMounted(async () => {
+  try {
+    const response = await fetch(`/api/orders?investmentAccountId=${investmentAccountId}`)
+    if (!response.ok) {
+      throw new Error('Netzwerkantwort war nicht ok')
+    }
+    orders.value = await response.json()
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Orders:', error);
+  }
+})
 
 const navigateToStockDetail = (symbol: string) => {
   router.push({name: 'wertpapier-detail', params: {symbol}});
