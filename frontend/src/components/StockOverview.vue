@@ -20,7 +20,7 @@
                         </tr>
                   </thead>
                   <tbody>
-                        <tr v-for="position in positions" :key="position.id">
+                        <tr v-for="position in positions" :key="position.id" @click="navigateToStockDetail(position.isin)">
                               <td>{{ position.name }}</td>
                               <td>{{ position.isin }}</td>
                               <td>{{ position.currentValue }} €</td>
@@ -36,12 +36,14 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue';
+import {useRouter} from "vue-router";
 
+const router = useRouter()
 const searchField = ref('')
 const positions = ref([
-  { id: 1, name: 'Apple', isin: 'US0378331005', currentValue: 1450.90, change: 33.39, changePercentage: 13.6 },
-  { id: 2, name: 'Tesla', isin: 'US88160R1014', currentValue: 3565.35, change: 120.75, changePercentage: 20.1 },
-  { id: 3, name: 'Amazon', isin: 'US0231351067', currentValue: 6169.52, change: -45.50, changePercentage: -5.2 },
+  { id: 1, name: 'Apple', isin: 2, currentValue: 1450.90, change: 33.39, changePercentage: 13.6 },
+  { id: 2, name: 'Tesla', isin: 5, currentValue: 3565.35, change: 120.75, changePercentage: 20.1 },
+  { id: 3, name: 'Amazon', isin: 10, currentValue: 6169.52, change: -45.50, changePercentage: -5.2 },
 ])
 
 function resetSearch() {
@@ -50,6 +52,10 @@ function resetSearch() {
 
 function searchContent() {
   console.log('searching for:', searchField.value)
+}
+
+const navigateToStockDetail = (isin: number) => {
+  router.push({name: 'wertpapier-detail', params: {isin}});
 }
 
 </script>
