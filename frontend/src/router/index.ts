@@ -4,6 +4,7 @@ import WertpapierUebersicht from '@/components/StockOverview.vue'
 import WertpapierDetail from '@/components/StockDetail.vue'
 import OrderManagementSell from "@/components/OrderManagementSell.vue";
 import OrderManagementBuy from "@/components/OrderManagementBuy.vue";
+import OrderManagementOverview from "@/components/OrderManagementOverview.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,7 +20,7 @@ const router = createRouter({
       component: WertpapierUebersicht,
     },
     {
-      path: '/wertpapier-detail/:isin',
+      path: '/wertpapier-detail/:symbol',
       name: 'wertpapier-detail',
       component: WertpapierDetail,
     },
@@ -32,6 +33,11 @@ const router = createRouter({
       path: '/order-management-buy/:isin',
       name: 'order-management-buy',
       component: OrderManagementBuy,
+    },
+    {
+      path: '/order-management-overview/:investmentAccountId',
+      name: 'order-management-overview',
+      component: OrderManagementOverview,
     },
     {
       path: '',
