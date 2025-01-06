@@ -10,12 +10,6 @@
           <li>
             <RouterLink to="/wertpapier-uebersicht" class="buttons">Wertpapierübersicht</RouterLink>
           </li>
-          <li>
-            <RouterLink to="/wertpapier-detail" class="buttons">Wertpapier Detail</RouterLink>
-          </li>
-          <li>
-            <RouterLink to="/order-management" class="buttons">Order Management</RouterLink>
-          </li>
         </ul>
       </nav>
     </header>
