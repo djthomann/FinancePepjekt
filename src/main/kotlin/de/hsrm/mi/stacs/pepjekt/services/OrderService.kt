@@ -96,7 +96,7 @@ class OrderService(
      * @param investmentAccountId the ID of the investment account whose orders are to be retrieved
      * @return a [Flux] emitting the [Order] instances associated with the given investment account
      */
-    override fun getOrdersByInvestmentAccount(investmentAccountId: String): Flux<Order> {
+    override fun getOrdersByInvestmentAccountId(investmentAccountId: String): Flux<Order> {
         return orderRepository.findByInvestmentAccountId(investmentAccountId.toLong())
     }
 }

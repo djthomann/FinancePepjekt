@@ -24,6 +24,6 @@ interface IOrderService {
         LocalDateTime
     ): Mono<Order>
 
-    fun getOrdersByInvestmentAccount(investmentAccountId: String): Flux<Order>
+    fun getOrdersByInvestmentAccountId(investmentAccountId: String): Flux<Order>
 
 }
