@@ -21,6 +21,17 @@ export interface Stock {
   changePercentage: number
 }
 
+export interface StockDetails {
+  symbol: string,
+  description: string,
+  figi: string,
+  currency: Currency,
+  currentValue: number,
+  change: number,
+  changePercentage: number,
+  amount: number
+}
+
 export enum Currency {
   USD = 'USD',
   EUR = 'EUR'
