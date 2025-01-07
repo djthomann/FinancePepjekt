@@ -44,7 +44,8 @@ class InvestmentAccountHandler(
                 val investmentAccountDTO = InvestmentAccountDTO.mapToDto(
                     investmentAccount,
                     bankAccount = TODO(),
-                    user = TODO()
+                    user = TODO(),
+                    stockService = stockService
                 )
                 ServerResponse.ok().bodyValue(investmentAccount)
             }

@@ -174,4 +174,16 @@ class StockService(
             }
             .one()
     }
+
+    override fun getCurrentValueBySymbol(symbol: String): Mono<BigDecimal> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getChangeBySymbol(symbol: String): Mono<BigDecimal> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getChangePercentageBySymbol(symbol: String): Mono<BigDecimal> {
+        TODO("Not yet implemented")
+    }
 }
