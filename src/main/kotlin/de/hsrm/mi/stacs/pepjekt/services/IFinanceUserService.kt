@@ -1,5 +1,6 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
+import de.hsrm.mi.stacs.pepjekt.entities.InvestmentAccount
 import de.hsrm.mi.stacs.pepjekt.entities.User
 import reactor.core.publisher.Mono
 
@@ -11,5 +12,7 @@ import reactor.core.publisher.Mono
 interface IFinanceUserService {
 
     fun getUserId(id: Long): Mono<User>
+
+    fun getUserByInvestmentAccountId(investmentAccount: Long): Mono<User>
 
 }

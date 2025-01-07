@@ -19,4 +19,8 @@ class FinanceUserService(
         return financeUserRepository.findById(id);
     }
 
+    override fun getUserByInvestmentAccountId(investmentAccount: Long): Mono<User> {
+        TODO("Not yet implemented")
+    }
+
 }
