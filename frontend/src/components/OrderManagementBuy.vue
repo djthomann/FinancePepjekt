@@ -7,17 +7,18 @@
             <div>
                   <form @submit.prevent="purchase">
                         <label for="amount">Anzahl</label>
-                        <input type="number" id="amount" />
+                        <input v-model.number="amount" type="number" id="amount" />
                         oder
                         <label for="sum">Summe</label>
                         <input type="number" id="sum" />
                         <br>
                         <label for="timestamp">Zeitpunkt</label>
-                        <input type="date" id="timestamp" />
+                        <input v-model="date" type="date" id="timestamp" />
 
                         <button type="submit" class="purchase-button">Kaufen</button>
                   </form>
             </div>
+
       </div>
 </template>
 
@@ -25,15 +26,43 @@
 import { ref } from 'vue';
 import {useRoute, useRouter} from "vue-router";
 
-const stock = ref({ id: 1, name: 'Apple', isin: 'US0378331005', amount: 2, currentValue: 1450.90, change: 33.39, changePercentage: 13.6, description: "Beschreibung ist toll" })
+const stock = ref({ id: 1, symbol:"AAPL", name: 'Apple', isin: 'US0378331005', amount: 2, currentValue: 1450.90, change: 33.39, changePercentage: 13.6, description: "Beschreibung ist toll" })
 
 const route = useRoute();
 const isin = route.params.isin;
 console.log("ISIN", isin)
 
-function purchase() {
-      console.log('Kaufen')
+const amount = ref(10);
+
+const url = "/api/order/buy"
+
+async function purchase() {
+  console.log(amount.value + ' Stück kaufen zum Zeitpunkt: ' + date.value)
+  const curl = url + `?accountId=1&stock=${stock.value.symbol}&amount=${amount.value}&time=${date.value}`
+  console.log(curl)
+  try {
+    const response = await fetch(curl, {
+      method: "POST"
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    console.log("Success: Order Placed");
+  } catch (error) {
+    console.error("Error: Order Not Placed", error);
+  }
 }
+
+const getTodayDate = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0'); // Monat von 0-11, daher +1
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const date = ref(getTodayDate());
 
 </script>
 
