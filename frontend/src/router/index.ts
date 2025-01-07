@@ -25,12 +25,12 @@ const router = createRouter({
       component: WertpapierDetail,
     },
     {
-      path: '/order-management-sell/:isin',
+      path: '/order-management-sell/:symbol',
       name: 'order-management-sell',
       component: OrderManagementSell,
     },
     {
-      path: '/order-management-buy/:isin',
+      path: '/order-management-buy/:symbol',
       name: 'order-management-buy',
       component: OrderManagementBuy,
     },
