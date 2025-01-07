@@ -1,5 +1,6 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
+import de.hsrm.mi.stacs.pepjekt.entities.dtos.InvestmentAccountDTO
 import de.hsrm.mi.stacs.pepjekt.services.IInvestmentAccountService
 import de.hsrm.mi.stacs.pepjekt.services.IStockService
 import org.springframework.stereotype.Component
@@ -39,8 +40,13 @@ class InvestmentAccountHandler(
                 .toLong()
 
         return investmentAccountService.getInvestmentAccountPortfolio(investmentAccountId)
-            .flatMap { portfolio ->
-                ServerResponse.ok().bodyValue(portfolio)
+            .flatMap { investmentAccount ->
+                val investmentAccountDTO = InvestmentAccountDTO.mapToDto(
+                    investmentAccount,
+                    bankAccount = TODO(),
+                    user = TODO()
+                )
+                ServerResponse.ok().bodyValue(investmentAccount)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
     }

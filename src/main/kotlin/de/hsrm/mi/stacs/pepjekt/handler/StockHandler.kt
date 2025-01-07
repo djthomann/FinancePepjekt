@@ -1,11 +1,15 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
+import de.hsrm.mi.stacs.pepjekt.entities.dtos.QuoteDTO
+import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDTO
+import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDetailsDTO
 import de.hsrm.mi.stacs.pepjekt.services.IStockService
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.math.BigDecimal
 import java.time.LocalDateTime
 
 /**
@@ -32,7 +36,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
             .collectList()
             .flatMap { stocks ->
                 if (stocks.isNotEmpty()) {
-                    ServerResponse.ok().bodyValue(stocks)
+                    val stockDtos = stocks.map { StockDTO.mapToDto(it, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO) }
+                    ServerResponse.ok().bodyValue(stockDtos)
                 } else {
                     ServerResponse.notFound().build()
                 }
@@ -55,7 +60,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
 
         return stockService.getStockBySymbol(symbol)
             .flatMap { stock ->
-                ServerResponse.ok().bodyValue(stock)
+                val stockDetails = StockDetailsDTO.mapToDto(stock, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
+                ServerResponse.ok().bodyValue(stockDetails)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
     }
@@ -76,7 +82,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
 
         return stockService.getStockByDescription(name)
             .flatMap { stock ->
-                ServerResponse.ok().bodyValue(stock)
+                val stockDetails = StockDetailsDTO.mapToDto(stock, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
+                ServerResponse.ok().bodyValue(stockDetails)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
     }
@@ -97,7 +104,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
 
         return stockService.getStockBySymbol(symbol)
             .flatMap { stock ->
-                ServerResponse.ok().bodyValue(stock)
+                val stockDetails = StockDetailsDTO.mapToDto(stock, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
+                ServerResponse.ok().bodyValue(stockDetails)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
     }
@@ -125,7 +133,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
             .collectList()
             .flatMap { stocks ->
                 if (stocks.isNotEmpty()) {
-                    ServerResponse.ok().bodyValue(stocks)
+                    val stockDtos = stocks.map { StockDTO.mapToDto(it, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO) }
+                    ServerResponse.ok().bodyValue(stockDtos)
                 } else {
                     ServerResponse.notFound().build()
                 }
@@ -148,7 +157,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
 
         return stockService.getStockByDescription(name)
             .flatMap { stock ->
-                ServerResponse.ok().bodyValue(stock)
+                val stockDetails = StockDetailsDTO.mapToDto(stock, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
+                ServerResponse.ok().bodyValue(stockDetails)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
     }
@@ -170,7 +180,7 @@ class StockHandler(private val stockService: IStockService, private val orderSer
 
         return stockService.getLatestQuoteBySymbol(symbol)
             .flatMap {
-                ServerResponse.ok().bodyValue(it)
+                ServerResponse.ok().bodyValue(QuoteDTO.mapToDto(it))
             }
             .switchIfEmpty(ServerResponse.notFound().build())
     }
@@ -193,7 +203,7 @@ class StockHandler(private val stockService: IStockService, private val orderSer
 
         return stockService.getDayLow(symbol, LocalDateTime.now())
             .flatMap {
-                ServerResponse.ok().bodyValue(it)
+                ServerResponse.ok().bodyValue(QuoteDTO.mapToDto(it))
             }
             .switchIfEmpty(ServerResponse.notFound().build())
     }
@@ -216,7 +226,7 @@ class StockHandler(private val stockService: IStockService, private val orderSer
 
         return stockService.getDayHigh(symbol, LocalDateTime.now())
             .flatMap {
-                ServerResponse.ok().bodyValue(it)
+                ServerResponse.ok().bodyValue(QuoteDTO.mapToDto(it))
             }
             .switchIfEmpty(ServerResponse.notFound().build())
     }
@@ -246,14 +256,16 @@ class StockHandler(private val stockService: IStockService, private val orderSer
             stockService.getStockHistoryBySymbol(symbol, from, to)
                 .collectList()
                 .flatMap { history ->
-                    ServerResponse.ok().bodyValue(history)
+                    val historyDtos = history.map { QuoteDTO.mapToDto(it) }
+                    ServerResponse.ok().bodyValue(historyDtos)
                 }
                 .switchIfEmpty(ServerResponse.notFound().build())
         } else {
             stockService.getStockHistoryBySymbol(symbol)
                 .collectList()
                 .flatMap { history ->
-                    ServerResponse.ok().bodyValue(history)
+                    val historyDtos = history.map { QuoteDTO.mapToDto(it) }
+                    ServerResponse.ok().bodyValue(historyDtos)
                 }
                 .switchIfEmpty(ServerResponse.notFound().build())
         }
