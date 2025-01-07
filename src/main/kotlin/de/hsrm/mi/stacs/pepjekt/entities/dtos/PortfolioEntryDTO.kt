@@ -20,20 +20,12 @@ class PortfolioEntryDTO(
         fun mapToDto(
             portfolioEntry: PortfolioEntry,
             stock: StockDTO,
-            currentValue: BigDecimal,
-            amount: BigDecimal,
-            change: BigDecimal,
-            changePercentage: BigDecimal
         ): PortfolioEntryDTO {
             return PortfolioEntryDTO(
                 investmentAccountId = portfolioEntry.investmentAccountId,
                 stockSymbol = portfolioEntry.stockSymbol,
                 quantity = portfolioEntry.quantity,
-                stock = stock,
-                currentValue = currentValue,
-                amount = amount,
-                change = change,
-                changePercentage = changePercentage
+                stock = stock
             )
         }
     }
