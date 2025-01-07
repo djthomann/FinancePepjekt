@@ -52,8 +52,8 @@ class OrderService(
             val order = Order(
                 volume = volume.toFloat(),
                 type = OrderType.BUY,
-                investmentAccount = account,
-                stock = stock
+                investmentAccountId = account.id!!,
+                stockSymbol = stock.symbol
             )
             orderRepository.save(order).`as`(operator::transactional)
         }
@@ -82,8 +82,8 @@ class OrderService(
             val order = Order(
                 volume = volume.toFloat(),
                 type = OrderType.SELL,
-                investmentAccount = account,
-                stock = stock
+                investmentAccountId = account.id!!,
+                stockSymbol = stock.symbol
             )
             orderRepository.save(order).`as`(operator::transactional)
         }

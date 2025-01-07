@@ -1,6 +1,6 @@
 package de.hsrm.mi.stacs.pepjekt.entities
 
-import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.*
 import org.springframework.data.relational.core.mapping.Table
 
 @Table("stock_order")
@@ -9,7 +9,6 @@ data class Order(
     var id: Long? = null,
     val volume: Float,
     val type: OrderType,
-    val investmentAccount: InvestmentAccount,
-    val stock: Stock
-) {
-}
+    val investmentAccountId: Long,
+    val stockSymbol: String
+)
