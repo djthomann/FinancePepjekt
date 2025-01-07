@@ -51,6 +51,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
      * @param request The incoming server request containing the stock symbol.
      * @return A Mono containing the server response with the stock data or a 404 Not Found if the stock is not found.
      * @throws IllegalArgumentException If the stock symbol is not provided in the request.
+     *
+     * TODO add details
      */
     fun getStockDetailsByName(request: ServerRequest): Mono<ServerResponse> {
         val name = request.queryParam("name").orElseThrow { IllegalArgumentException("name is required") }
@@ -109,10 +111,23 @@ class StockHandler(private val stockService: IStockService, private val orderSer
             }
     }
 
+    /**
+     * Handles a request to retrieve stock data by its description/name.
+     *
+     * Extracts the stock symbol from the request's query parameters and retrieves the stock data for the given description/name.
+     *
+     * @param request The incoming server request containing the stock symbol.
+     * @return A Mono containing the server response with the stock data or a 404 Not Found if the stock is not found.
+     * @throws IllegalArgumentException If the stock symbol is not provided in the request.
+     */
     fun getStockByName(request: ServerRequest): Mono<ServerResponse> {
         val name = request.queryParam("name").orElseThrow { IllegalArgumentException("name is required") }
 
-        TODO("Not yet implemented")
+        return stockService.getStockByDescription(name)
+            .flatMap { stock ->
+                ServerResponse.ok().bodyValue(stock)
+            }
+            .switchIfEmpty(ServerResponse.notFound().build())
     }
 
     fun getCurrentStockValue(request: ServerRequest): Mono<ServerResponse> {
