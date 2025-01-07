@@ -21,7 +21,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr v-for="stock in stocks" :key="stock.id" @click="navigateToStockDetail(stock.symbol)">
+        <tr v-for="stock in stocks" :key="stock.symbol" @click="navigateToStockDetail(stock.symbol)">
           <td>{{ stock.description }}</td>
           <td>{{ stock.symbol }}</td>
           <td>{{ stock.figi }}</td>
