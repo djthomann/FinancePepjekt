@@ -1,8 +1,8 @@
 export interface Order {
-  id?: number;
-  volume: number;
-  type: OrderType;
-  stock: Stock;
+  id: number,
+  volume: number,
+  type: OrderType,
+  stock: Stock,
   stockSymbol: String
 }
 
@@ -12,18 +12,22 @@ export enum OrderType {
 }
 
 export interface Stock {
-  symbol: string;
-  description: string;
-  figi: string;
-  currency: Currency;
+  symbol: string,
+  description: string,
+  figi: string,
+  currency: Currency,
+  currentValue: number,
+  change: number,
+  changePercentage: number
 }
 
 export enum Currency {
-  USD = 'USD'
+  USD = 'USD',
+  EUR = 'EUR'
 }
 
 export interface InvestmentAccount {
-  id?: number,
+  id: number,
   bankAccountId: number,
   portfolio: PortfolioEntry[],
   userId: number,
