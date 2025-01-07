@@ -23,11 +23,11 @@
       <tr v-for="order in orders" :key="order.id" @click="navigateToStockDetail(order.stock.symbol)">
         <td>{{ order.id }}</td>
         <td>{{ order.volume }}</td>
-        <td>{{ order.type }}</td>
+        <!--td>{{ order.type }}</td-->
         <td>{{ order.stock.symbol }}</td>
-        <td>{{ order.stock.description }}</td>
-        <td>{{ order.stock.figi }}</td>
-        <td>{{ order.stock.currency }}</td>
+        <!--td>{{ order.stock.description }}</td-->
+        <!--td>{{ order.stock.figi }}</td-->
+        <!--td>{{ order.stock.currency }}</td-->
       </tr>
       </tbody>
     </table>
@@ -39,6 +39,7 @@ import {onMounted, ref} from 'vue';
 import {useRouter, useRoute} from "vue-router";
 import {Currency, OrderType} from '@/types/types.ts';
 import type {Order} from '@/types/types.ts'
+import axios from 'axios';
 
 const router = useRouter()
 const route = useRoute();
@@ -68,15 +69,36 @@ const orders = ref<Order[]>([{
 ])
 
 onMounted(async () => {
-  try {
-    const response = await fetch(`/api/orders?investmentAccountId=${investmentAccountId}`)
-    if (!response.ok) {
-      throw new Error('Netzwerkantwort war nicht ok')
-    }
-    orders.value = await response.json()
-  } catch (error) {
-    console.error('Fehler beim Abrufen der Orders:', error);
-  }
+  /*axios.get(`/api/orders`, {
+    params: { investmentAccountId: investmentAccountId }
+  })
+    .then(response => {
+      orders.value = response.data
+      console.log(response.data)
+    })
+    .catch(error => {
+      console.error('Error fetching orders:', error)
+      if (error.response && error.response.status === 404) {
+        orders.value = []
+      }
+    });*/
+  fetch(`/api/orders?investmentAccountId=${investmentAccountId}`, {
+    credentials: 'include'
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log(data)
+      orders.value = data
+    })
+    .catch(error => {
+      console.error('Fehler beim Abrufen der Orders:', error)
+    })
+
 })
 
 const navigateToStockDetail = (symbol: string) => {
