@@ -2,15 +2,16 @@
   <div class="invest-depot">
     <div class="header">
       <div class="title">
-        <h1>InvestDepot</h1>
-        <p>Hans Mustermann</p>
+        <h1>Investment-Depot</h1>
+        <p>{{ investmentAccount.user.name }}</p>
+        <p>{{ investmentAccount.user.mail}}</p>
       </div>
       <div class="total-value">
         <p>Depotwert: <strong>{{ totalValue }} €</strong></p>
       </div>
     </div>
 
-    <h2>Positionen</h2>
+    <h2>Portfolio-Wertpapiere</h2>
     <table>
       <thead>
       <tr>
@@ -22,14 +23,14 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="position in positions" :key="position.id" @click="navigateToStockDetail(position.symbol)">
-        <td>{{ position.name }}</td>
-        <td>{{ position.symbol }}</td>
-        <td>{{ position.currentValue }} €</td>
-        <td>{{ position.amount }}</td>
-        <td :class="{ 'positive': position.change >= 0, 'negative': position.change < 0 }">
-          {{ position.change }} € ({{ position.changePercentage }}%)
-        </td>
+      <tr v-for="portfolioEntry in investmentAccount.portfolio" :key="portfolioEntry.id" @click="navigateToStockDetail(portfolioEntry.stockSymbol)">
+        <td>{{ portfolioEntry.stock.description }}</td>
+        <td>{{ portfolioEntry.stockSymbol }}</td>
+        <td>{{ portfolioEntry.currentValue }} €</td>    <!--reactive value-->
+        <td>{{ portfolioEntry.amount }}</td>    <!--reactive value-->
+        <td :class="{ 'positive': portfolioEntry.change >= 0, 'negative': portfolioEntry.change < 0 }">
+          {{ portfolioEntry.change }} € ({{ portfolioEntry.changePercentage }}%)
+        </td>         <!--reactive value-->
       </tr>
       </tbody>
     </table>
@@ -37,16 +38,34 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
-import {useRouter} from "vue-router";
+import {onMounted, ref} from 'vue';
+import {useRoute, useRouter} from "vue-router";
+import type {InvestmentAccount} from "@/types/types.ts";
 
 const router = useRouter()
-const totalValue = ref(2345.56)
-const positions = ref([
-  { id: 1, name: 'Apple', symbol: "APPL", amount: 3, currentValue: 1450.90, change: 33.39, changePercentage: 13.6 },
-  { id: 2, name: 'Tesla', symbol: "TSLA", amount: 3, currentValue: 3565.35, change: 120.75, changePercentage: 20.1 },
-  { id: 3, name: 'Amazon', symbol: "AMZ", amount: 5, currentValue: 6169.52, change: -45.50, changePercentage: -5.2 },
-])
+const route = useRoute()
+const investmentAccountId = route.params.investmentAccountId
+const totalValue = ref(0.0)
+const investmentAccount = ref<InvestmentAccount>({})
+
+
+onMounted(async () => {
+  try {
+    const responsePortfolio = await fetch(`/api/portfolio?investmentAccountId=${investmentAccountId}`)
+    if (!responsePortfolio.ok) {
+      throw new Error(`HTTP error! status: ${responsePortfolio.status}`)
+    }
+    investmentAccount.value = await responsePortfolio.json() as InvestmentAccount
+
+    const responseTotalValue = await fetch(`/api/portfolio/totalValue?investmentAccountId=${investmentAccountId}`)
+    if (!responseTotalValue.ok) {
+      throw new Error(`HTTP error! status: ${responseTotalValue.status}`)
+    }
+    totalValue.value = await responseTotalValue.json() as number
+  } catch (e) {
+    console.error(e)
+  }
+})
 
 const navigateToStockDetail = (symbol: string) => {
   router.push({name: 'wertpapier-detail', params: {symbol}});
