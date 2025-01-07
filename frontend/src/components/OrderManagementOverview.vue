@@ -51,28 +51,6 @@ onMounted(async () => {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
     orders.value = await response.json() as Order[]
-
-    /*let symbols = ""
-    for (let order of orders.value) {
-      symbols += order.stockSymbol + ";"
-    }
-    symbols = symbols.slice(0, -1);
-
-    const stockResponse = await fetch(`/api/stocks/by/symbols?symbols=${symbols}`)
-    if (!stockResponse.ok) {
-      throw new Error(`HTTP error! status: ${stockResponse.status}`)
-    }
-    const stockData = await stockResponse.json() as Stock[]
-    console.log(stockData)
-
-    for (let order of orders.value) {
-      order.stock = order.stock || {}
-      const matchingStock = stockData.find(stock => stock.symbol === order.stockSymbol)
-      if (matchingStock) {
-        order.stock = matchingStock
-      }
-    }
-    console.log("Orders data:", orders.value)*/
   } catch (e) {
     console.error(e)
   }
