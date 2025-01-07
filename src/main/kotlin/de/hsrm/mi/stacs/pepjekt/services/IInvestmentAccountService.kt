@@ -16,5 +16,5 @@ interface IInvestmentAccountService {
 
     fun sellStock(investmentAccountId: Long, stockSymbol: String, volume: BigDecimal): Mono<InvestmentAccount>
 
-    fun getInvestmentAccountPortfolio(userId: Long): Mono<InvestmentAccount>
+    fun getInvestmentAccountPortfolio(investmentAccountId: Long): Mono<InvestmentAccount>
 }
