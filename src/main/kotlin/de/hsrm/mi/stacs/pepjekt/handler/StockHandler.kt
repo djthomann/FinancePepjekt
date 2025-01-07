@@ -19,6 +19,21 @@ import java.time.LocalDateTime
 @Component
 class StockHandler(private val stockService: IStockService, private val orderService: IStockService) {
 
+    /**
+     * @return all stocks in the database
+     */
+    fun getStocks(request: ServerRequest): Mono<ServerResponse> {
+        return Flux.merge(stockService.getAllStocks())
+            .collectList()
+            .flatMap { stocks ->
+                if (stocks.isNotEmpty()) {
+                    ServerResponse.ok().bodyValue(stocks)
+                } else {
+                    ServerResponse.notFound().build()
+                }
+            }
+    }
+
     fun getStockDetailsBySymbol(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
 

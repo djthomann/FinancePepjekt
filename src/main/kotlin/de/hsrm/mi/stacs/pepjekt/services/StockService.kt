@@ -85,4 +85,11 @@ class StockService(
 
     }
 
+    /**
+     * @return all stocks in the database
+     */
+    override fun getAllStocks(): Flux<Stock> {
+        return stockRepository.findAll()
+    }
+
 }

@@ -72,6 +72,7 @@ class RouterConfig {
     @Bean
     fun stockRouter(stockHandler: StockHandler) = router {
         "/api".nest {
+            GET("/stocks", stockHandler::getStocks)
             GET("/stock-details/symbol", stockHandler::getStockDetailsBySymbol)
             GET("/stock-details/name", stockHandler::getStockDetailsByName)
             GET("/stock/by/symbol", stockHandler::getStockBySymbol)
