@@ -57,6 +57,7 @@ class RouterConfig {
     fun investmentAccountRouter(investmentAccountHandler: InvestmentAccountHandler) = router {
         "/api".nest {
             GET("/portfolio", investmentAccountHandler::getPortfolio)
+            GET("/portfolio/totalValue", investmentAccountHandler::getPortfolioTotalValue)
             POST("/stock/buy", investmentAccountHandler::buyStock)
             POST("/stock/sell", investmentAccountHandler::sellStock)
         }

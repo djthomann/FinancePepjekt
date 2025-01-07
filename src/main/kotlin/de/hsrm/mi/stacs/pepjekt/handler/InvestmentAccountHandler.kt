@@ -36,6 +36,10 @@ class InvestmentAccountHandler(private val investmentAccountService: IInvestment
             .switchIfEmpty(ServerResponse.notFound().build())
     }
 
+    fun getPortfolioTotalValue(request: ServerRequest): Mono<ServerResponse> {
+        TODO("Not yet implemented")
+    }
+
 
     /**
      * Handles a request to buy stock in an investment account.
