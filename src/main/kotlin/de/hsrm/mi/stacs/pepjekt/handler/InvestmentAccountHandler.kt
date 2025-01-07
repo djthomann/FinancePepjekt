@@ -1,9 +1,11 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
 import de.hsrm.mi.stacs.pepjekt.services.IInvestmentAccountService
+import de.hsrm.mi.stacs.pepjekt.services.IStockService
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
 
@@ -15,7 +17,10 @@ import java.math.BigDecimal
  * @param investmentAccountService The service used to perform operations on investment accounts.
  */
 @Component
-class InvestmentAccountHandler(private val investmentAccountService: IInvestmentAccountService) {
+class InvestmentAccountHandler(
+    private val investmentAccountService: IInvestmentAccountService,
+    private val stockService: IStockService
+) {
 
     /**
      * Handles a request to get the portfolio of an investment account.
@@ -27,7 +32,9 @@ class InvestmentAccountHandler(private val investmentAccountService: IInvestment
      * @throws IllegalArgumentException If the user ID is missing in the query parameters.
      */
     fun getPortfolio(request: ServerRequest): Mono<ServerResponse> {
-        val investmentAccountId = request.queryParam("investmentAccountId").orElseThrow { IllegalArgumentException("userId is required") }.toLong()
+        val investmentAccountId =
+            request.queryParam("investmentAccountId").orElseThrow { IllegalArgumentException("userId is required") }
+                .toLong()
 
         return investmentAccountService.getInvestmentAccountPortfolio(investmentAccountId)
             .flatMap { portfolio ->
@@ -36,12 +43,43 @@ class InvestmentAccountHandler(private val investmentAccountService: IInvestment
             .switchIfEmpty(ServerResponse.notFound().build())
     }
 
+    /**
+     * Handles a request to get the portfolio of an investment account.
+     *
+     * If the investmentAccountId is not provided or the portfolio cannot be found, an error response will be returned.
+     *
+     * @param request The incoming server request containing query parameters.
+     * @return A Mono containing the server response with the total value of the portfolio or a 404 if the portfolio is empty.
+     * @throws IllegalArgumentException If the investmentAccountId is missing in the query parameters.
+     */
     fun getPortfolioTotalValue(request: ServerRequest): Mono<ServerResponse> {
         val investmentAccountId = request.queryParam("investmentAccountId")
             .map { it.toLong() }
             .orElseThrow { IllegalArgumentException("investmentAccountId is required") }
 
-        TODO("Not yet implemented")
+        return investmentAccountService.getInvestmentAccountPortfolio(investmentAccountId)
+            .flatMap { portfolio ->
+                val stockSymbols = portfolio.portfolio.map { it.stockSymbol }
+                if(stockSymbols.isEmpty()){
+                    ServerResponse.notFound().build()
+                }
+
+                val highestValuesMonos = stockSymbols.map { symbol ->
+                    stockService.getLatestQuoteBySymbol(symbol)
+                        .map { quote ->
+                            quote.currentPrice
+                        }
+                }
+
+                Flux.merge(highestValuesMonos)
+                    .collectList()
+                    .flatMap { highestValues ->
+                        val totalValue = highestValues.fold(BigDecimal.ZERO) { acc, price ->
+                            acc.add(price)
+                        }
+                        ServerResponse.ok().bodyValue(totalValue)
+                    }
+            }
     }
 
 
