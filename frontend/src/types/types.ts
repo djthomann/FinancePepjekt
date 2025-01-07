@@ -2,6 +2,7 @@ export interface Order {
   id: number,
   volume: number,
   type: OrderType,
+  investmentAccountId: number,
   stock: Stock,
   stockSymbol: String
 }
