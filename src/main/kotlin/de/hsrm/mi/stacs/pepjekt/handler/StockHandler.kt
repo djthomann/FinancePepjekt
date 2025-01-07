@@ -148,19 +148,47 @@ class StockHandler(private val stockService: IStockService, private val orderSer
                 ServerResponse.ok().bodyValue(it)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
-
     }
 
+    /**
+     * Handles a request to retrieve the lowest stock value of the day for a given symbol.
+     *
+     * Extracts the stock symbol from the request's query parameters and retrieves the lowest stock value of the day
+     * for the specified symbol as of the current date and time.
+     * Returns a 404 Not Found response if no data is available for the provided symbol.
+     *
+     * @param request The incoming server request containing the stock symbol as a query parameter.
+     * @return A Mono containing the server response with the day's lowest stock value, or a 404 Not Found if no data is found.
+     * @throws IllegalArgumentException If the stock symbol is not provided in the request.
+     */
     fun getStockDayLow(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
 
-        TODO("Not yet implemented")
+        return stockService.getDayLow(symbol, LocalDateTime.now())
+            .flatMap {
+                ServerResponse.ok().bodyValue(it)
+            }
+            .switchIfEmpty(ServerResponse.notFound().build())
     }
-
+    /**
+     * Handles a request to retrieve the highest stock value of the day for a given symbol.
+     *
+     * Extracts the stock symbol from the request's query parameters and retrieves the highest stock value of the day
+     * for the specified symbol as of the current date and time.
+     * Returns a 404 Not Found response if no data is available for the provided symbol.
+     *
+     * @param request The incoming server request containing the stock symbol as a query parameter.
+     * @return A Mono containing the server response with the day's highest stock value, or a 404 Not Found if no data is found.
+     * @throws IllegalArgumentException If the stock symbol is not provided in the request.
+     */
     fun getStockDayHigh(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
 
-        TODO("Not yet implemented")
+        return stockService.getDayHigh(symbol, LocalDateTime.now())
+            .flatMap {
+                ServerResponse.ok().bodyValue(it)
+            }
+            .switchIfEmpty(ServerResponse.notFound().build())
     }
 
     /**

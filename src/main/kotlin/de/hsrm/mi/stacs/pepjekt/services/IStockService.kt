@@ -29,4 +29,7 @@ interface IStockService {
 
     fun getLatestQuoteBySymbol(symbol: String): Mono<Quote>
 
+    fun getDayLow(stockSymbol: String, timeStamp: LocalDateTime): Mono<Quote>
+
+    fun getDayHigh(stockSymbol: String, timeStamp: LocalDateTime): Mono<Quote>
 }
