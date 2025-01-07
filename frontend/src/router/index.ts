@@ -10,7 +10,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/depot-uebersicht',
+      path: '/depot-uebersicht/:investmentAccountId',
       name: 'depot-uebersicht',
       component: DepotUebersicht,
     },
@@ -43,7 +43,7 @@ const router = createRouter({
       path: '',
       redirect: (to: any) => {
         const { hash, params, query } = to
-        return '/depot-uebersicht'
+        return '/depot-uebersicht/1'
       },
     },
   ],
