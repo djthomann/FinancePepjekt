@@ -1,6 +1,8 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.InvestmentAccountDTO
+import de.hsrm.mi.stacs.pepjekt.entities.dtos.UserDTO
+import de.hsrm.mi.stacs.pepjekt.services.IFinanceUserService
 import de.hsrm.mi.stacs.pepjekt.services.IInvestmentAccountService
 import de.hsrm.mi.stacs.pepjekt.services.IStockService
 import org.springframework.stereotype.Component
@@ -20,7 +22,8 @@ import java.math.BigDecimal
 @Component
 class InvestmentAccountHandler(
     private val investmentAccountService: IInvestmentAccountService,
-    private val stockService: IStockService
+    private val stockService: IStockService,
+    private val userService: IFinanceUserService
 ) {
 
     /**
@@ -44,10 +47,10 @@ class InvestmentAccountHandler(
                 val investmentAccountDTO = InvestmentAccountDTO.mapToDto(
                     investmentAccount,
                     bankAccount = TODO(),
-                    user = TODO(),
+                    user = UserDTO.mapToDto(userService.getUserByInvestmentAccountId(investmentAccountId).block()!!),
                     stockService = stockService
                 )
-                ServerResponse.ok().bodyValue(investmentAccount)
+                ServerResponse.ok().bodyValue(investmentAccountDTO)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
     }
