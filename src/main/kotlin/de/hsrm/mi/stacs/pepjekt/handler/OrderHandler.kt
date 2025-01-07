@@ -86,7 +86,7 @@ class OrderHandler(private val orderService: IOrderService, private val stockSer
      * @return A Mono containing the server response with the list of orders or a 404 if no orders are found.
      * @throws IllegalArgumentException If the investmentAccountId is missing.
      *
-     * TODO return OrderDTO
+     * TODO return OrderDTO -> has to be done, already in use
      */
     fun getOrders(request: ServerRequest): Mono<ServerResponse> {
         val investmentAccountId = request.queryParam("investmentAccountId")

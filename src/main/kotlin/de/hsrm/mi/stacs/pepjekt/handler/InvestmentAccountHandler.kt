@@ -31,7 +31,7 @@ class InvestmentAccountHandler(
      * @return A Mono containing the server response with the portfolio or a 404 not found if no portfolio is found.
      * @throws IllegalArgumentException If the user ID is missing in the query parameters.
      *
-     * TODO return InvestmentAccountDTO
+     * TODO return InvestmentAccountDTO -> has to be done, already in use
      */
     fun getPortfolio(request: ServerRequest): Mono<ServerResponse> {
         val investmentAccountId =
@@ -53,6 +53,8 @@ class InvestmentAccountHandler(
      * @param request The incoming server request containing query parameters.
      * @return A Mono containing the server response with the total value of the portfolio or a 404 if the portfolio is empty.
      * @throws IllegalArgumentException If the investmentAccountId is missing in the query parameters.
+     *
+     * TODO -> has to be done, already in use
      */
     fun getPortfolioTotalValue(request: ServerRequest): Mono<ServerResponse> {
         val investmentAccountId = request.queryParam("investmentAccountId")

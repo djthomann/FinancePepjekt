@@ -48,7 +48,7 @@ class StockHandler(private val stockService: IStockService, private val orderSer
      * @return A Mono containing the server response with the stock data or a 404 Not Found if the stock is not found.
      * @throws IllegalArgumentException If the stock symbol is not provided in the request.
      *
-     * TODO return StockDetailsDTO
+     * TODO return StockDetailsDTO -> has to be done, already in use
      */
     fun getStockDetailsBySymbol(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
