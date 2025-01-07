@@ -23,11 +23,11 @@
       <tr v-for="order in orders" :key="order.id" @click="navigateToStockDetail(order.stock.symbol)">
         <td>{{ order.id }}</td>
         <td>{{ order.volume }}</td>
-        <!--td>{{ order.type }}</td-->
+        <td>{{ order.type }}</td>
         <td>{{ order.stock.symbol }}</td>
-        <!--td>{{ order.stock.description }}</td-->
-        <!--td>{{ order.stock.figi }}</td-->
-        <!--td>{{ order.stock.currency }}</td-->
+        <td>{{ order.stock.description }}</td>
+        <td>{{ order.stock.figi }}</td>
+        <td>{{ order.stock.currency }}</td>
       </tr>
       </tbody>
     </table>
@@ -37,69 +37,40 @@
 <script lang="ts" setup>
 import {onMounted, ref} from 'vue';
 import {useRouter, useRoute} from "vue-router";
-import {Currency, OrderType} from '@/types/types.ts';
-import type {Order} from '@/types/types.ts'
-import axios from 'axios';
+import type {Order, Stock} from '@/types/types.ts'
 
 const router = useRouter()
 const route = useRoute();
 const investmentAccountId = route.params.investmentAccountId
-const orders = ref<Order[]>([{
-  id: 1,
-  volume: 100.5,
-  type: OrderType.BUY,
-  stock: {
-    symbol: 'AAPL',
-    description: 'Apple Inc., default data',
-    figi: 'BBG000B9XRY4',
-    currency: Currency.USD
-  }
-},
-  {
-    id: 2,
-    volume: 50.75,
-    type: OrderType.SELL,
-    stock: {
-      symbol: 'GOOGL',
-      description: 'Alphabet Inc., default data',
-      figi: 'BBG009S39JX6',
-      currency: Currency.USD
-    }
-  }
-])
+const orders = ref<Order[]>([])
 
 onMounted(async () => {
-  /*axios.get(`/api/orders`, {
-    params: { investmentAccountId: investmentAccountId }
-  })
-    .then(response => {
-      orders.value = response.data
-      console.log(response.data)
-    })
-    .catch(error => {
-      console.error('Error fetching orders:', error)
-      if (error.response && error.response.status === 404) {
-        orders.value = []
-      }
-    });*/
-  fetch(`/api/orders?investmentAccountId=${investmentAccountId}`, {
-    credentials: 'include'
-  })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log(data)
-      orders.value = data
-    })
-    .catch(error => {
-      console.error('Fehler beim Abrufen der Orders:', error)
-    })
+  try {
+    const response = await fetch(`/api/orders?investmentAccountId=${investmentAccountId}`)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    orders.value = await response.json() as Order[]
 
-})
+    for (let order of orders.value) {
+      try {
+        const stockResponse = await fetch(`/api/stock/by/symbol?symbol=${order.stockSymbol}`)
+        if (!stockResponse.ok) {
+          throw new Error(`HTTP error! status: ${stockResponse.status}`)
+        }
+        const stockData = await stockResponse.json() as Stock
+        order.stock = {...order.stock, ...stockData}
+      } catch (error) {
+        console.error(`Error fetching stock data for ${order.stock.symbol}:`, error)
+      }
+    }
+    console.log("Final orders data:", orders.value)
+
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Orders:', error);
+  }
+});
+
 
 const navigateToStockDetail = (symbol: string) => {
   router.push({name: 'wertpapier-detail', params: {symbol}});
