@@ -31,10 +31,16 @@ CREATE TABLE finance_user
 
 CREATE TABLE quote
 (
-    id           SERIAL PRIMARY KEY,
-    value        DECIMAL(18, 4) NOT NULL,
-    timeStamp    TIMESTAMP      NOT NULL,
-    stock_symbol VARCHAR(50)    NOT NULL,
+    id                     SERIAL PRIMARY KEY,
+    current_price          DECIMAL(18, 4) NOT NULL,
+    change                 FLOAT          NOT NULL,
+    percent_change         FLOAT          NOT NULL,
+    high_price_of_the_day  DECIMAL(18, 4) NOT NULL,
+    low_price_of_the_day   DECIMAL(18, 4) NOT NULL,
+    open_price_of_the_day  DECIMAL(18, 4) NOT NULL,
+    previous_close_price   DECIMAL(18, 4) NOT NULL,
+    time_stamp             TIMESTAMP      NOT NULL,
+    stock_symbol           VARCHAR(50)    NOT NULL,
     FOREIGN KEY (stock_symbol) REFERENCES stock (symbol) ON DELETE CASCADE
 );
 

@@ -44,20 +44,18 @@ class StockService(
      * @return a [Mono] emitting the average price as a [BigDecimal], or zero if no quotes are found
      */
     override fun calculateAveragePrice(symbol: String, from: LocalDateTime, to: LocalDateTime): Mono<BigDecimal> {
-        return stockRepository.findBySymbol(symbol)
-            .flatMap { stock ->
-                quoteRepository.findByStock(stock)
-                    .filter { quote -> quote.timeStamp.isAfter(from) && quote.timeStamp.isBefore(to) }
-                    .collectList()
-                    .map { quotes ->
-                        if (quotes.isEmpty()) {
-                            BigDecimal.ZERO
-                        } else {
-                            val sum = quotes.fold(BigDecimal.ZERO) { acc, quote -> acc.add(quote.value) }
-                            sum.divide(BigDecimal(quotes.size), 2, RoundingMode.HALF_UP)
-                        }
-                    }
+        return quoteRepository.findByStockSymbol(symbol)
+            .filter { quote -> quote.timeStamp.isAfter(from) && quote.timeStamp.isBefore(to) }
+            .collectList()
+            .map { quotes ->
+                if (quotes.isEmpty()) {
+                    BigDecimal.ZERO
+                } else {
+                    val sum = quotes.fold(BigDecimal.ZERO) { acc, quote -> acc.add(quote.currentPrice) }
+                    sum.divide(BigDecimal(quotes.size), 2, RoundingMode.HALF_UP)
+                }
             }
+
     }
 
     /**
@@ -68,8 +66,8 @@ class StockService(
      */
     override fun getStockHistory(symbol: String): Flux<Quote> {
         return stockRepository.findBySymbol(symbol)
-            .flatMapMany { stock ->
-                quoteRepository.findByStock(stock)
+            .flatMapMany {
+                quoteRepository.findByStockSymbol(symbol)
             }
     }
 
@@ -82,11 +80,9 @@ class StockService(
      * @return a [Flux] emitting the [Quote] instances within the specified time range
      */
     override fun getStockHistory(symbol: String, from: LocalDateTime, to: LocalDateTime): Flux<Quote> {
-        return stockRepository.findBySymbol(symbol)
-            .flatMapMany { stock ->
-                quoteRepository.findByStock(stock)
-                    .filter { quote -> quote.timeStamp.isAfter(from) && quote.timeStamp.isBefore(to) }
-            }
+        return quoteRepository.findByStockSymbol(symbol)
+            .filter { quote -> quote.timeStamp.isAfter(from) && quote.timeStamp.isBefore(to) }
+
     }
 
 }
