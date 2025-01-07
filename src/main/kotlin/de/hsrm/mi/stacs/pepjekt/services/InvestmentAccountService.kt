@@ -55,7 +55,6 @@ class InvestmentAccountService(
                         // Create a new entry if none exists
                         portfolioEntryRepository.save(
                             PortfolioEntry(
-                                id = null,
                                 investmentAccountId = investmentAccountId,
                                 stockSymbol = stockSymbol,
                                 quantity = volume.toDouble()
@@ -140,12 +139,22 @@ class InvestmentAccountService(
     }
 
     /**
-     * Retrieves the portfolio of an investment account by the user ID.
+     * Retrieves the portfolio of an investment account by the investmentAccountId ID.
      *
      * @param investmentAccountId the ID of the investmentAccount whose investment account portfolio is to be retrieved
      * @return a [Mono] emitting the [InvestmentAccount] containing the portfolio, or an error if not found
      */
     override fun getInvestmentAccountPortfolio(investmentAccountId: Long): Mono<InvestmentAccount> {
-        return investmentAccountRepository.findByBankAccountId(investmentAccountId)
+        val investmentAccountMono = investmentAccountRepository.findById(investmentAccountId)
+        val portfolioEntriesMono = portfolioEntryRepository.findAllByInvestmentAccountId(investmentAccountId)
+
+        return investmentAccountMono.zipWith(portfolioEntriesMono.collectList()) { account, entries ->
+            InvestmentAccount(
+                id = account.id,
+                bankAccountId = account.bankAccountId,
+                portfolio = entries,
+                userId = account.userId
+            )
+        }
     }
 }
