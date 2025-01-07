@@ -2,7 +2,7 @@ package de.hsrm.mi.stacs.pepjekt.entities.dtos
 
 import org.springframework.data.annotation.Id
 
-data class InvestmentAccountDTO (
+class InvestmentAccountDTO (
     @Id
     val id: Long? = null,
     val bankAccountId: Long? = null,

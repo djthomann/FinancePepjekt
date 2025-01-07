@@ -3,7 +3,7 @@ package de.hsrm.mi.stacs.pepjekt.entities.dtos
 import org.springframework.data.annotation.Id
 import java.math.BigDecimal
 
-data class PortfolioEntryDTO(
+class PortfolioEntryDTO(
     @Id
     val id: Long? = null,
     val investmentAccountId: Long,
