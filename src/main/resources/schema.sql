@@ -1,3 +1,4 @@
+DROP TABLE If EXISTS investment_portfolio;
 DROP TABLE IF EXISTS portfolio_entry;
 DROP TABLE IF EXISTS stock_order;
 DROP TABLE IF EXISTS investmentaccount;

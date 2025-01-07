@@ -4,6 +4,7 @@ import de.hsrm.mi.stacs.pepjekt.services.IStockService
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.LocalDateTime
 
@@ -48,6 +49,34 @@ class StockHandler(private val stockService: IStockService, private val orderSer
                 ServerResponse.ok().bodyValue(stock)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
+    }
+
+    /**
+     * Handles a request to retrieve stocks by their symbol.
+     *
+     * Extracts the stock symbols from the request's query parameters and retrieves the stocks data for the given symbols.
+     *
+     * @param request The incoming server request containing the stock symbol.
+     * @return A Mono containing the server response with the stocks data or a 404 Not Found if the stocks is not found.
+     * @throws IllegalArgumentException If the stock symbol is not provided in the request.
+     */
+    fun getStocksBySymbols(request: ServerRequest): Mono<ServerResponse> {
+        val symbols = request.queryParam("symbols").orElseThrow { IllegalArgumentException("symbols are required") }
+        val symbolParts = symbols.split(";")
+
+        val stockMonos = symbolParts.map { symbol ->
+            stockService.getStockBySymbol(symbol)
+        }
+
+        return Flux.merge(stockMonos)
+            .collectList()
+            .flatMap { stocks ->
+                if (stocks.isNotEmpty()) {
+                    ServerResponse.ok().bodyValue(stocks)
+                } else {
+                    ServerResponse.notFound().build()
+                }
+            }
     }
 
     fun getStockByName(request: ServerRequest): Mono<ServerResponse> {

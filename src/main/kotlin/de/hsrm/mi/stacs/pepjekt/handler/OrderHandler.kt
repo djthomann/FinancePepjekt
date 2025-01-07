@@ -88,7 +88,7 @@ class OrderHandler(private val orderService: IOrderService) {
             .map { it }
             .orElseThrow { IllegalArgumentException("investmentAccountId is required") }
 
-        return orderService.getOrdersByInvestmentAccount(investmentAccountId)
+        return orderService.getOrdersByInvestmentAccountId(investmentAccountId)
             .collectList()
             .flatMap { orders ->
                 if (orders.isEmpty()) {

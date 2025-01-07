@@ -90,6 +90,11 @@
       color: #555;
     }
 
+    tr:hover {
+      background-color: var(--main-color);
+      opacity: 0.5;
+    }
+
     .positive {
       color: #28a745;
     }
