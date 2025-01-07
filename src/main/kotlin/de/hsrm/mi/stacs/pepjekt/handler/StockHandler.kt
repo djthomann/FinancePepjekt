@@ -130,10 +130,25 @@ class StockHandler(private val stockService: IStockService, private val orderSer
             .switchIfEmpty(ServerResponse.notFound().build())
     }
 
+    /**
+     * Handles a request to retrieve the latest stock value by its symbol.
+     *
+     * Extracts the stock symbol from the request's query parameters and retrieves the latest stock quote for the specified symbol.
+     * Returns a 404 Not Found response if no stock data is available for the provided symbol.
+     *
+     * @param request The incoming server request containing the stock symbol as a query parameter.
+     * @return A Mono containing the server response with the latest stock value, or a 404 Not Found if the stock is not found.
+     * @throws IllegalArgumentException If the stock symbol is not provided in the request.
+     */
     fun getCurrentStockValue(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
 
-        TODO("Not yet implemented")
+        return stockService.getLatestQuoteBySymbol(symbol)
+            .flatMap {
+                ServerResponse.ok().bodyValue(it)
+            }
+            .switchIfEmpty(ServerResponse.notFound().build())
+
     }
 
     fun getStockDayLow(request: ServerRequest): Mono<ServerResponse> {
@@ -186,8 +201,10 @@ class StockHandler(private val stockService: IStockService, private val orderSer
 
     fun getStockHistoryByName(request: ServerRequest): Mono<ServerResponse> {
         val name = request.queryParam("name").orElseThrow { IllegalArgumentException("name is required") }
-        val from = LocalDateTime.parse(request.queryParam("from").orElseThrow { IllegalArgumentException("from is required") })
-        val to = LocalDateTime.parse(request.queryParam("to").orElseThrow { IllegalArgumentException("to is required") })
+        val from =
+            LocalDateTime.parse(request.queryParam("from").orElseThrow { IllegalArgumentException("from is required") })
+        val to =
+            LocalDateTime.parse(request.queryParam("to").orElseThrow { IllegalArgumentException("to is required") })
 
         TODO("Not yet implemented")
     }
@@ -204,8 +221,10 @@ class StockHandler(private val stockService: IStockService, private val orderSer
      */
     fun getStockAveragePrice(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
-        val from = LocalDateTime.parse(request.queryParam("from").orElseThrow { IllegalArgumentException("from is required") })
-        val to = LocalDateTime.parse(request.queryParam("to").orElseThrow { IllegalArgumentException("to is required") })
+        val from =
+            LocalDateTime.parse(request.queryParam("from").orElseThrow { IllegalArgumentException("from is required") })
+        val to =
+            LocalDateTime.parse(request.queryParam("to").orElseThrow { IllegalArgumentException("to is required") })
 
         return stockService.calculateAveragePrice(symbol, from, to)
             .flatMap { history ->
