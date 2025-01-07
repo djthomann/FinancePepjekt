@@ -9,11 +9,23 @@ VALUES (1, 'Alice Smith', 'alice.smith@example.com'),
        (2, 'Bob Johnson', 'bob.johnson@example.com'),
        (3, 'Charlie Brown', 'charlie.brown@example.com');
 
-INSERT INTO quote (value, timeStamp, stock_symbol)
-VALUES (182.50, '2024-12-17 10:30:00', 'AAPL'),
-       (250.75, '2024-12-17 11:00:00', 'TSLA'),
-       (132.20, '2024-12-17 12:15:00', 'GOOGL'),
-       (123.45, '2024-12-17 13:00:00', 'SAP');
+INSERT INTO quote (
+    current_price,
+    change,
+    percent_change,
+    high_price_of_the_day,
+    low_price_of_the_day,
+    open_price_of_the_day,
+    previous_close_price,
+    time_stamp,
+    stock_symbol
+)
+VALUES
+    (182.50, 2.5, 1.39, 185.00, 180.00, 181.00, 180.00, '2024-12-17 10:30:00', 'AAPL'),
+    (250.75, -1.25, -0.50, 255.00, 249.00, 252.00, 252.00, '2024-12-17 11:00:00', 'TSLA'),
+    (132.20, 0.75, 0.57, 133.50, 131.00, 131.50, 131.00, '2024-12-17 12:15:00', 'GOOGL'),
+    (123.45, -0.55, -0.44, 124.00, 123.00, 123.80, 124.00, '2024-12-17 13:00:00', 'SAP');
+
 
 INSERT INTO bankaccount (currency, balance)
 VALUES ('USD', 1000.50),
