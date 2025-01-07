@@ -76,11 +76,11 @@ class StockServiceTest {
     }
 
     /**
-     * Tests the [StockService.getStockHistory] method to ensure all quotes for a stock are retrieved correctly.
+     * Tests the [StockService.getStockHistoryBySymbol] method to ensure all quotes for a stock are retrieved correctly.
      */
     @Test
     fun `test getStockHistory`() {
-        stockService.getStockHistory("AAPL")
+        stockService.getStockHistoryBySymbol("AAPL")
             .collectList()
             .doOnNext { result ->
                 assert(result.size == 5)
@@ -90,7 +90,7 @@ class StockServiceTest {
     }
 
     /**
-     * Tests the [StockService.getStockHistory] method with a time filter to ensure only quotes
+     * Tests the [StockService.getStockHistoryBySymbol] method with a time filter to ensure only quotes
      * within the specified time range are retrieved.
      */
     @Test
@@ -98,7 +98,7 @@ class StockServiceTest {
         val from = LocalDateTime.now().minusDays(2)
         val to = LocalDateTime.now().minusDays(1)
 
-        stockService.getStockHistory("AAPL", from, to)
+        stockService.getStockHistoryBySymbol("AAPL", from, to)
             .collectList()
             .doOnNext { result ->
                 assert(result.size == 1)

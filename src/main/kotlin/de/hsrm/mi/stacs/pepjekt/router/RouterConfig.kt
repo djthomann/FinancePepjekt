@@ -82,7 +82,6 @@ class RouterConfig {
             GET("/stock/day-low", stockHandler::getStockDayLow)
             GET("/stock/day-high", stockHandler::getStockDayHigh)
             GET("/stock/history/symbol", stockHandler::getStockHistoryBySymbol)
-            GET("/stock/history/name", stockHandler::getStockHistoryByName)
             GET("/stock/average-price", stockHandler::getStockAveragePrice)
         }
     }

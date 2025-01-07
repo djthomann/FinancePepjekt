@@ -37,10 +37,25 @@ class StockHandler(private val stockService: IStockService, private val orderSer
             }
     }
 
+    /**
+     * Handles a request to retrieve stock data by its symbol.
+     *
+     * Extracts the stock symbol from the request's query parameters and retrieves the stock data for the given symbol.
+     *
+     * @param request The incoming server request containing the stock symbol.
+     * @return A Mono containing the server response with the stock data or a 404 Not Found if the stock is not found.
+     * @throws IllegalArgumentException If the stock symbol is not provided in the request.
+     *
+     * TODO add details
+     */
     fun getStockDetailsBySymbol(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
 
-        TODO("Not yet implemented")
+        return stockService.getStockBySymbol(symbol)
+            .flatMap { stock ->
+                ServerResponse.ok().bodyValue(stock)
+            }
+            .switchIfEmpty(ServerResponse.notFound().build())
     }
 
     /**
@@ -48,9 +63,9 @@ class StockHandler(private val stockService: IStockService, private val orderSer
      *
      * Extracts the stock symbol from the request's query parameters and retrieves the stock data for the given description/name.
      *
-     * @param request The incoming server request containing the stock symbol.
+     * @param request The incoming server request containing the stock description/name.
      * @return A Mono containing the server response with the stock data or a 404 Not Found if the stock is not found.
-     * @throws IllegalArgumentException If the stock symbol is not provided in the request.
+     * @throws IllegalArgumentException If the stock description/name is not provided in the request.
      *
      * TODO add details
      */
@@ -170,6 +185,7 @@ class StockHandler(private val stockService: IStockService, private val orderSer
             }
             .switchIfEmpty(ServerResponse.notFound().build())
     }
+
     /**
      * Handles a request to retrieve the highest stock value of the day for a given symbol.
      *
@@ -211,30 +227,20 @@ class StockHandler(private val stockService: IStockService, private val orderSer
             val from = LocalDateTime.parse(fromParam.get())
             val to = LocalDateTime.parse(toParam.get())
 
-            stockService.getStockHistory(symbol, from, to)
+            stockService.getStockHistoryBySymbol(symbol, from, to)
                 .collectList()
                 .flatMap { history ->
                     ServerResponse.ok().bodyValue(history)
                 }
                 .switchIfEmpty(ServerResponse.notFound().build())
         } else {
-            stockService.getStockHistory(symbol)
+            stockService.getStockHistoryBySymbol(symbol)
                 .collectList()
                 .flatMap { history ->
                     ServerResponse.ok().bodyValue(history)
                 }
                 .switchIfEmpty(ServerResponse.notFound().build())
         }
-    }
-
-    fun getStockHistoryByName(request: ServerRequest): Mono<ServerResponse> {
-        val name = request.queryParam("name").orElseThrow { IllegalArgumentException("name is required") }
-        val from =
-            LocalDateTime.parse(request.queryParam("from").orElseThrow { IllegalArgumentException("from is required") })
-        val to =
-            LocalDateTime.parse(request.queryParam("to").orElseThrow { IllegalArgumentException("to is required") })
-
-        TODO("Not yet implemented")
     }
 
     /**
