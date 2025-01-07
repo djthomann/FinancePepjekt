@@ -5,9 +5,8 @@ import org.springframework.data.relational.core.mapping.Table
 
 @Table("portfolio_entry")
 data class PortfolioEntry(
-    @Id
-    val id: Long? = null,
     val investmentAccountId: Long,
+    @Id
     val stockSymbol: String,
     val quantity: Double
 )
