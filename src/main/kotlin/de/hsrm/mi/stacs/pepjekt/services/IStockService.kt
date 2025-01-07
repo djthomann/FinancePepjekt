@@ -17,6 +17,8 @@ interface IStockService {
 
     fun getStockBySymbol(symbol: String): Mono<Stock>
 
+    fun getStockByDescription(description: String): Mono<Stock>
+
     fun calculateAveragePrice(symbol: String, from: LocalDateTime, to: LocalDateTime): Mono<BigDecimal>
 
     fun getStockHistory(symbol: String): Flux<Quote>

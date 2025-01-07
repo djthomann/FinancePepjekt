@@ -34,6 +34,16 @@ class StockService(
         return stockRepository.findBySymbol(symbol)
     }
 
+    /**
+     * Retrieves a stock by its description.
+     *
+     * @param description the description of the stock to retrieve
+     * @return a [Mono] emitting the [Stock] corresponding to the description, or an error if not found
+     */
+    override fun getStockByDescription(description: String): Mono<Stock> {
+        return stockRepository.findByDescription(description)
+    }
+
 
     /**
      * Calculates the average price of a stock within a given time range.
