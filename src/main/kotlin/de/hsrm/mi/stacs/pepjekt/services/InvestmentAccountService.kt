@@ -142,10 +142,10 @@ class InvestmentAccountService(
     /**
      * Retrieves the portfolio of an investment account by the user ID.
      *
-     * @param userId the ID of the user whose investment account portfolio is to be retrieved
+     * @param investmentAccountId the ID of the investmentAccount whose investment account portfolio is to be retrieved
      * @return a [Mono] emitting the [InvestmentAccount] containing the portfolio, or an error if not found
      */
-    override fun getInvestmentAccountPortfolio(userId: Long): Mono<InvestmentAccount> {
-        return investmentAccountRepository.findByUserId(userId)
+    override fun getInvestmentAccountPortfolio(investmentAccountId: Long): Mono<InvestmentAccount> {
+        return investmentAccountRepository.findByBankAccountId(investmentAccountId)
     }
 }
