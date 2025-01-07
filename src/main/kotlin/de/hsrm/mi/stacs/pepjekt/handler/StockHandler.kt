@@ -24,6 +24,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
      *
      * @param request The incoming server request.
      * @return all stocks in the database
+     *
+     * TODO return StockDT0
      */
     fun getStocks(request: ServerRequest): Mono<ServerResponse> {
         return Flux.merge(stockService.getAllStocks())
@@ -46,7 +48,7 @@ class StockHandler(private val stockService: IStockService, private val orderSer
      * @return A Mono containing the server response with the stock data or a 404 Not Found if the stock is not found.
      * @throws IllegalArgumentException If the stock symbol is not provided in the request.
      *
-     * TODO add details
+     * TODO return StockDetailsDTO
      */
     fun getStockDetailsBySymbol(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
@@ -67,7 +69,7 @@ class StockHandler(private val stockService: IStockService, private val orderSer
      * @return A Mono containing the server response with the stock data or a 404 Not Found if the stock is not found.
      * @throws IllegalArgumentException If the stock description/name is not provided in the request.
      *
-     * TODO add details
+     * TODO return StockDetailsDTO
      */
     fun getStockDetailsByName(request: ServerRequest): Mono<ServerResponse> {
         val name = request.queryParam("name").orElseThrow { IllegalArgumentException("name is required") }
@@ -87,6 +89,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
      * @param request The incoming server request containing the stock symbol.
      * @return A Mono containing the server response with the stock data or a 404 Not Found if the stock is not found.
      * @throws IllegalArgumentException If the stock symbol is not provided in the request.
+     *
+     * TODO return StockDTO
      */
     fun getStockBySymbol(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
@@ -106,6 +110,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
      * @param request The incoming server request containing the stock symbol.
      * @return A Mono containing the server response with the stocks data or a 404 Not Found if the stocks is not found.
      * @throws IllegalArgumentException If the stock symbol is not provided in the request.
+     *
+     * TODO return StockDTO
      */
     fun getStocksBySymbols(request: ServerRequest): Mono<ServerResponse> {
         val symbols = request.queryParam("symbols").orElseThrow { IllegalArgumentException("symbols are required") }
@@ -134,6 +140,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
      * @param request The incoming server request containing the stock symbol.
      * @return A Mono containing the server response with the stock data or a 404 Not Found if the stock is not found.
      * @throws IllegalArgumentException If the stock symbol is not provided in the request.
+     *
+     * TODO return StockDTO
      */
     fun getStockByName(request: ServerRequest): Mono<ServerResponse> {
         val name = request.queryParam("name").orElseThrow { IllegalArgumentException("name is required") }
@@ -154,6 +162,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
      * @param request The incoming server request containing the stock symbol as a query parameter.
      * @return A Mono containing the server response with the latest stock value, or a 404 Not Found if the stock is not found.
      * @throws IllegalArgumentException If the stock symbol is not provided in the request.
+     *
+     * TODO return QuoteDTO oder wo anders rein da QuoteDTO noch nicht existiert?
      */
     fun getCurrentStockValue(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
@@ -175,6 +185,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
      * @param request The incoming server request containing the stock symbol as a query parameter.
      * @return A Mono containing the server response with the day's lowest stock value, or a 404 Not Found if no data is found.
      * @throws IllegalArgumentException If the stock symbol is not provided in the request.
+     *
+     * TODO return QuoteDTO oder wo anders rein da QuoteDTO noch nicht existiert?
      */
     fun getStockDayLow(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
@@ -196,6 +208,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
      * @param request The incoming server request containing the stock symbol as a query parameter.
      * @return A Mono containing the server response with the day's highest stock value, or a 404 Not Found if no data is found.
      * @throws IllegalArgumentException If the stock symbol is not provided in the request.
+     *
+     * TODO return QuoteDTO oder wo anders rein da QuoteDTO noch nicht existiert?
      */
     fun getStockDayHigh(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
@@ -217,6 +231,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
      * @param request The incoming server request containing the stock symbol and optional time range parameters.
      * @return A Mono containing the server response with the stock history or a 404 Not Found if no history is found.
      * @throws IllegalArgumentException If the stock symbol is not provided in the request.
+     *
+     * TODO return QuoteDTO oder wo anders rein da QuoteDTO noch nicht existiert?
      */
     fun getStockHistoryBySymbol(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }

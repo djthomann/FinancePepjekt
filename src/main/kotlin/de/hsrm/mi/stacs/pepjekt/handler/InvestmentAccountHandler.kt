@@ -30,6 +30,8 @@ class InvestmentAccountHandler(
      * @param request The incoming server request containing query parameters.
      * @return A Mono containing the server response with the portfolio or a 404 not found if no portfolio is found.
      * @throws IllegalArgumentException If the user ID is missing in the query parameters.
+     *
+     * TODO return InvestmentAccountDTO
      */
     fun getPortfolio(request: ServerRequest): Mono<ServerResponse> {
         val investmentAccountId =
