@@ -92,4 +92,11 @@ class StockService(
         return stockRepository.findAll()
     }
 
+    /**
+     * @param symbol the symbol of the stock
+     * @return a [Mono] emitting the [Quote] latest instance
+     */
+    override fun getLatestQuoteBySymbol(symbol: String): Mono<Quote> {
+        return quoteRepository.findTopByStockSymbolOrderByTimeStampDesc(symbol)
+    }
 }

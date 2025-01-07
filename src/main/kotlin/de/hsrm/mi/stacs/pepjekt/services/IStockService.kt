@@ -25,4 +25,6 @@ interface IStockService {
 
     fun getAllStocks(): Flux<Stock>
 
+    fun getLatestQuoteBySymbol(symbol: String): Mono<Quote>
+
 }
