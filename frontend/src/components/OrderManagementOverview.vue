@@ -52,7 +52,7 @@ onMounted(async () => {
     }
     orders.value = await response.json() as Order[]
 
-    let symbols = ""
+    /*let symbols = ""
     for (let order of orders.value) {
       symbols += order.stockSymbol + ";"
     }
@@ -72,7 +72,7 @@ onMounted(async () => {
         order.stock = matchingStock
       }
     }
-    console.log("Orders data:", orders.value)
+    console.log("Orders data:", orders.value)*/
   } catch (e) {
     console.error(e)
   }
