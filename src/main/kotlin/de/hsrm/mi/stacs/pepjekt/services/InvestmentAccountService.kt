@@ -27,6 +27,7 @@ class InvestmentAccountService(
     val portfolioEntryRepository: IPortfolioEntryRepository,
     val bankAccountRepository: IBankAccountRepository,
     val ownerRepository: IOwnerRepository,
+    val stockRepository: IStockRepository,
 ) : IInvestmentAccountService {
 
     /**
@@ -177,11 +178,22 @@ class InvestmentAccountService(
         // Load Portfolio and create PortfolioDTO
         val portfolioMono = accountMono.flatMap { account ->
             portfolioEntryRepository.findByInvestmentAccountId(account.id!!)
-                .map { portfolioEntry ->
-                    PortfolioEntryDTO(
-                        id = portfolioEntry.id,
-                        stockSymbol = portfolioEntry.stockSymbol
-                    )
+                .flatMap { portfolioEntry ->
+                    // Lade Stock-Daten für jedes PortfolioEntry
+                    stockRepository.findBySymbol(portfolioEntry.stockSymbol)
+                        .map { stock ->
+                            PortfolioEntryDTO(
+                                id = portfolioEntry.id,
+                                stockSymbol = portfolioEntry.stockSymbol,
+                                quantity = portfolioEntry.quantity,
+                                stock = StockDTO(
+                                    symbol = stock.symbol,
+                                    description = stock.description,
+                                    figi = stock.figi,
+                                    currency = stock.currency,
+                                ),
+                            )
+                        }
                 }.collectList()
         }
 

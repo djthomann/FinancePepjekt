@@ -4,7 +4,7 @@ export interface Order {
   type: OrderType,
   investmentAccountId: number,
   stock: Stock,
-  stockSymbol: String
+  stockSymbol: string
 }
 
 export enum OrderType {
@@ -42,15 +42,13 @@ export interface InvestmentAccount {
   id: number,
   bankAccountId: number,
   portfolio: PortfolioEntry[],
-  ownerId: number,
   bankAccount: BankAccount,
   owner: Owner
 }
 
 export interface PortfolioEntry {
   id: number,
-  investmentAccountId: number,
-  stockSymbol: String,
+  stockSymbol: string,
   quantity: number,
   stock: Stock,
   currentValue: number,
@@ -67,6 +65,6 @@ export interface BankAccount {
 
 export interface Owner {
   id: number,
-  name: String,
-  mail: String
+  name: string,
+  mail: string
 }

@@ -1,6 +1,7 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
 import de.hsrm.mi.stacs.pepjekt.services.IInvestmentAccountService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -17,6 +18,8 @@ import java.math.BigDecimal
 @Component
 class InvestmentAccountHandler(private val investmentAccountService: IInvestmentAccountService) {
 
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     /**
      * Handles a request to get the portfolio of an investment account.
      *
@@ -27,8 +30,11 @@ class InvestmentAccountHandler(private val investmentAccountService: IInvestment
      * @throws IllegalArgumentException If the user ID is missing in the query parameters.
      */
     fun getPortfolio(request: ServerRequest): Mono<ServerResponse> {
+
         val investmentAccountId = request.queryParam("investmentAccountId").orElseThrow { IllegalArgumentException(" " +
                 "investmentaccountId is required") }.toLong()
+
+        logger.info("Fetch InvestmentAccountDTO with investmentAccountId: $investmentAccountId")
 
         return investmentAccountService.getInvestmentAccountPortfolio(investmentAccountId)
             .flatMap { portfolio ->
