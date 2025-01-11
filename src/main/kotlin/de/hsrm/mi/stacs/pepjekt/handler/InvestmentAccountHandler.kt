@@ -27,7 +27,8 @@ class InvestmentAccountHandler(private val investmentAccountService: IInvestment
      * @throws IllegalArgumentException If the user ID is missing in the query parameters.
      */
     fun getPortfolio(request: ServerRequest): Mono<ServerResponse> {
-        val investmentAccountId = request.queryParam("investmentAccountId").orElseThrow { IllegalArgumentException("userId is required") }.toLong()
+        val investmentAccountId = request.queryParam("investmentAccountId").orElseThrow { IllegalArgumentException(" " +
+                "investmentaccountId is required") }.toLong()
 
         return investmentAccountService.getInvestmentAccountPortfolio(investmentAccountId)
             .flatMap { portfolio ->
