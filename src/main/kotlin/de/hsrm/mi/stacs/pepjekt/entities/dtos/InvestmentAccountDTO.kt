@@ -7,7 +7,6 @@ class InvestmentAccountDTO (
     val id: Long? = null,
     val bankAccountId: Long? = null,
     val portfolio: List<PortfolioEntryDTO> = emptyList(),
-    val userId: Long? = null,
     val bankAccount: BankAccountDTO,
-    val user: UserDTO
+    val owner: OwnerDTO
 )
