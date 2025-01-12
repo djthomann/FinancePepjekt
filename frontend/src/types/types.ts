@@ -17,6 +17,7 @@ export interface Stock {
   description: string;
   figi: string;
   currency: Currency;
+  cprice: number;
 }
 
 export enum Currency {
