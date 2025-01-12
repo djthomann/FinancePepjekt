@@ -6,6 +6,7 @@
                   <input v-model="searchField" placeholder="Symbol/Name" />
                   <button class="details-button" @click="resetSearch">Reset</button>
                   <button class="details-button" @click="searchContent">Search</button>
+                  <button class="details-button" @click="poll">Aktualisieren</button>
             </div>
       </div>
 
@@ -16,16 +17,18 @@
                               <th>Name</th>
                               <th>Symbol</th>
                               <th>Aktueller Wert</th>
+                              <th>Währung</th>
                               <th>Gewinn/Verlust</th>
                         </tr>
                   </thead>
                   <tbody>
-                        <tr v-for="position in stocks" :key="position.id" @click="navigateToStockDetail(position.symbol)">
-                              <td>{{ position.name }}</td>
-                              <td>{{ position.symbol }}</td>
-                              <td>{{ position.currentValue }} €</td>
-                              <td :class="{ 'positive': position.change >= 0, 'negative': position.change < 0 }">
-                                    {{ position.change }} € ({{ position.changePercentage }}%)
+                        <tr v-for="stock in stocks" :key="stock.id" @click="navigateToStockDetail(stock.symbol)">
+                              <td>{{ stock.name }}</td>
+                              <td>{{ stock.symbol }}</td>
+                              <td>{{ stock.cprice }}</td>
+                              <td>{{stock.currency}}</td>
+                              <td :class="{ 'positive': stock.change >= 0, 'negative': stock.change < 0 }">
+                                {{ stock.change }} € ({{ stock.changePercentage }}%)
                               </td>
                         </tr>
                   </tbody>
@@ -37,7 +40,7 @@
 <script lang="ts" setup>
 import {onMounted, ref} from 'vue';
 import {useRouter} from "vue-router";
-import type {Order, Stock} from "@/types/types.ts";
+import type { Stock} from "@/types/types.ts";
 
 const router = useRouter()
 const searchField = ref('')
@@ -49,8 +52,28 @@ const searchField = ref('')
 */
 const stocks = ref<Stock[]>([])
 
+setInterval(poll, 3000)
+
 function resetSearch() {
   searchField.value = ''
+}
+
+async function poll() {
+
+  for (const stock of stocks.value) {
+    try {
+      const response = await fetch(`/api/stock/by/symbol?symbol=${stock.symbol}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      // Aktualisiere stocks.value mit den abgerufenen Daten
+      const stockData = await response.json() as Stock;
+      stock.cprice = stockData.cprice
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
 }
 
 onMounted(async () => {
@@ -60,7 +83,6 @@ onMounted(async () => {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
     stocks.value = await response.json() as Stock[]
-    console.log(stocks.value)
   } catch (e) {
     console.error(e)
   }
