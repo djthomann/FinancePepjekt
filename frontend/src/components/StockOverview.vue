@@ -15,8 +15,8 @@
                         <tr>
                               <th>Name</th>
                               <th>Symbol</th>
-                              <th>Aktueller Wert</th>
                               <th>Währung</th>
+                              <th>Aktueller Wert</th>
                               <th>Gewinn/Verlust</th>
                         </tr>
                   </thead>
@@ -24,8 +24,8 @@
                         <tr class="table-row" v-for="stock in stocks" :key="stock.id" :class="{ 'just-changed': stock.justChanged}" @click="navigateToStockDetail(stock.symbol)">
                               <td>{{ stock.name }}</td>
                               <td>{{ stock.symbol }}</td>
-                              <td>{{ stock.cprice }}</td>
                               <td>{{stock.currency}}</td>
+                              <td>{{ stock.cprice }}</td>
                               <td :class="{ 'positive': stock.change >= 0, 'negative': stock.change < 0 }">
                                 {{ stock.change }} € ({{ stock.changePercentage }}%)
                               </td>
@@ -37,11 +37,12 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref} from 'vue';
+import {onMounted, onUnmounted, ref} from 'vue';
 import {useRouter} from "vue-router";
 import type { Stock} from "@/types/types.ts";
 
 const router = useRouter()
+let pollingIntervalID: number
 const searchField = ref('')
 /*const stocks = ref([
   { id: 1, name: 'Apple', symbol: "AAPL", currentValue: 1450.90, change: 33.39, changePercentage: 13.6 },
@@ -50,8 +51,6 @@ const searchField = ref('')
 ])
 */
 const stocks = ref<Stock[]>([])
-
-setInterval(poll, 3000)
 
 function resetSearch() {
   searchField.value = ''
@@ -67,7 +66,6 @@ async function poll() {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      // Aktualisiere stocks.value mit den abgerufenen Daten
       const stockData = await response.json() as Stock;
       if(stock.cprice !== stockData.cprice) {
         stock.cprice = stockData.cprice
@@ -94,6 +92,13 @@ onMounted(async () => {
   } catch (e) {
     console.error(e)
   }
+
+  pollingIntervalID = setInterval(poll, 3000)
+})
+
+onUnmounted( () => {
+  console.log("Cleaing interval for polling")
+  clearInterval(pollingIntervalID)
 })
 
 function searchContent() {
