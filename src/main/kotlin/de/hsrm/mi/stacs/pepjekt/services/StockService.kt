@@ -34,6 +34,10 @@ class StockService(
         return stockRepository.findBySymbol(symbol)
     }
 
+    override fun getStocks(): Flux<Stock> {
+        return stockRepository.findAll()
+    }
+
 
     /**
      * Calculates the average price of a stock within a given time range.

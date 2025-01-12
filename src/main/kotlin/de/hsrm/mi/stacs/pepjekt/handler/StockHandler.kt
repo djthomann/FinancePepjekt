@@ -1,5 +1,6 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
+import de.hsrm.mi.stacs.pepjekt.entities.Stock
 import de.hsrm.mi.stacs.pepjekt.services.IStockService
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
@@ -27,6 +28,14 @@ class StockHandler(private val stockService: IStockService, private val orderSer
                 ServerResponse.ok().bodyValue(stock)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
+    }
+
+    fun getStocks(request: ServerRequest): Mono<ServerResponse> {
+
+        val stocks:Flux<Stock> = stockService.getStocks()
+
+        return ServerResponse.ok().body(stocks, Stock::class.java)
+        .switchIfEmpty(ServerResponse.noContent().build())
     }
 
     fun getStockDetailsByName(request: ServerRequest): Mono<ServerResponse> {

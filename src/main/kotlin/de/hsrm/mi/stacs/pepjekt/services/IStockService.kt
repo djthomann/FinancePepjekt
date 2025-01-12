@@ -23,4 +23,6 @@ interface IStockService {
 
     fun getStockHistory(symbol: String, from: LocalDateTime, to: LocalDateTime): Flux<Quote>
 
+    fun getStocks(): Flux<Stock>
+
 }

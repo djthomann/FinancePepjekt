@@ -82,6 +82,7 @@ class RouterConfig {
             GET("/stock/history/symbol", stockHandler::getStockHistoryBySymbol)
             GET("/stock/history/name", stockHandler::getStockHistoryByName)
             GET("/stock/average-price", stockHandler::getStockAveragePrice)
+            GET("/stocks", stockHandler::getStocks)
         }
     }
 
