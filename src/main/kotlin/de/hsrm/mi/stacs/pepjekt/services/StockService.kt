@@ -4,6 +4,8 @@ import de.hsrm.mi.stacs.pepjekt.entities.Quote
 import de.hsrm.mi.stacs.pepjekt.entities.Stock
 import de.hsrm.mi.stacs.pepjekt.repositories.IQuoteRepository
 import de.hsrm.mi.stacs.pepjekt.repositories.IStockRepository
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -23,7 +25,7 @@ class StockService(
     val quoteRepository: IQuoteRepository
 ) : IStockService {
 
-
+    val logger: Logger = LoggerFactory.getLogger(StockService::class.java)
     /**
      * Retrieves a stock by its symbol.
      *
@@ -38,6 +40,20 @@ class StockService(
         return stockRepository.findAll()
     }
 
+    override fun getCurrentPrice(symbol: String): Mono<BigDecimal> {
+        return getStockBySymbol(symbol).map { stock -> stock.cprice }
+    }
+
+    override fun setCurrentPrice(price: BigDecimal, symbol: String): Mono<Stock> {
+
+        return getStockBySymbol(symbol)
+            .flatMap { stock ->
+                stock.cprice = price
+                logger.info("New Price: " + price)
+                stockRepository.save(stock)
+            }
+
+    }
 
     /**
      * Calculates the average price of a stock within a given time range.
