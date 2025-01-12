@@ -1,7 +1,7 @@
 <template>
       <div class="stock-purchase">
             <h2>{{ stock.name }} - Detailansicht</h2>
-            <p><strong>ISIN:</strong> {{ stock.isin }}</p>
+            <p><strong>FIGI:</strong> {{ stock.figi }}</p>
             <p><strong>Aktueller Wert:</strong> {{ stock.currentValue }} €</p>
 
             <div>
@@ -18,18 +18,33 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import {onBeforeMount, ref} from 'vue';
 import {useRoute} from "vue-router";
+import type {Stock} from "@/types/types.ts";
 
-const stock = ref({ id: 1, name:"Apple", symbol: 'AAPL', isin: 'US0378331005', amount: 2, currentValue: 1450.90, change: 33.39, changePercentage: 13.6, description: "Beschreibung ist toll" })
-
-const route = useRoute();
-const isin = route.params.isin;
-console.log("ISIN", isin)
+const stock = ref<Stock>({})
 
 const amount = ref(0);
 
 const url = "/api/sell/stock"
+
+onBeforeMount(async () => {
+
+  const route = useRoute();
+
+  const symbol = route.params.symbol;
+
+  try {
+    const response = await fetch(`/api/stock-details/symbol?symbol=${symbol}`)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    stock.value = await response.json() as Stock
+    console.log(stock.value)
+  } catch (e) {
+    console.error(e)
+  }
+})
 
 async function purchase() {
   console.log(amount.value + ' Stück verkaufen zum Zeitpunkt: ' + date.value)
