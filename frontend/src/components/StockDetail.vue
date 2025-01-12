@@ -1,10 +1,10 @@
 <template>
   <div class="stock-detail">
-    <h2>{{ stock.name }} - Detailansicht</h2>
+    <h2>{{ stock.symbol }} - Detailansicht</h2>
     <p><strong>Symbol:</strong> {{ stock.symbol }}</p>
+    <p><strong>FIGI:</strong> {{ stock.figi }}</p>
     <p><strong>Aktueller Wert:</strong> {{ stock.currentValue }} €</p>
-    <p><strong>Beschreibung:</strong></p>
-    <p>{{ stock.description }}</p>
+    <p><strong>Beschreibung:</strong> {{ stock.description }}</p>
 
     <div class="purchase-buttons">
       <button class="purchase-button" @click="purchase(stock.symbol)">Kaufen</button>
@@ -56,25 +56,32 @@
 </template>
 
 <script lang="ts" setup>
-import {ref} from 'vue';
+import {onBeforeMount, ref} from 'vue';
 import {useRoute, useRouter} from "vue-router";
+import type { Stock} from '@/types/types.ts'
 
-const stock = ref({
-  id: 1,
-  name: 'Apple',
-  symbol: 'US0378331005',
-  amount: 2,
-  currentValue: 1450.90,
-  change: 33.39,
-  changePercentage: 13.6,
-  description: "Beschreibung ist toll"
+const stock = ref<Stock>({})
+
+onBeforeMount(async () => {
+
+  const route = useRoute();
+
+  const symbol = route.params.symbol;
+  console.log("Symbol", symbol)
+
+  try {
+    const response = await fetch(`/api/stock-details/symbol?symbol=${symbol}`)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    stock.value = await response.json() as Stock
+    console.log(stock.value)
+  } catch (e) {
+    console.error(e)
+  }
 })
 
-const route = useRoute();
 const router = useRouter()
-
-const isin = route.params.isin;
-console.log("ISIN", isin)
 
 function sell(symbol: string) {
   console.log('Verkaufen')

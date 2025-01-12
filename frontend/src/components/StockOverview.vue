@@ -14,7 +14,7 @@
                   <thead>
                         <tr>
                               <th>Name</th>
-                              <th>ISIN</th>
+                              <th>Symbol</th>
                               <th>Aktueller Wert</th>
                               <th>Gewinn/Verlust</th>
                         </tr>
@@ -35,15 +35,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import {onMounted, ref} from 'vue';
 import {useRouter} from "vue-router";
+import type {Order} from "@/types/types.ts";
 
 const router = useRouter()
 const searchField = ref('')
 const positions = ref([
-  { id: 1, name: 'Apple', symbol: "2", currentValue: 1450.90, change: 33.39, changePercentage: 13.6 },
-  { id: 2, name: 'Tesla', symbol: "5", currentValue: 3565.35, change: 120.75, changePercentage: 20.1 },
-  { id: 3, name: 'Amazon', symbol: "10", currentValue: 6169.52, change: -45.50, changePercentage: -5.2 },
+  { id: 1, name: 'Apple', symbol: "AAPL", currentValue: 1450.90, change: 33.39, changePercentage: 13.6 },
+  { id: 2, name: 'Tesla', symbol: "TSLA", currentValue: 3565.35, change: 120.75, changePercentage: 20.1 },
+  { id: 3, name: 'Amazon', symbol: "GOOGL", currentValue: 6169.52, change: -45.50, changePercentage: -5.2 },
 ])
 
 function resetSearch() {

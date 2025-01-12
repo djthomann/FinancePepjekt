@@ -37,7 +37,7 @@
 <script lang="ts" setup>
 import {onMounted, ref} from 'vue';
 import {useRouter, useRoute} from "vue-router";
-import type {Order, Stock} from '@/types/types.ts'
+import type {Order} from '@/types/types.ts'
 
 const router = useRouter()
 const route = useRoute();
