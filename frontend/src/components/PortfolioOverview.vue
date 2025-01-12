@@ -6,8 +6,8 @@
         <p v-if="investmentAccount && investmentAccount.owner">{{ investmentAccount.owner.name }}</p>
         <p v-if="investmentAccount && investmentAccount.owner">{{ investmentAccount.owner.mail }}</p>
       </div>
-      <div class="total-value">
-        <p>Depotwert: <strong>{{ totalValue }} €</strong></p>
+      <div class="total-value" v-if="investmentAccount && investmentAccount.owner">
+        <p>Depotwert: <strong>{{ investmentAccount.totalValue }} €</strong></p>
       </div>
     </div>
 
@@ -22,7 +22,7 @@
         <th>Gewinn/Verlust</th>
       </tr>
       </thead>
-      <tbody >
+      <tbody>
       <tr v-for="portfolioEntry in investmentAccount!.portfolio" :key="portfolioEntry.id"
           @click="navigateToStockDetail(portfolioEntry.stockSymbol)">
         <td>{{ portfolioEntry.stock.description }}</td>
@@ -58,15 +58,9 @@ onMounted(async () => {
       throw new Error(`HTTP error! status: ${responsePortfolio.status}`)
     }
 
-    investmentAccount.value = await responsePortfolio.json()
-/*
-    const responseTotalValue = await fetch(`/api/portfolio/totalValue?investmentAccountId=${investmentAccountId}`)
-    if (!responseTotalValue.ok) {
-      throw new Error(`HTTP error! status: ${responseTotalValue.status}`)
-    }
+    investmentAccount.value = await responsePortfolio.json() as InvestmentAccount
 
- */
- //   totalValue.value = await responseTotalValue.json() as number
+    //   totalValue.value = await responseTotalValue.json() as number
   } catch (e) {
     console.error(e)
   }

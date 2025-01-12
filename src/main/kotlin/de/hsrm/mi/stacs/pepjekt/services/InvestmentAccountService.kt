@@ -3,15 +3,15 @@ package de.hsrm.mi.stacs.pepjekt.services
 import de.hsrm.mi.stacs.pepjekt.entities.InvestmentAccount
 import de.hsrm.mi.stacs.pepjekt.entities.PortfolioEntry
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.*
+import de.hsrm.mi.stacs.pepjekt.handler.FinnhubHandler
 import de.hsrm.mi.stacs.pepjekt.repositories.*
 import org.springframework.stereotype.Service
 import org.springframework.transaction.reactive.TransactionalOperator
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.util.function.component1
-import reactor.kotlin.core.util.function.component2
-import reactor.kotlin.core.util.function.component3
-import reactor.kotlin.core.util.function.component4
+import reactor.kotlin.core.util.function.*
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 /**
  * Service for managing investment accounts, including buying and selling stocks,
@@ -28,6 +28,7 @@ class InvestmentAccountService(
     val bankAccountRepository: IBankAccountRepository,
     val ownerRepository: IOwnerRepository,
     val stockRepository: IStockRepository,
+    val finnhubHandler: FinnhubHandler,
 ) : IInvestmentAccountService {
 
     /**
@@ -197,23 +198,43 @@ class InvestmentAccountService(
                 }.collectList()
         }
 
+        val totalValue = calculateInvestmentAccountTotalValueAsync(portfolioMono)
+
         // Combine all and create InvestmentAccountDTO
-        return Mono.zip(accountMono, ownerMono, bankAccountMono, portfolioMono)
+        return Mono.zip(accountMono, ownerMono, bankAccountMono, portfolioMono, totalValue)
             .map { tuple ->
                 val account = tuple.component1()
                 val owner = tuple.component2()
                 val bankAccount = tuple.component3()
                 val portfolio = tuple.component4()
+                val portfolioTotalValue = tuple.component5()
+
+                val roundedPortfolioTotalValue = portfolioTotalValue.setScale(2, RoundingMode.HALF_UP)
 
                 InvestmentAccountDTO(
                     id = account.id,
                     bankAccountId = account.bankAccountId,
                     portfolio = portfolio,
                     bankAccount = bankAccount,
-                    owner = owner
+                    owner = owner,
+                    totalValue = roundedPortfolioTotalValue
                 )
             }
     }
 
-
+    // Asynchrone Methode, die den Gesamtwert des Depots berechnet
+    private fun calculateInvestmentAccountTotalValueAsync(portfolioMono: Mono<List<PortfolioEntryDTO>>): Mono<BigDecimal> {
+        return portfolioMono.flatMap { portfolioEntries ->
+            Flux.fromIterable(portfolioEntries)
+                .flatMap { entry ->
+                    // Hole aktuelle Quote für das Stock-Symbol
+                    finnhubHandler.fetchStockQuote(entry.stockSymbol)
+                        .map { quote ->
+                            // Berechne den Wert der Position
+                            quote.currentPrice.multiply(BigDecimal(entry.quantity))
+                        }
+                }
+                .reduce(BigDecimal.ZERO) { acc, value -> acc.add(value) } // Summiere alle Werte
+        }
+    }
 }
