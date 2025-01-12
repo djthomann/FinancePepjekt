@@ -21,6 +21,18 @@ export interface Stock {
   justChanged: boolean
 }
 
+export interface PortfolioEntry {
+  investmentAccountId: number,
+  stockSymbol: string,
+  quantity: number
+}
+
+export interface UserInfo {
+  id: number,
+  name: string,
+  mail: string
+}
+
 export enum Currency {
   USD = 'USD'
 }
