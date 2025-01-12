@@ -2,12 +2,11 @@ package de.hsrm.mi.stacs.pepjekt.services
 
 import de.hsrm.mi.stacs.pepjekt.entities.InvestmentAccount
 import de.hsrm.mi.stacs.pepjekt.entities.PortfolioEntry
-import de.hsrm.mi.stacs.pepjekt.repositories.IBankAccountRepository
-import de.hsrm.mi.stacs.pepjekt.repositories.IInvestmentAccountRepository
-import de.hsrm.mi.stacs.pepjekt.repositories.IPortfolioEntryRepository
-import de.hsrm.mi.stacs.pepjekt.repositories.IStockRepository
+import de.hsrm.mi.stacs.pepjekt.entities.User
+import de.hsrm.mi.stacs.pepjekt.repositories.*
 import org.springframework.stereotype.Service
 import org.springframework.transaction.reactive.TransactionalOperator
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.core.util.function.component1
@@ -27,6 +26,7 @@ class InvestmentAccountService(
     val investmentAccountRepository: IInvestmentAccountRepository,
     val portfolioEntryRepository: IPortfolioEntryRepository,
     val bankAccountRepository: IBankAccountRepository,
+    val userRepository: IUserRepository,
 ) : IInvestmentAccountService {
 
     /**
@@ -55,7 +55,6 @@ class InvestmentAccountService(
                         // Create a new entry if none exists
                         portfolioEntryRepository.save(
                             PortfolioEntry(
-                                id = null,
                                 investmentAccountId = investmentAccountId,
                                 stockSymbol = stockSymbol,
                                 quantity = volume.toDouble()
@@ -145,7 +144,12 @@ class InvestmentAccountService(
      * @param userId the ID of the user whose investment account portfolio is to be retrieved
      * @return a [Mono] emitting the [InvestmentAccount] containing the portfolio, or an error if not found
      */
-    override fun getInvestmentAccountPortfolio(userId: Long): Mono<InvestmentAccount> {
-        return investmentAccountRepository.findByUserId(userId)
+    override fun getInvestmentAccountPortfolio(userId: Long): Flux<PortfolioEntry> {
+        return portfolioEntryRepository.findByInvestmentAccountId(userId)
     }
+
+    override fun getInvestmentAccountOwner(userId: Long): Mono<User> {
+        return userRepository.findById(userId)
+    }
+
 }

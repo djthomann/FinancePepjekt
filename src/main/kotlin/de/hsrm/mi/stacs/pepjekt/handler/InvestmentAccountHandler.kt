@@ -1,11 +1,15 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
+import de.hsrm.mi.stacs.pepjekt.entities.PortfolioEntry
+import de.hsrm.mi.stacs.pepjekt.entities.Stock
 import de.hsrm.mi.stacs.pepjekt.services.IInvestmentAccountService
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
+import javax.sound.sampled.Port
 
 /**
  * Handler for managing investment account-related requests.
@@ -29,13 +33,20 @@ class InvestmentAccountHandler(private val investmentAccountService: IInvestment
     fun getPortfolio(request: ServerRequest): Mono<ServerResponse> {
         val userId = request.queryParam("userId").orElseThrow { IllegalArgumentException("userId is required") }.toLong()
 
-        return investmentAccountService.getInvestmentAccountPortfolio(userId)
-            .flatMap { portfolio ->
-                ServerResponse.ok().bodyValue(portfolio)
-            }
-            .switchIfEmpty(ServerResponse.notFound().build())
+        val portfolio: Flux<PortfolioEntry> = investmentAccountService.getInvestmentAccountPortfolio(userId)
+
+        return ServerResponse.ok().body(portfolio, PortfolioEntry::class.java)
+            .switchIfEmpty(ServerResponse.noContent().build())
     }
 
+    fun getUser(request: ServerRequest): Mono<ServerResponse> {
+        val userId = request.queryParam("userId").orElseThrow { IllegalArgumentException("userId is required") }.toLong()
+
+        return investmentAccountService.getInvestmentAccountOwner(userId)
+            .flatMap<ServerResponse?> { user ->
+                ServerResponse.ok().bodyValue(user)
+            }.switchIfEmpty(ServerResponse.notFound().build())
+    }
 
     /**
      * Handles a request to buy stock in an investment account.
