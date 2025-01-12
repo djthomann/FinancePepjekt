@@ -60,6 +60,8 @@ function resetSearch() {
 
 async function poll() {
 
+  console.log("polling")
+
   for (const stock of stocks.value) {
     try {
       const response = await fetch(`/api/stock/by/symbol?symbol=${stock.symbol}`);
