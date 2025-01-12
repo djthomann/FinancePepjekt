@@ -18,6 +18,7 @@ export interface Stock {
   figi: string;
   currency: Currency;
   cprice: number;
+  justChanged: boolean
 }
 
 export enum Currency {

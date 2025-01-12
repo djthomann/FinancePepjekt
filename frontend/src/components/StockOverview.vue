@@ -22,7 +22,7 @@
                         </tr>
                   </thead>
                   <tbody>
-                        <tr v-for="stock in stocks" :key="stock.id" @click="navigateToStockDetail(stock.symbol)">
+                        <tr class="table-row" v-for="stock in stocks" :key="stock.id" :class="{ 'just-changed': stock.justChanged}" @click="navigateToStockDetail(stock.symbol)">
                               <td>{{ stock.name }}</td>
                               <td>{{ stock.symbol }}</td>
                               <td>{{ stock.cprice }}</td>
@@ -70,7 +70,14 @@ async function poll() {
       }
       // Aktualisiere stocks.value mit den abgerufenen Daten
       const stockData = await response.json() as Stock;
-      stock.cprice = stockData.cprice
+      if(stock.cprice !== stockData.cprice) {
+        stock.cprice = stockData.cprice
+        stock.justChanged = true
+
+        setTimeout(() => {
+          stock.justChanged = false;
+        }, 200);
+      }
     } catch (e) {
       console.error(e);
     }
@@ -102,4 +109,11 @@ const navigateToStockDetail = (symbol: string) => {
 
 <style lang="scss">
 @use "./style.scss";
+.just-changed {
+  background-color: var(--main-color-light);
+}
+
+.table-row {
+  transition: background-color 200ms;
+}
 </style>
