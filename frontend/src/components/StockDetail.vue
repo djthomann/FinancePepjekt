@@ -109,7 +109,7 @@ onBeforeMount(async () => {
 })
 
 onUnmounted( () => {
-  console.log("Cleaing interval for polling")
+  console.log("Clearing interval for polling")
   clearInterval(pollingIntervalID)
 })
 
