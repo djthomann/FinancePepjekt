@@ -1,6 +1,9 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
 import de.hsrm.mi.stacs.pepjekt.entities.InvestmentAccount
+import de.hsrm.mi.stacs.pepjekt.entities.PortfolioEntry
+import de.hsrm.mi.stacs.pepjekt.entities.User
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
 

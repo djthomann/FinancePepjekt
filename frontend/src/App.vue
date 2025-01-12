@@ -5,7 +5,7 @@
         <ul id="user">
           <li id="icon"></li>
           <li>
-            <RouterLink to="/depot-uebersicht" class="buttons">Depotübersicht</RouterLink>
+            <RouterLink to="/depot-uebersicht/1" class="buttons">Depotübersicht</RouterLink>
           </li>
           <li>
             <RouterLink to="/wertpapier-uebersicht" class="buttons">Wertpapierübersicht</RouterLink>
