@@ -1,8 +1,8 @@
-INSERT INTO stock (symbol, description, figi, currency)
-VALUES ('AAPL', 'Apple Inc.', 'BBG000B9XRY4', 'USD'),
-       ('TSLA', 'Tesla Inc.', 'BBG000N9MNX3', 'USD'),
-       ('GOOGL', 'Alphabet Inc.', 'BBG001S5N8V8', 'USD'),
-       ('SAP', 'SAP SE', 'BBG000BB1CX2', 'EUR');
+INSERT INTO stock (symbol, name, description, figi, currency)
+VALUES ('AAPL', 'Apple', 'Apple Inc.', 'BBG000B9XRY4', 'USD'),
+       ('TSLA', 'Tesla', 'Tesla Inc.', 'BBG000N9MNX3', 'USD'),
+       ('GOOGL', 'Google', 'Alphabet Inc.', 'BBG001S5N8V8', 'USD'),
+       ('SAP', 'SAP','SAP SE', 'BBG000BB1CX2', 'EUR');
 
 INSERT INTO finance_user (id, name, mail)
 VALUES (1, 'Alice Smith', 'alice.smith@example.com'),

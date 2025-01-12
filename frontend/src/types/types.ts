@@ -3,7 +3,7 @@ export interface Order {
   volume: number;
   type: OrderType;
   stock: Stock;
-  stockSymbol: String
+  stockSymbol: string
 }
 
 export enum OrderType {
@@ -13,6 +13,7 @@ export enum OrderType {
 
 export interface Stock {
   symbol: string;
+  name: string,
   description: string;
   figi: string;
   currency: Currency;
