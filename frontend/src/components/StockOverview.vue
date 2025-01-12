@@ -6,7 +6,6 @@
                   <input v-model="searchField" placeholder="Symbol/Name" />
                   <button class="details-button" @click="resetSearch">Reset</button>
                   <button class="details-button" @click="searchContent">Search</button>
-                  <button class="details-button" @click="poll">Aktualisieren</button>
             </div>
       </div>
 
