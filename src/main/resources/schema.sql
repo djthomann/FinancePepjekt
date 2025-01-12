@@ -16,7 +16,8 @@ CREATE TABLE stock
     name        VARCHAR(50),
     description VARCHAR(255) NOT NULL,
     figi        VARCHAR(50)  NOT NULL,
-    currency    VARCHAR(3)   NOT NULL -- ISO 4217
+    currency    VARCHAR(3)   NOT NULL, -- ISO 4217
+    cprice      DECIMAL(18, 4)
 );
 
 ---------------------------------------User-------------------------------------------------------
