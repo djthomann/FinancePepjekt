@@ -25,4 +25,10 @@ interface IStockService {
 
     fun getStocks(): Flux<Stock>
 
+    fun getCurrentQuote(symbol: String): Mono<Quote>
+
+    fun getCurrentPrice(symbol: String): Mono<BigDecimal>
+
+    fun setCurrentPrice(price: BigDecimal, symbol: String): Mono<Stock>
+
 }
