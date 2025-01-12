@@ -9,7 +9,13 @@ import java.time.LocalDateTime
 data class Quote(
     @Id
     var id: Long? = null,
-    var value: BigDecimal,
+    var currentPrice: BigDecimal,
+    var change: Float,
+    var percentChange: Float,
+    var highPriceOfTheDay: BigDecimal,
+    var lowPriceOfTheDay: BigDecimal,
+    var openPriceOfTheDay: BigDecimal,
+    var previousClosePrice: BigDecimal,
     var timeStamp: LocalDateTime,
-    var stock: Stock
+    var stockSymbol: String
 )

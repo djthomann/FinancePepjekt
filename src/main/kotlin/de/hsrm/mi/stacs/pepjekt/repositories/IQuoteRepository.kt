@@ -7,7 +7,5 @@ import reactor.core.publisher.Flux
 
 interface IQuoteRepository : R2dbcRepository<Quote, Long> {
 
-    fun findByStock(stock: Stock): Flux<Quote>
-
-    fun findByStockSymbol(symbol: String): Flux<Quote>
+    fun findByStockSymbol(stockSymbol: String): Flux<Quote>
 }
