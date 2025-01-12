@@ -37,16 +37,31 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
-import {useRouter} from "vue-router";
+import {onBeforeMount, ref} from 'vue';
+import {useRoute, useRouter} from "vue-router";
+import type {Stock} from "@/types/types.ts";
 
 const router = useRouter()
+const id = 1
 const totalValue = ref(2345.56)
 const positions = ref([
   { id: 1, name: 'Apple', symbol: "APPL", amount: 3, currentValue: 1450.90, change: 33.39, changePercentage: 13.6 },
   { id: 2, name: 'Tesla', symbol: "TSLA", amount: 3, currentValue: 3565.35, change: 120.75, changePercentage: 20.1 },
   { id: 3, name: 'Amazon', symbol: "AMZ", amount: 5, currentValue: 6169.52, change: -45.50, changePercentage: -5.2 },
 ])
+
+onBeforeMount(async () => {
+
+  try {
+    const response = await fetch(`/api/portfolio?userId=${id}`)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    console.log(response.json())
+  } catch (e) {
+    console.error(e)
+  }
+})
 
 const navigateToStockDetail = (symbol: string) => {
   router.push({name: 'wertpapier-detail', params: {symbol}});
