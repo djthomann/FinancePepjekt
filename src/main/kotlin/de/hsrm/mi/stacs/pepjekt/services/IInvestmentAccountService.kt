@@ -1,6 +1,7 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
 import de.hsrm.mi.stacs.pepjekt.entities.InvestmentAccount
+import de.hsrm.mi.stacs.pepjekt.entities.dtos.InvestmentAccountDTO
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
 
@@ -16,5 +17,5 @@ interface IInvestmentAccountService {
 
     fun sellStock(investmentAccountId: Long, stockSymbol: String, volume: BigDecimal): Mono<InvestmentAccount>
 
-    fun getInvestmentAccountPortfolio(investmentAccountId: Long): Mono<InvestmentAccount>
+    fun getInvestmentAccountPortfolio(investmentAccountId: Long): Mono<InvestmentAccountDTO>
 }

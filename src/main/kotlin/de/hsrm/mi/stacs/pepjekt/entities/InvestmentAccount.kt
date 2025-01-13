@@ -8,6 +8,5 @@ data class InvestmentAccount (
     @Id
     val id: Long? = null,
     val bankAccountId: Long? = null,
-    val portfolio: List<PortfolioEntry> = emptyList(),
-    val userId: Long? = null
+    val ownerId: Long? = null,
 )

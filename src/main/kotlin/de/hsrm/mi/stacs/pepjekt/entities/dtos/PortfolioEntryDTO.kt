@@ -6,8 +6,9 @@ import org.springframework.data.annotation.Id
 import java.math.BigDecimal
 
 class PortfolioEntryDTO(
-    val investmentAccountId: Long,
     @Id
+    val id: Long? = null,
+    val investmentAccountId: Long,
     val stockSymbol: String,
     val quantity: Double,
     val stock: StockDTO,

@@ -4,6 +4,7 @@ import de.hsrm.mi.stacs.pepjekt.entities.dtos.InvestmentAccountDTO
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.UserDTO
 import de.hsrm.mi.stacs.pepjekt.services.IFinanceUserService
 import de.hsrm.mi.stacs.pepjekt.services.IInvestmentAccountService
+import org.slf4j.LoggerFactory
 import de.hsrm.mi.stacs.pepjekt.services.IStockService
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
@@ -26,6 +27,8 @@ class InvestmentAccountHandler(
     private val userService: IFinanceUserService
 ) {
 
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     /**
      * Handles a request to get the portfolio of an investment account.
      *
@@ -38,9 +41,11 @@ class InvestmentAccountHandler(
      * TODO return InvestmentAccountDTO -> has to be done, already in use
      */
     fun getPortfolio(request: ServerRequest): Mono<ServerResponse> {
-        val investmentAccountId =
-            request.queryParam("investmentAccountId").orElseThrow { IllegalArgumentException("userId is required") }
-                .toLong()
+
+        val investmentAccountId = request.queryParam("investmentAccountId").orElseThrow { IllegalArgumentException(" " +
+                "investmentaccountId is required") }.toLong()
+
+        logger.info("Fetch InvestmentAccountDTO with investmentAccountId: $investmentAccountId")
 
         return investmentAccountService.getInvestmentAccountPortfolio(investmentAccountId)
             .flatMap { investmentAccount ->

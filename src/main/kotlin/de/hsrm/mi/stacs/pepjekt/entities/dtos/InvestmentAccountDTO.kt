@@ -3,15 +3,16 @@ package de.hsrm.mi.stacs.pepjekt.entities.dtos
 import de.hsrm.mi.stacs.pepjekt.entities.InvestmentAccount
 import de.hsrm.mi.stacs.pepjekt.services.IStockService
 import org.springframework.data.annotation.Id
+import java.math.BigDecimal
 
 class InvestmentAccountDTO(
     @Id
     val id: Long? = null,
     val bankAccountId: Long? = null,
     val portfolio: List<PortfolioEntryDTO> = emptyList(),
-    val userId: Long? = null,
+    val totalValue: BigDecimal,
     val bankAccount: BankAccountDTO,
-    val user: UserDTO
+    val owner: OwnerDTO
 ) {
     companion object {
         fun mapToDto(
@@ -36,7 +37,7 @@ class InvestmentAccountDTO(
                 },
                 userId = investmentAccount.userId,
                 bankAccount = bankAccount,
-                user = user
+                owner = user
             )
         }
     }

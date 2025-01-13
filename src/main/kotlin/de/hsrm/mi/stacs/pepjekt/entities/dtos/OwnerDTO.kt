@@ -5,7 +5,7 @@ import de.hsrm.mi.stacs.pepjekt.entities.User
 import org.springframework.data.annotation.Id
 import java.math.BigDecimal
 
-data class UserDTO(
+data class OwnerDTO(
     @Id
     val id: Long,
     val name: String,

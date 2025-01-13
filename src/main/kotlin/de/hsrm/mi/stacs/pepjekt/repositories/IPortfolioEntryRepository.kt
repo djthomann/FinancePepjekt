@@ -9,6 +9,8 @@ import reactor.core.publisher.Mono
 @Repository
 interface IPortfolioEntryRepository: R2dbcRepository<PortfolioEntry, Long> {
 
+    fun findByInvestmentAccountId(investmentAccountId: Long): Flux<PortfolioEntry>
+
     fun findByInvestmentAccountIdAndStockSymbol(investmentAccountId: Long, stockSymbol: String): Mono<PortfolioEntry>
 
     fun findAllByInvestmentAccountId(investmentAccountId: Long): Flux<PortfolioEntry>
