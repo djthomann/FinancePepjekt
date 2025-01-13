@@ -23,26 +23,17 @@
       </tr>
       </thead>
       <tbody>
-      <tr class="table-row" :class="{ 'just-changed': stock.justChanged}" v-for="portfolioEntry in investmentAccount!.portfolio" :key="portfolioEntry.id"
-          @click="navigateToStockDetail(portfolioEntry.stockSymbol)">
-        <td>{{ portfolioEntry.stock.description }}</td>
-        <td>{{ portfolioEntry.stockSymbol }}</td>
-        <td>{{ portfolioEntry.currentValue }} €</td>    <!--reactive value-->
-        <td>{{ portfolioEntry.amount }}</td>    <!--reactive value-->
-        <td :class="{ 'positive': portfolioEntry.change >= 0, 'negative': portfolioEntry.change < 0 }">
-          {{ portfolioEntry.change }} € ({{ portfolioEntry.changePercentage }}%)
-        </td>         <!--reactive value-->
-        <!--
-     <tr class="table-row" :class="{ 'just-changed': stock.justChanged}" v-for="stock in stocks" :key="stock.symbol" @click="navigateToStockDetail(stock.symbol)">
-       <td>{{ stock.name }}</td>
-       <td>{{ stock.symbol }}</td>
-       <td>{{positions.get(stock.symbol)}}</td>
-       <td>{{ stock.cprice }}</td>
-       <td :class="{ 'positive': position.change >= 0, 'negative': position.change < 0 }">
-         {{ position.change }} € ({{ position.changePercentage }}%)
-       </td>
-       -->
-        <td>{{ stockValueMap.get(stock.symbol) }} </td>
+
+      <tr class="table-row" :class="{ 'just-changed': portfolioEntry.stock.justChanged}"
+          v-for="portfolioEntry in investmentAccount.portfolio" :key="portfolioEntry.stock.symbol"
+          @click="navigateToStockDetail(portfolioEntry.stock.symbol)">
+        <td>{{ portfolioEntry.stock.name }}</td>
+        <td>{{ portfolioEntry.stock.symbol }}</td>
+        <td>{{ portfolioEntry.quantity }}</td>
+        <td>{{ portfolioEntry.stock.currentValue }}</td>
+        <td :class="{ 'positive': portfolioEntry.stock.change >= 0, 'negative': portfolioEntry.stock.change < 0 }">
+          {{ portfolioEntry.totalValue }} € ({{ portfolioEntry.changePercentage }}%)
+        </td>
       </tr>
       </tbody>
     </table>
@@ -52,53 +43,21 @@
 <script lang="ts" setup>
 import {useRoute, useRouter} from "vue-router";
 import type {InvestmentAccount} from "@/types/types.ts";
-import {computed, onBeforeMount, onUnmounted, ref, onMounted} from 'vue';
-import type {PortfolioEntry, Stock, UserInfo} from "@/types/types.ts";
+import {onBeforeMount, onUnmounted, ref} from 'vue';
 
 const router = useRouter()
 const route = useRoute()
-const investmentAccountId = route.params.investmentAccountId
-const totalValue = ref(0.0)
 const investmentAccount = ref<InvestmentAccount>()
 let pollingIntervalID: number
 const investmentAccountId = route.params.investmentAccountId
-const username = ref<string>()
-const stocks = ref<Stock[]>([])
-const portfolio = ref<PortfolioEntry[]>([])
-const positions = ref<Map<string, number>>(new Map());
-let stockValueMap = <Map<string, computed<number>>>(new Map)
-let totalPortfolioValue = computed<number>(0)
-
-
-onMounted(async () => {
-  try {
-    const responsePortfolio = await fetch(`/api/portfolio?investmentAccountId=${investmentAccountId}`)
-
-    if (!responsePortfolio.ok) {
-      throw new Error(`HTTP error! status: ${responsePortfolio.status}`)
-    }
-
-    investmentAccount.value = await responsePortfolio.json() as InvestmentAccount
-
-    //   totalValue.value = await responseTotalValue.json() as number
-  } catch (e) {
-    console.error(e)
-  }
-})
 
 onBeforeMount(async () => {
-
   try {
-    const response = await fetch(`/api/portfolio?userId=${investmentAccountId}`)
+    const response = await fetch(`/api/portfolio?investmentAccountId=${investmentAccountId}`)
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
-    portfolio.value = await response.json() as PortfolioEntry
-    loadStocks()
-    loadUserInfo()
-    loadPositions()
-    calculateStockValueMap()
-    calculatePortfolioValue()
+    investmentAccount.value = await response.json() as InvestmentAccount
   } catch (e) {
     console.error(e)
   }
@@ -106,113 +65,45 @@ onBeforeMount(async () => {
   pollingIntervalID = setInterval(poll, 3000)
 })
 
-function calculatePortfolioValue() {
-  totalPortfolioValue = computed(() => {
-    let totalValue = 0;
-
-    stockValueMap.value.forEach(valueComputed => {
-      totalValue += valueComputed.value;
-    });
-
-    return totalValue;
-  });
-}
-
-async function loadUserInfo() {
-  try {
-    const response = await fetch(`/api/user?userId=${investmentAccountId}`)
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    const data = await response.json() as UserInfo
-    username.value = data.name
-  } catch (e) {
-    console.error(e)
-  }
-}
-
-function calculateStockValueMap() {
-
-  stockValueMap = computed(() => {
-    const map = new Map<string, computed<number>>();
-
-    stocks.value.forEach(stock => {
-      const quantity = positions.value.get(stock.symbol) || 0;
-      const totalValue = computed(() => stock.cprice * quantity);  // Dynamischer Wert in computed
-      map.set(stock.symbol, totalValue);  // Füge das computed Objekt in die Map ein
-    });
-
-    return map;
-  });
-}
-
-function loadPositions() {
-
-  for (const position of portfolio.value) {
-    positions.value.set(position.stockSymbol, position.quantity)
-  }
-
-}
-
-async function loadStocks() {
-
-  if(stocks.value.length > 0) {
-    return
-  }
-
-  console.log("loading Stocks")
-
-  for (const position of portfolio.value) {
-    try {
-      const response = await fetch(`/api/stock/by/symbol?symbol=${position.stockSymbol}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const stockData = await response.json() as Stock;
-      stocks.value.push(stockData as Stock)
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  console.log(stocks.value)
-
-}
-
 async function poll() {
+  console.log("polling");
 
-  console.log("polling")
+  try {
+    const response = await fetch(`/api/portfolio?investmentAccountId=${investmentAccountId}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const investmentAccountData = (await response.json()) as InvestmentAccount;
 
-  for (const stock of stocks.value) {
-    try {
-      const response = await fetch(`/api/stock/by/symbol?symbol=${stock.symbol}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const stockData = await response.json() as Stock;
-      if(stock.cprice !== stockData.cprice) {
-        stock.cprice = stockData.cprice
-        stock.justChanged = true
+    for (const portfolioEntry of investmentAccount.value!.portfolio) {
+      const matchingEntry = investmentAccountData.portfolio.find(
+        (entry) => portfolioEntry.id === entry.id
+      );
+
+      if (matchingEntry && portfolioEntry.stock.currentValue !== matchingEntry.stock.currentValue) {
+        portfolioEntry.stock.currentValue = matchingEntry.stock.currentValue;
+        portfolioEntry.stock.justChanged = true;
 
         setTimeout(() => {
-          stock.justChanged = false;
+          portfolioEntry.stock.justChanged = false;
         }, 200);
       }
-    } catch (e) {
-      console.error(e);
     }
+  } catch (e) {
+    console.error(e);
   }
-
 }
 
-onUnmounted( () => {
+onUnmounted(() => {
   console.log("Clearing interval for polling")
   clearInterval(pollingIntervalID)
 })
 
+
 const navigateToStockDetail = (symbol: string) => {
   router.push({name: 'wertpapier-detail', params: {symbol}});
 }
+
 
 </script>
 

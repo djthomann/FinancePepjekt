@@ -11,9 +11,8 @@ class PortfolioEntryDTO(
     val stockSymbol: String,
     val quantity: Double,
     val stock: StockDTO,
+    val totalValue: BigDecimal = BigDecimal.ZERO,
     /*
-    val currentValue: BigDecimal = BigDecimal.ZERO,
-    val amount: BigDecimal = BigDecimal.ZERO,
     val change: BigDecimal = BigDecimal.ZERO,
     val changePercentage: BigDecimal = BigDecimal.ZERO
      */
@@ -28,6 +27,7 @@ class PortfolioEntryDTO(
                 stockSymbol = portfolioEntry.stockSymbol,
                 quantity = portfolioEntry.quantity,
                 stock = stock,
+                totalValue = stock.currentValue.multiply(portfolioEntry.quantity.toBigDecimal()),
             )
         }
     }

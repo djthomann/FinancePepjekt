@@ -80,8 +80,7 @@ export interface PortfolioEntry {
   stockSymbol: string,
   quantity: number,
   stock: Stock,
-  currentValue: number,
-  amount: number,
+  totalValue: number,
   change: number,
   changePercentage: number
 }
