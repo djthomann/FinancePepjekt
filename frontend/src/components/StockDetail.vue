@@ -1,14 +1,21 @@
 <template>
   <div class="stock-detail">
-    <h2>{{ stock.name }} - Detailansicht</h2>
-    <p><strong>Symbol:</strong> {{ stock.symbol }}</p>
-    <p><strong>FIGI:</strong> {{ stock.figi }}</p>
-    <p :class="{ 'just-changed': stock.justChanged}"><strong>Aktueller Wert:</strong> {{ stock.cprice }} {{stock.currency}}</p>
-    <p><strong>Beschreibung:</strong> {{ stock.description }}</p>
+    <div class="stock-detail-header">
+      <div class="stock-detail-header-info">
+        <h2>{{ stock.name }} - Detailansicht</h2>
+        <p><strong>Symbol:</strong> {{ stock.symbol }}</p>
+        <p><strong>FIGI:</strong> {{ stock.figi }}</p>
+        <p><strong>Aktueller Wert:</strong> {{ stock.cprice }} {{stock.currency}}</p>
+        <p><strong>Beschreibung:</strong> {{ stock.description }}</p>
 
-    <div class="purchase-buttons">
-      <button class="purchase-button" @click="purchase(stock.symbol)">Kaufen</button>
-      <button class="purchase-button" @click="sell(stock.symbol)">Verkaufen</button>
+        <div class="purchase-buttons">
+          <button class="purchase-button" @click="purchase(stock.symbol)">Kaufen</button>
+          <button class="purchase-button" @click="sell(stock.symbol)">Verkaufen</button>
+        </div>
+      </div>
+      <div class="stock-detail-header-chart">
+        <Line ref="lineChart"  :data="data" :options="options" />
+      </div>
     </div>
 
     <div class="stock-info-section">
@@ -59,6 +66,59 @@
 import {onBeforeMount, onUnmounted, ref} from 'vue';
 import {useRoute, useRouter} from "vue-router";
 import type { Stock} from '@/types/types.ts'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js'
+import { Line } from 'vue-chartjs'
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+)
+
+const dataPoints = []
+
+const data = {
+  labels: ['-18s', '-15s', '-12s', '9s', '-6s', '-3s', 'jetzt'],
+  datasets: [
+    {
+      label: '',
+      backgroundColor: '#f87979',
+      data: dataPoints
+    }
+  ]
+}
+
+const options = {
+  maintainAspectRatio: false,
+  scales: {
+    x: {
+      display: false // Keine Labels auf der x-Achse
+    }
+  },
+  plugins: {
+    legend: {
+      display: false, // Deaktiviert die Legende (farbiger Button)
+    },
+    tooltip: {
+      enabled: false, // Deaktiviert die Tooltips
+    }
+  }
+}
+
+const lineChart = ref(null)
 
 const stock = ref<Stock>({})
 let pollingIntervalID: number
@@ -76,10 +136,20 @@ async function poll() {
     if(stock.value.cprice !== stockData.cprice) {
       stock.value.cprice = stockData.cprice
       stock.value.justChanged = true
-
       setTimeout(() => {
         stock.value.justChanged = false;
       }, 200);
+    }
+    if(dataPoints.length > 6) {
+      dataPoints.shift();
+    }
+    dataPoints.push(stockData.cprice)
+    console.log("Data Points" + dataPoints);
+    if (lineChart.value) {
+      console.log("Instanz aktualisieren")
+      lineChart.value.chart.update();
+    } else {
+      console.log("Instanz ist null")
     }
   } catch (e) {
     console.error(e);
@@ -129,8 +199,20 @@ function purchase(symbol: string) {
 
 <style lang="scss">
 @use "./style.scss";
-.just-changed {
-  background-color: var(--main-color-light);
+
+.stock-detail-header {
+  display: flex;
+  align-content: center;
+  justify-content: space-between;
+}
+
+.stock-detail-header-info {
+  width: 40%;
+}
+
+.stock-detail-header-chart {
+  width: 50%;
+  padding: 5% 0 5% 5%;
 }
 </style>
 
