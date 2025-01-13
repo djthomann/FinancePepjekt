@@ -1,5 +1,5 @@
 <template>
-      <div class="stock-purchase">
+      <div class="stock-order">
             <h2>{{ stock.name }} - Detailansicht</h2>
             <p><strong>FIGI:</strong> {{ stock.figi }}</p>
             <p><strong>Aktueller Wert:</strong> {{ stock.currentValue }} €</p>
