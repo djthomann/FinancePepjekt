@@ -7,8 +7,9 @@ DROP TABLE IF EXISTS bankaccount;
 DROP TABLE IF EXISTS quote;
 DROP TABLE IF EXISTS stock;
 DROP TABLE IF EXISTS finance_user;
+DROP TABLE IF EXISTS finance_owner;
 
----------------------------------------User-------------------------------------------------------
+---------------------------------------Stock-------------------------------------------------------
 
 CREATE TABLE stock
 (
@@ -20,9 +21,9 @@ CREATE TABLE stock
     cprice      DECIMAL(18, 4)
 );
 
----------------------------------------User-------------------------------------------------------
+---------------------------------------Owner-------------------------------------------------------
 
-CREATE TABLE finance_user
+CREATE TABLE finance_owner
 (
     id   SERIAL PRIMARY KEY,
     name VARCHAR(100)        NOT NULL,
@@ -33,16 +34,16 @@ CREATE TABLE finance_user
 
 CREATE TABLE quote
 (
-    id                     SERIAL PRIMARY KEY,
-    current_price          DECIMAL(18, 4) NOT NULL,
-    change                 FLOAT          NOT NULL,
-    percent_change         FLOAT          NOT NULL,
-    high_price_of_the_day  DECIMAL(18, 4) NOT NULL,
-    low_price_of_the_day   DECIMAL(18, 4) NOT NULL,
-    open_price_of_the_day  DECIMAL(18, 4) NOT NULL,
-    previous_close_price   DECIMAL(18, 4) NOT NULL,
-    time_stamp             TIMESTAMP      NOT NULL,
-    stock_symbol           VARCHAR(50)    NOT NULL,
+    id                    SERIAL PRIMARY KEY,
+    current_price         DECIMAL(18, 4) NOT NULL,
+    change                FLOAT          NOT NULL,
+    percent_change        FLOAT          NOT NULL,
+    high_price_of_the_day DECIMAL(18, 4) NOT NULL,
+    low_price_of_the_day  DECIMAL(18, 4) NOT NULL,
+    open_price_of_the_day DECIMAL(18, 4) NOT NULL,
+    previous_close_price  DECIMAL(18, 4) NOT NULL,
+    time_stamp            TIMESTAMP      NOT NULL,
+    stock_symbol          VARCHAR(50)    NOT NULL,
     FOREIGN KEY (stock_symbol) REFERENCES stock (symbol) ON DELETE CASCADE
 );
 
@@ -63,15 +64,15 @@ CREATE TABLE investmentaccount
     bank_account_id BIGINT,
     owner_id        BIGINT,
     FOREIGN KEY (bank_account_id) REFERENCES bankaccount (id) ON DELETE SET NULL,
-    FOREIGN KEY (owner_id) REFERENCES finance_user (id) ON DELETE SET NULL
+    FOREIGN KEY (owner_id) REFERENCES finance_owner (id) ON DELETE SET NULL
 );
 
 CREATE TABLE portfolio_entry
 (
-    investment_account_id BIGINT NOT NULL,
-    stock_symbol          VARCHAR(50) NOT NULL,
-    quantity              FLOAT       NOT NULL,
-    PRIMARY KEY (investment_account_id, stock_symbol),
+    id           SERIAL PRIMARY KEY,
+    investment_account_id BIGINT,
+    stock_symbol VARCHAR(50) NOT NULL,
+    quantity     FLOAT       NOT NULL,
     FOREIGN KEY (investment_account_id) REFERENCES investmentaccount (id) ON DELETE CASCADE,
     FOREIGN KEY (stock_symbol) REFERENCES stock (symbol) ON DELETE CASCADE
 );
@@ -81,11 +82,11 @@ CREATE TABLE portfolio_entry
 -- Tabelle erstellen
 CREATE TABLE stock_order
 (
-    id                    SERIAL PRIMARY KEY,
-    volume                FLOAT       NOT NULL,
-    type                  VARCHAR(4)  NOT NULL CHECK (type IN ('BUY', 'SELL')),
+    id                 SERIAL PRIMARY KEY,
+    volume             FLOAT       NOT NULL,
+    type               VARCHAR(4)  NOT NULL CHECK (type IN ('BUY', 'SELL')),
     investment_account_id BIGINT      NOT NULL,
-    stock_symbol          VARCHAR(50) NOT NULL,
+    stock_symbol       VARCHAR(50) NOT NULL,
     FOREIGN KEY (investment_account_id) REFERENCES investmentaccount (id) ON DELETE CASCADE,
     FOREIGN KEY (stock_symbol) REFERENCES stock (symbol) ON DELETE CASCADE
 );

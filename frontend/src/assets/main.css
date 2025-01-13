@@ -29,29 +29,34 @@ body {
   margin: 0 30px;
 }
 
-#header-navigation {
+#header {
   height: 80px;
+  width: 100%;
   background-color: var(--main-color);
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: flex-start;
 }
 
-ul {
-  display: flex;
-  padding: 0;
-  margin: 0;
-  align-items: center;
+#header-navigation {
+  width: 60%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  font: 120% system-ui;
+  text-align: center;
 }
 
 li {
   list-style-type: none;
   /* margin-right: 15px; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 a {
   text-decoration: none;
-  color: black;
+  color: white;
   text-align: center;
 }
 
@@ -66,12 +71,6 @@ a {
   background-origin: content-box;
 }
 
-#user {
-  display: flex;
-  flex-direction: row;
-  padding: 0;
-}
-
 #user li {
   text-align: center;
 }
@@ -83,13 +82,7 @@ a {
 }
 
 .buttons {
-  display: flex;
-  margin: 20px;
-  text-align: center;
-  font-size: 16pt;
-  background-color: transparent;
-  border: none;
-  color: var(--font-color);
+
 }
 
 .buttons:hover {

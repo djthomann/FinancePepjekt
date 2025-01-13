@@ -4,7 +4,7 @@ VALUES ('AAPL', 'Apple', 'Apple Inc.', 'BBG000B9XRY4', 'USD', 1.0),
        ('NVDA', 'Nvidia', 'Nvidia Inc.', 'BBG001S5N8V8', 'USD', 1.0),
        ('SAP', 'SAP','SAP SE', 'BBG000BB1CX2', 'EUR', 1.0);
 
-INSERT INTO finance_user (id, name, mail)
+INSERT INTO finance_owner (id, name, mail)
 VALUES (1, 'Alice Smith', 'alice.smith@example.com'),
        (2, 'Bob Johnson', 'bob.johnson@example.com'),
        (3, 'Charlie Brown', 'charlie.brown@example.com');
@@ -21,6 +21,9 @@ INSERT INTO quote (
     stock_symbol
 )
 VALUES
+    (182.50, 2.5, 1.39, 185.00, 20.00, 181.00, 180.00, '2024-12-17 10:30:00', 'AAPL'),
+    (120.50, 2.5, 1.39, 220.00, 50.00, 420.00, 180.00, '2025-01-07 10:30:00', 'AAPL'),
+    (190.50, 2.5, 1.39, 200.00, 180.00, 181.00, 180.00, '2024-12-21 10:30:00', 'AAPL'),
     (182.50, 2.5, 1.39, 185.00, 180.00, 181.00, 180.00, '2024-12-17 10:30:00', 'AAPL'),
     (182.50, 2.5, 1.39, 185.00, 180.00, 181.00, 180.00, '2024-12-17 10:45:00', 'AAPL'),
     (250.75, -1.25, -0.50, 255.00, 249.00, 252.00, 252.00, '2024-12-17 11:00:00', 'TSLA'),
@@ -46,7 +49,7 @@ VALUES (1, 1), -- Verknüpft mit Bankkonto ID 1 und Benutzer ID 1
 INSERT INTO portfolio_entry (investment_account_id, stock_symbol, quantity)
 VALUES (1, 'AAPL', 50.5),
        (1, 'TSLA', 10.0),
-       (2, 'NVDA', 5.0),
+       (1, 'NVDA', 5.0),
        (2, 'SAP', 15.0),
        (3, 'AAPL', 25.0);
 

@@ -6,6 +6,7 @@
         <p><strong>Symbol:</strong> {{ stock.symbol }}</p>
         <p><strong>FIGI:</strong> {{ stock.figi }}</p>
         <p><strong>Aktueller Wert:</strong> {{ stock.cprice }} {{stock.currency}}</p>
+        <p :class="{ 'just-changed': stock.justChanged}"><strong>Aktueller Wert:</strong> {{ stock.cprice }} {{stock.currency}}</p>
         <p><strong>Beschreibung:</strong> {{ stock.description }}</p>
 
         <div class="purchase-buttons">
