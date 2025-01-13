@@ -35,8 +35,8 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref} from 'vue'
-import {useRouter, useRoute} from "vue-router"
+import {onMounted, ref} from 'vue';
+import {useRouter, useRoute} from "vue-router";
 import type {Order} from '@/types/types.ts'
 
 const router = useRouter()

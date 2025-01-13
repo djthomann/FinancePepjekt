@@ -1,7 +1,7 @@
 <template>
       <div class="stock-purchase">
-            <h2>{{ stock.name }} - Detailansicht</h2>
-            <p><strong>ISIN:</strong> {{ stock.isin }}</p>
+            <h2>{{ stock.name }} - Kaufansicht</h2>
+            <p><strong>FIGI:</strong> {{ stock.figi }}</p>
             <p><strong>Aktueller Wert:</strong> {{ stock.currentValue }} €</p>
 
             <div>
@@ -23,22 +23,38 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
-import {useRoute, useRouter} from "vue-router";
+import {onBeforeMount, ref} from 'vue';
+import {useRoute} from "vue-router";
+import type {Stock} from "@/types/types.ts";
 
-const stock = ref({ id: 1, symbol:"AAPL", name: 'Apple', isin: 'US0378331005', amount: 2, currentValue: 1450.90, change: 33.39, changePercentage: 13.6, description: "Beschreibung ist toll" })
-
-const route = useRoute();
-const isin = route.params.isin;
-console.log("ISIN", isin)
+const stock = ref<Stock>({})
 
 const amount = ref(10);
 
-const url = "/api/order/buy"
+
+const url = "/api/buy/stock"
+
+onBeforeMount(async () => {
+
+  const route = useRoute();
+
+  const symbol = route.params.symbol;
+
+  try {
+    const response = await fetch(`/api/stock-details/symbol?symbol=${symbol}`)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    stock.value = await response.json() as Stock
+    console.log(stock.value)
+  } catch (e) {
+    console.error(e)
+  }
+})
 
 async function purchase() {
   console.log(amount.value + ' Stück kaufen zum Zeitpunkt: ' + date.value)
-  const curl = url + `?accountId=1&stock=${stock.value.symbol}&amount=${amount.value}&time=${date.value}`
+  const curl = url + `?investmentAccountId=1&stockSymbol=${stock.value.symbol}&volume=${amount.value}&executionTime=${date.value}`
   console.log(curl)
   try {
     const response = await fetch(curl, {
@@ -48,7 +64,7 @@ async function purchase() {
     if (!response.ok) {
       throw new Error("Network response was not ok");
     }
-    console.log("Success: Order Placed");
+    console.log("Success: Buy Order Placed");
   } catch (error) {
     console.error("Error: Order Not Placed", error);
   }

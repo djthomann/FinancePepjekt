@@ -3,6 +3,7 @@ package de.hsrm.mi.stacs.pepjekt.handler
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.QuoteDTO
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDTO
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDetailsDTO
+import de.hsrm.mi.stacs.pepjekt.entities.Stock
 import de.hsrm.mi.stacs.pepjekt.services.IStockService
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
@@ -65,6 +66,7 @@ class StockHandler(private val stockService: IStockService, private val orderSer
             }
             .switchIfEmpty(ServerResponse.notFound().build())
     }
+
 
     /**
      * Handles a request to retrieve stock data by its description/name.

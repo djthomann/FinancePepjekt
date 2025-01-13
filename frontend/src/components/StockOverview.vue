@@ -21,13 +21,13 @@
         </tr>
         </thead>
         <tbody>
-        <tr v-for="stock in stocks" :key="stock.symbol" @click="navigateToStockDetail(stock.symbol)">
-          <td>{{ stock.description }}</td>
-          <td>{{ stock.symbol }}</td>
-          <td>{{ stock.figi }}</td>
-          <td>{{ stock.currentValue }} €</td>    <!--reactive value-->
-          <td :class="{ 'positive': stock.change >= 0, 'negative': stock.change < 0 }">
-            {{ stock.change }} € ({{ stock.changePercentage }}%)
+        <tr v-for="position in stocks" :key="position.symbol" @click="navigateToStockDetail(position.symbol)">
+          <td>{{ position.description }}</td>
+          <td>{{ position.symbol }}</td>
+          <td>{{ position.figi }}</td>
+          <td>{{ position.currentValue }} €</td>    <!--reactive value-->
+          <td :class="{ 'positive': position.change >= 0, 'negative': position.change < 0 }">
+            {{ position.change }} € ({{ position.changePercentage }}%)
           </td>    <!--reactive value-->
         </tr>
         </tbody>
@@ -43,6 +43,7 @@ import type {Stock} from "@/types/types.ts";
 
 const router = useRouter()
 const searchField = ref('')
+
 const stocks = ref<Stock[]>([])
 
 onMounted(async () => {

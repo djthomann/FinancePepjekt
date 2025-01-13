@@ -7,6 +7,7 @@ import org.springframework.data.relational.core.mapping.Table
 data class Stock(
     @Id
     val symbol: String,
+    val name: String,
     val description: String,
     val figi: String,
     val currency: Currency

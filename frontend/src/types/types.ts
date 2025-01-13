@@ -1,10 +1,10 @@
 export interface Order {
-  id: number,
+  id?: number,
   volume: number,
   type: OrderType,
   investmentAccountId: number,
   stock: Stock,
-  stockSymbol: String
+  stockSymbol: string
 }
 
 export enum OrderType {
@@ -14,6 +14,7 @@ export enum OrderType {
 
 export interface Stock {
   symbol: string,
+  name:string,
   description: string,
   figi: string,
   currency: Currency,
@@ -50,7 +51,7 @@ export interface InvestmentAccount {
 export interface PortfolioEntry {
   id: number,
   investmentAccountId: number,
-  stockSymbol: String,
+  stockSymbol: string,
   quantity: number,
   stock: Stock,
   currentValue: number,
@@ -67,6 +68,6 @@ export interface BankAccount {
 
 export interface User {
   id: number,
-  name: String,
-  mail: String
+  name: string,
+  mail: string
 }

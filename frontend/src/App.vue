@@ -1,10 +1,9 @@
 <template>
   <main>
-    <header>
+    <header id="header">
+      <li id="icon"></li>
       <nav  id="header-navigation">
-        <ul id="user">
-          <li id="icon"></li>
-          <li>
+          <li title="Depotübersicht">
             <RouterLink :to="`/depot-uebersicht/${investmentAccountId}`" class="buttons">Depotübersicht</RouterLink>
           </li>
           <li>
@@ -13,7 +12,7 @@
           <li>
             <RouterLink :to="`/order-management-overview/${investmentAccountId}`" class="buttons">Orderübersicht</RouterLink>    <!--TODO replace the hardcoded investmentAccountId-->
           </li>
-        </ul>
+
       </nav>
     </header>
     <router-view></router-view>
@@ -25,3 +24,15 @@ import {ref} from 'vue';
 
 const investmentAccountId = ref(1)
 </script>
+
+<style>
+.buttons::after {
+  display: block;
+  content: attr(title);
+  font-weight: bold;
+  height: 1px;
+  color: transparent;
+  overflow: hidden;
+  visibility: hidden;
+}
+</style>
