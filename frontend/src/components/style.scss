@@ -90,9 +90,11 @@
       color: #555;
     }
 
-    tr:hover {
-      background-color: var(--main-color);
-      opacity: 0.5;
+    tbody {
+      tr:hover {
+        background-color: var(--main-color-light);
+        cursor: pointer;
+      }
     }
 
     .positive {

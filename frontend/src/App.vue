@@ -1,11 +1,10 @@
 <template>
   <main>
-    <header>
+    <header id="header">
+      <li id="icon"></li>
       <nav  id="header-navigation">
-        <ul id="user">
-          <li id="icon"></li>
-          <li>
-            <RouterLink to="/depot-uebersicht" class="buttons">Depotübersicht</RouterLink>
+          <li title="Depotübersicht">
+            <RouterLink to="/depot-uebersicht" class="buttons" title="Depotübersicht">Depotübersicht</RouterLink>
           </li>
           <li>
             <RouterLink to="/wertpapier-uebersicht" class="buttons">Wertpapierübersicht</RouterLink>
@@ -13,7 +12,7 @@
           <li>
             <RouterLink to="/order-management-overview/1" class="buttons">Orderübersicht</RouterLink>    <!--TODO replace the hardcoded investmentAccountId-->
           </li>
-        </ul>
+
       </nav>
     </header>
     <router-view></router-view>
@@ -22,3 +21,15 @@
 
 <script setup lang="ts">
 </script>
+
+<style>
+.buttons::after {
+  display: block;
+  content: attr(title);
+  font-weight: bold;
+  height: 1px;
+  color: transparent;
+  overflow: hidden;
+  visibility: hidden;
+}
+</style>

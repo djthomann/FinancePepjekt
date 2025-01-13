@@ -22,7 +22,11 @@ class StockHandler(private val stockService: IStockService, private val orderSer
     fun getStockDetailsBySymbol(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
 
-        TODO("Not yet implemented")
+        return stockService.getStockBySymbol(symbol)
+            .flatMap { stock ->
+                ServerResponse.ok().bodyValue(stock)
+            }
+            .switchIfEmpty(ServerResponse.notFound().build())
     }
 
     fun getStockDetailsByName(request: ServerRequest): Mono<ServerResponse> {

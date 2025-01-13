@@ -11,6 +11,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 /**
@@ -40,8 +41,10 @@ class OrderHandler(private val orderService: IOrderService, private val stockSer
             request.queryParam("stockSymbol").orElseThrow { IllegalArgumentException("stockSymbol is required") }
         val volume =
             BigDecimal(request.queryParam("volume").orElseThrow { IllegalArgumentException("volume is required") })
-        val executionTime = LocalDateTime.parse(
+        val executionDate = LocalDate.parse(
             request.queryParam("executionTime").orElseThrow { IllegalArgumentException("executionTime is required") })
+
+        val executionTime = executionDate.atStartOfDay();
 
         return orderService.placeBuyOrder(investmentAccountId, stockSymbol, volume, executionTime)
             .flatMap { order ->
@@ -68,8 +71,10 @@ class OrderHandler(private val orderService: IOrderService, private val stockSer
             request.queryParam("stockSymbol").orElseThrow { IllegalArgumentException("stockSymbol is required") }
         val volume =
             BigDecimal(request.queryParam("volume").orElseThrow { IllegalArgumentException("volume is required") })
-        val executionTime = LocalDateTime.parse(
+        val executionDate = LocalDate.parse(
             request.queryParam("executionTime").orElseThrow { IllegalArgumentException("executionTime is required") })
+
+        val executionTime = executionDate.atStartOfDay();
 
         return orderService.placeSellOrder(investmentAccountId, stockSymbol, volume, executionTime)
             .flatMap { order ->
