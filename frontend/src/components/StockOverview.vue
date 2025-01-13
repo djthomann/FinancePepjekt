@@ -21,7 +21,7 @@
                         </tr>
                   </thead>
                   <tbody>
-                        <tr class="table-row" v-for="stock in stocks" :key="stock.id" :class="{ 'just-changed': stock.justChanged}" @click="navigateToStockDetail(stock.symbol)">
+                        <tr class="table-row" v-for="stock in stocks" :key="stock.name" :class="{ 'just-changed': stock.justChanged}" @click="navigateToStockDetail(stock.symbol)">
                               <td>{{ stock.name }}</td>
                               <td>{{ stock.symbol }}</td>
                               <td>{{stock.currency}}</td>

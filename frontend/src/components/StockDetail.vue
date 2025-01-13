@@ -88,10 +88,11 @@ ChartJS.register(
   Legend
 )
 
+const numDataPoints = 60
 const dataPoints = []
 
 const data = {
-  labels: ['-18s', '-15s', '-12s', '9s', '-6s', '-3s', 'jetzt'],
+  labels: new Array(numDataPoints).fill(0),
   datasets: [
     {
       label: '',
@@ -140,7 +141,7 @@ async function poll() {
         stock.value.justChanged = false;
       }, 200);
     }
-    if(dataPoints.length > 6) {
+    if(dataPoints.length >= numDataPoints) {
       dataPoints.shift();
     }
     dataPoints.push(stockData.cprice)
@@ -175,7 +176,7 @@ onBeforeMount(async () => {
     console.error(e)
   }
 
-  pollingIntervalID = setInterval(poll, 3000)
+  pollingIntervalID = setInterval(poll, 1000)
 })
 
 onUnmounted( () => {
