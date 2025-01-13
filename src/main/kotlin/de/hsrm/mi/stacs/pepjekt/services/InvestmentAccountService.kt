@@ -1,17 +1,15 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
 import de.hsrm.mi.stacs.pepjekt.entities.InvestmentAccount
+import de.hsrm.mi.stacs.pepjekt.entities.Owner
 import de.hsrm.mi.stacs.pepjekt.entities.PortfolioEntry
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.*
 import de.hsrm.mi.stacs.pepjekt.handler.FinnhubHandler
-import de.hsrm.mi.stacs.pepjekt.repositories.*
-import de.hsrm.mi.stacs.pepjekt.entities.User
 import de.hsrm.mi.stacs.pepjekt.repositories.*
 import org.springframework.stereotype.Service
 import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.core.util.function.*
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -32,6 +30,7 @@ class InvestmentAccountService(
     val ownerRepository: IOwnerRepository,
     val stockRepository: IStockRepository,
     val finnhubHandler: FinnhubHandler,
+    val stockService: StockService
 ) : IInvestmentAccountService {
 
     /**
@@ -62,7 +61,7 @@ class InvestmentAccountService(
                             PortfolioEntry(
                                 investmentAccountId = investmentAccountId,
                                 stockSymbol = stockSymbol,
-                                quantity = volume.toDouble()
+                                quantity = volume.toDouble(),
                             )
                         ).`as`(operator::transactional)
                     )
@@ -143,6 +142,7 @@ class InvestmentAccountService(
             }
     }
 
+
     /**
      * Retrieves the portfolio of an investment account by the investmentAccountId ID.
      *
@@ -183,15 +183,17 @@ class InvestmentAccountService(
             portfolioEntryRepository.findByInvestmentAccountId(account.id!!)
                 .flatMap { portfolioEntry ->
                     // Lade Stock-Daten für jedes PortfolioEntry
-                    stockRepository.findBySymbol(portfolioEntry.stockSymbol)
-                        .map { stock ->
-                            PortfolioEntryDTO(
-                                id = portfolioEntry.id,
-                                stockSymbol = portfolioEntry.stockSymbol,
-                                quantity = portfolioEntry.quantity,
-                                stock = StockDTO.mapToDto (stock)
-                            )
-                        }
+                    stockRepository.findBySymbol(portfolioEntry.stockSymbol).flatMap { stock ->
+                        stockService.getLatestQuoteBySymbol(stock.symbol)
+                            .map { quote ->
+                                PortfolioEntryDTO(
+                                    id = portfolioEntry.id,
+                                    stockSymbol = portfolioEntry.stockSymbol,
+                                    quantity = portfolioEntry.quantity,
+                                    stock = StockDTO.mapToDto(stock, quote)
+                                )
+                            }
+                    }
                 }.collectList()
         }
 
@@ -235,8 +237,8 @@ class InvestmentAccountService(
         }
     }
 
-    override fun getInvestmentAccountOwner(userId: Long): Mono<User> {
-        return userRepository.findById(userId)
+    fun getInvestmentAccountOwner(userId: Long): Mono<Owner> {
+        return ownerRepository.findById(userId)
     }
 
 }

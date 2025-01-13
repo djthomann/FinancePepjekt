@@ -41,8 +41,4 @@ interface IStockService {
 
     fun getChangePercentageBySymbol(symbol: String): Mono<BigDecimal>
 
-    fun getCurrentPrice(symbol: String): Mono<BigDecimal>
-
-    fun setCurrentPrice(price: BigDecimal, symbol: String): Mono<Stock>
-
 }

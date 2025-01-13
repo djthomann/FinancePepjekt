@@ -49,12 +49,12 @@ VALUES (1, 1), -- Verknüpft mit Bankkonto ID 1 und Benutzer ID 1
 INSERT INTO portfolio_entry (investment_account_id, stock_symbol, quantity)
 VALUES (1, 'AAPL', 50.5),
        (1, 'TSLA', 10.0),
-       (1, 'GOOGL', 5.0),
+       (1, 'NVDA', 5.0),
        (2, 'SAP', 15.0),
        (3, 'AAPL', 25.0);
 
 -- 
-INSERT INTO stock_order (volume, type, portfolio_entry_id, stock_symbol)
+INSERT INTO stock_order (volume, type, investment_account_id, stock_symbol)
 VALUES (100.0, 'BUY', 1, 'AAPL'), -- Order for 100 AAPL from Investmentkonto 1
        (50.0, 'SELL', 1, 'TSLA'), -- Order for 50 TSLA from Investmentkonto 1
        (25.5, 'BUY', 2, 'NVDA'), -- Order for 25.5 NVDA from Investmentkonto 2

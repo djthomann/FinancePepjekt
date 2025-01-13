@@ -63,8 +63,3 @@ const navigateToStockDetail = (symbol: string) => {
 <style lang="scss">
 @use "./style.scss";
 </style>
-
-
-<style lang="scss">
-@use "./style.scss";
-</style>

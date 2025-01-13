@@ -52,21 +52,6 @@ class StockService(
         return stockRepository.findAll()
     }
 
-    override fun getCurrentPrice(symbol: String): Mono<BigDecimal> {
-        return getStockBySymbol(symbol).map { stock -> stock.cprice }
-    }
-
-    override fun setCurrentPrice(price: BigDecimal, symbol: String): Mono<Stock> {
-
-        return getStockBySymbol(symbol)
-            .flatMap { stock ->
-                stock.cprice = price
-                logger.info("New Price: " + price)
-                stockRepository.save(stock)
-            }
-
-    }
-
     /**
      * Calculates the average price of a stock within a given time range.
      *

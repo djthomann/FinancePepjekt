@@ -21,6 +21,8 @@ export interface Stock {
   currentValue: number,
   change: number,
   changePercentage: number
+
+  justChanged: boolean //Just for frontend
 }
 
 export interface StockDetails {

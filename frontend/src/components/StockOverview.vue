@@ -9,30 +9,32 @@
       </div>
     </div>
 
-      <div>
-            <table>
-                  <thead>
-                        <tr>
-                              <th>Name</th>
-                              <th>Symbol</th>
-                              <th>Währung</th>
-                              <th>Aktueller Wert</th>
-                              <th>Gewinn/Verlust</th>
-                        </tr>
-                  </thead>
-                  <tbody>
-                        <tr class="table-row" v-for="stock in stocks" :key="stock.id" :class="{ 'just-changed': stock.justChanged}" @click="navigateToStockDetail(stock.symbol)">
-                              <td>{{ stock.name }}</td>
-                              <td>{{ stock.symbol }}</td>
-                              <td>{{stock.currency}}</td>
-                              <td>{{ stock.cprice }}</td>
-                              <td :class="{ 'positive': stock.change >= 0, 'negative': stock.change < 0 }">
-                                {{ stock.change }} € ({{ stock.changePercentage }}%)
-                              </td>
-                        </tr>
-                  </tbody>
-            </table>
-      </div>
+    <div>
+      <table>
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Symbol</th>
+          <th>Währung</th>
+          <th>Aktueller Wert</th>
+          <th>Gewinn/Verlust</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        <tr class="table-row" v-for="stock in stocks" :key="stock.figi" :class="{ 'just-changed':
+                       stock.justChanged}" @click="navigateToStockDetail(stock.symbol)">
+          <td>{{ stock.name }}</td>
+          <td>{{ stock.symbol }}</td>
+          <td>{{ stock.currency }}</td>
+          <td>{{ stock.currentValue }}</td>
+          <td :class="{ 'positive': stock.change >= 0, 'negative': stock.change < 0 }">
+            {{ stock.change }} € ({{ stock.changePercentage }}%)
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -47,9 +49,6 @@ const searchField = ref('')
 
 const stocks = ref<Stock[]>([])
 
-function resetSearch() {
-  searchField.value = ''
-}
 
 async function poll() {
 
@@ -62,8 +61,9 @@ async function poll() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const stockData = await response.json() as Stock;
-      if(stock.cprice !== stockData.cprice) {
-        stock.cprice = stockData.cprice
+
+      if (stock.currentValue !== stockData.currentValue) {
+        stock.currentValue = stockData.currentValue
         stock.justChanged = true
 
         setTimeout(() => {
@@ -91,7 +91,7 @@ onMounted(async () => {
   pollingIntervalID = setInterval(poll, 3000)
 })
 
-onUnmounted( () => {
+onUnmounted(() => {
   console.log("Clearing interval for polling")
   clearInterval(pollingIntervalID)
 })
@@ -112,6 +112,7 @@ const navigateToStockDetail = (symbol: string) => {
 
 <style lang="scss">
 @use "./style.scss";
+
 .just-changed {
   background-color: var(--main-color-light);
 }
