@@ -18,26 +18,17 @@ class InvestmentAccountDTO(
         fun mapToDto(
             investmentAccount: InvestmentAccount,
             bankAccount: BankAccountDTO,
-            user: UserDTO,
-            stockService: IStockService
+            owner: OwnerDTO,
+            portfolioEntryDTOs: List<PortfolioEntryDTO>,
+            totalValue: BigDecimal,
         ): InvestmentAccountDTO {
             return InvestmentAccountDTO(
                 id = investmentAccount.id,
                 bankAccountId = investmentAccount.bankAccountId,
-                portfolio = investmentAccount.portfolio.map {
-                    PortfolioEntryDTO.mapToDto(
-                        it,
-                        stock = StockDTO.mapToDto(
-                            stockService.getStockBySymbol(it.stockSymbol).block()!!,
-                            currentValue = stockService.getCurrentValueBySymbol(it.stockSymbol).block()!!,
-                            change = stockService.getChangeBySymbol(it.stockSymbol).block()!!,
-                            changePercentage = stockService.getChangePercentageBySymbol(it.stockSymbol).block()!!,
-                        )
-                    )
-                },
-                userId = investmentAccount.userId,
                 bankAccount = bankAccount,
-                owner = user
+                owner = owner,
+                portfolio = portfolioEntryDTOs,
+                totalValue = totalValue
             )
         }
     }

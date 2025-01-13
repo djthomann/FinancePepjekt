@@ -1,8 +1,5 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
-import de.hsrm.mi.stacs.pepjekt.entities.dtos.InvestmentAccountDTO
-import de.hsrm.mi.stacs.pepjekt.entities.dtos.UserDTO
-import de.hsrm.mi.stacs.pepjekt.services.IFinanceUserService
 import de.hsrm.mi.stacs.pepjekt.services.IInvestmentAccountService
 import org.slf4j.LoggerFactory
 import de.hsrm.mi.stacs.pepjekt.services.IStockService
@@ -24,7 +21,6 @@ import java.math.BigDecimal
 class InvestmentAccountHandler(
     private val investmentAccountService: IInvestmentAccountService,
     private val stockService: IStockService,
-    private val userService: IFinanceUserService
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -38,7 +34,6 @@ class InvestmentAccountHandler(
      * @return A Mono containing the server response with the portfolio or a 404 not found if no portfolio is found.
      * @throws IllegalArgumentException If the user ID is missing in the query parameters.
      *
-     * TODO return InvestmentAccountDTO -> has to be done, already in use
      */
     fun getPortfolio(request: ServerRequest): Mono<ServerResponse> {
 
@@ -48,14 +43,8 @@ class InvestmentAccountHandler(
         logger.info("Fetch InvestmentAccountDTO with investmentAccountId: $investmentAccountId")
 
         return investmentAccountService.getInvestmentAccountPortfolio(investmentAccountId)
-            .flatMap { investmentAccount ->
-                val investmentAccountDTO = InvestmentAccountDTO.mapToDto(
-                    investmentAccount,
-                    bankAccount = TODO(),
-                    user = UserDTO.mapToDto(userService.getUserByInvestmentAccountId(investmentAccountId).block()!!),
-                    stockService = stockService
-                )
-                ServerResponse.ok().bodyValue(investmentAccountDTO)
+            .flatMap { portfolio ->
+                ServerResponse.ok().bodyValue(portfolio)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
     }

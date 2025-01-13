@@ -10,8 +10,7 @@ import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
-import reactor.kotlin.core.util.function.component1
-import reactor.kotlin.core.util.function.component2
+import reactor.kotlin.core.util.function.*
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -188,12 +187,7 @@ class InvestmentAccountService(
                                 id = portfolioEntry.id,
                                 stockSymbol = portfolioEntry.stockSymbol,
                                 quantity = portfolioEntry.quantity,
-                                stock = StockDTO(
-                                    symbol = stock.symbol,
-                                    description = stock.description,
-                                    figi = stock.figi,
-                                    currency = stock.currency,
-                                ),
+                                stock = StockDTO.mapToDto (stock)
                             )
                         }
                 }.collectList()

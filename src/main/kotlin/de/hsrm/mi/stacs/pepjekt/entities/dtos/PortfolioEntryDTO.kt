@@ -8,14 +8,15 @@ import java.math.BigDecimal
 class PortfolioEntryDTO(
     @Id
     val id: Long? = null,
-    val investmentAccountId: Long,
     val stockSymbol: String,
     val quantity: Double,
     val stock: StockDTO,
+    /*
     val currentValue: BigDecimal = BigDecimal.ZERO,
     val amount: BigDecimal = BigDecimal.ZERO,
     val change: BigDecimal = BigDecimal.ZERO,
     val changePercentage: BigDecimal = BigDecimal.ZERO
+     */
 ) {
     companion object {
         fun mapToDto(
@@ -23,10 +24,10 @@ class PortfolioEntryDTO(
             stock: StockDTO,
         ): PortfolioEntryDTO {
             return PortfolioEntryDTO(
-                investmentAccountId = portfolioEntry.investmentAccountId,
+                id = portfolioEntry.id,
                 stockSymbol = portfolioEntry.stockSymbol,
                 quantity = portfolioEntry.quantity,
-                stock = stock
+                stock = stock,
             )
         }
     }

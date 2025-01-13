@@ -3,7 +3,6 @@ package de.hsrm.mi.stacs.pepjekt.handler
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.QuoteDTO
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDTO
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDetailsDTO
-import de.hsrm.mi.stacs.pepjekt.entities.Stock
 import de.hsrm.mi.stacs.pepjekt.services.IStockService
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
@@ -37,7 +36,7 @@ class StockHandler(private val stockService: IStockService, private val orderSer
             .collectList()
             .flatMap { stocks ->
                 if (stocks.isNotEmpty()) {
-                    val stockDtos = stocks.map { StockDTO.mapToDto(it, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO) }
+                    val stockDtos = stocks.map { StockDTO.mapToDto(it) }
                     ServerResponse.ok().bodyValue(stockDtos)
                 } else {
                     ServerResponse.notFound().build()
@@ -135,7 +134,7 @@ class StockHandler(private val stockService: IStockService, private val orderSer
             .collectList()
             .flatMap { stocks ->
                 if (stocks.isNotEmpty()) {
-                    val stockDtos = stocks.map { StockDTO.mapToDto(it, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO) }
+                    val stockDtos = stocks.map { StockDTO.mapToDto(it) }
                     ServerResponse.ok().bodyValue(stockDtos)
                 } else {
                     ServerResponse.notFound().build()
