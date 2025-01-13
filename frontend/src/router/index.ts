@@ -5,6 +5,8 @@ import WertpapierDetail from '@/components/StockDetail.vue'
 import OrderManagementSell from "@/components/OrderManagementSell.vue";
 import OrderManagementBuy from "@/components/OrderManagementBuy.vue";
 import OrderManagementOverview from "@/components/OrderManagementOverview.vue";
+import CryptoOverview from "@/components/CryptoOverview.vue";
+import CryptoDetail from "@/components/CryptoDetail.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,6 +25,16 @@ const router = createRouter({
       path: '/wertpapier-detail/:symbol',
       name: 'wertpapier-detail',
       component: WertpapierDetail,
+    },
+    {
+      path: '/krypto-uebersicht',
+      name: 'krypto-uebersicht',
+      component: CryptoOverview,
+    },
+    {
+      path: '/krypto-detail/:symbol',
+      name: 'krypto-detail',
+      component: CryptoDetail,
     },
     {
       path: '/order-management-sell/:symbol',

@@ -11,6 +11,9 @@
             <RouterLink to="/wertpapier-uebersicht" class="buttons">Wertpapierübersicht</RouterLink>
           </li>
           <li>
+            <RouterLink to="/krypto-uebersicht" class="buttons">Kryptoübersicht</RouterLink>
+          </li>
+          <li>
             <RouterLink to="/order-management-overview/1" class="buttons">Orderübersicht</RouterLink>    <!--TODO replace the hardcoded investmentAccountId-->
           </li>
         </ul>
