@@ -3,6 +3,8 @@ package de.hsrm.mi.stacs.pepjekt.handler
 import de.hsrm.mi.stacs.pepjekt.entities.PortfolioEntry
 import de.hsrm.mi.stacs.pepjekt.entities.Stock
 import de.hsrm.mi.stacs.pepjekt.services.IInvestmentAccountService
+import org.slf4j.LoggerFactory
+import de.hsrm.mi.stacs.pepjekt.services.IStockService
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -19,7 +21,12 @@ import javax.sound.sampled.Port
  * @param investmentAccountService The service used to perform operations on investment accounts.
  */
 @Component
-class InvestmentAccountHandler(private val investmentAccountService: IInvestmentAccountService) {
+class InvestmentAccountHandler(
+    private val investmentAccountService: IInvestmentAccountService,
+    private val stockService: IStockService,
+) {
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     /**
      * Handles a request to get the portfolio of an investment account.
@@ -29,24 +36,63 @@ class InvestmentAccountHandler(private val investmentAccountService: IInvestment
      * @param request The incoming server request containing query parameters.
      * @return A Mono containing the server response with the portfolio or a 404 not found if no portfolio is found.
      * @throws IllegalArgumentException If the user ID is missing in the query parameters.
+     *
      */
     fun getPortfolio(request: ServerRequest): Mono<ServerResponse> {
-        val userId = request.queryParam("userId").orElseThrow { IllegalArgumentException("userId is required") }.toLong()
 
-        val portfolio: Flux<PortfolioEntry> = investmentAccountService.getInvestmentAccountPortfolio(userId)
+        val investmentAccountId = request.queryParam("investmentAccountId").orElseThrow { IllegalArgumentException(" " +
+                "investmentaccountId is required") }.toLong()
 
-        return ServerResponse.ok().body(portfolio, PortfolioEntry::class.java)
-            .switchIfEmpty(ServerResponse.noContent().build())
+        logger.info("Fetch InvestmentAccountDTO with investmentAccountId: $investmentAccountId")
+
+        return investmentAccountService.getInvestmentAccountPortfolio(investmentAccountId)
+            .flatMap { portfolio ->
+                ServerResponse.ok().bodyValue(portfolio)
+            }
+            .switchIfEmpty(ServerResponse.notFound().build())
     }
 
-    fun getUser(request: ServerRequest): Mono<ServerResponse> {
-        val userId = request.queryParam("userId").orElseThrow { IllegalArgumentException("userId is required") }.toLong()
+    /**
+     * Handles a request to get the portfolio of an investment account.
+     *
+     * If the investmentAccountId is not provided or the portfolio cannot be found, an error response will be returned.
+     *
+     * @param request The incoming server request containing query parameters.
+     * @return A Mono containing the server response with the total value of the portfolio or a 404 if the portfolio is empty.
+     * @throws IllegalArgumentException If the investmentAccountId is missing in the query parameters.
+     *
+     * TODO -> has to be done, already in use
+     */
+    fun getPortfolioTotalValue(request: ServerRequest): Mono<ServerResponse> {
+        val investmentAccountId = request.queryParam("investmentAccountId")
+            .map { it.toLong() }
+            .orElseThrow { IllegalArgumentException("investmentAccountId is required") }
 
-        return investmentAccountService.getInvestmentAccountOwner(userId)
-            .flatMap<ServerResponse?> { user ->
-                ServerResponse.ok().bodyValue(user)
-            }.switchIfEmpty(ServerResponse.notFound().build())
+        return investmentAccountService.getInvestmentAccountPortfolio(investmentAccountId)
+            .flatMap { portfolio ->
+                val stockSymbols = portfolio.portfolio.map { it.stockSymbol }
+                if(stockSymbols.isEmpty()){
+                    ServerResponse.notFound().build()
+                }
+
+                val highestValuesMonos = stockSymbols.map { symbol ->
+                    stockService.getLatestQuoteBySymbol(symbol)
+                        .map { quote ->
+                            quote.currentPrice
+                        }
+                }
+
+                Flux.merge(highestValuesMonos)
+                    .collectList()
+                    .flatMap { highestValues ->
+                        val totalValue = highestValues.fold(BigDecimal.ZERO) { acc, price ->
+                            acc.add(price)
+                        }
+                        ServerResponse.ok().bodyValue(totalValue)
+                    }
+            }
     }
+
 
     /**
      * Handles a request to buy stock in an investment account.

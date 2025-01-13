@@ -1,13 +1,13 @@
 <template>
   <div class="invest-depot">
-      <div>
-            <h1>Wertpapiere</h1>
-            <div id="searchField">
-                  <input v-model="searchField" placeholder="Symbol/Name" />
-                  <button class="details-button" @click="resetSearch">Reset</button>
-                  <button class="details-button" @click="searchContent">Search</button>
-            </div>
+    <div>
+      <h1>Wertpapiere</h1>
+      <div id="searchField">
+        <input v-model="searchField" placeholder="Symbol/Name"/>
+        <button class="details-button" @click="resetSearch">Reset</button>
+        <button class="details-button" @click="searchContent">Search</button>
       </div>
+    </div>
 
       <div>
             <table>
@@ -39,17 +39,12 @@
 <script lang="ts" setup>
 import {onMounted, onUnmounted, ref} from 'vue';
 import {useRouter} from "vue-router";
-import type { Stock} from "@/types/types.ts";
+import type {Stock} from "@/types/types.ts";
 
 const router = useRouter()
 let pollingIntervalID: number
 const searchField = ref('')
-/*const stocks = ref([
-  { id: 1, name: 'Apple', symbol: "AAPL", currentValue: 1450.90, change: 33.39, changePercentage: 13.6 },
-  { id: 2, name: 'Tesla', symbol: "TSLA", currentValue: 3565.35, change: 120.75, changePercentage: 20.1 },
-  { id: 3, name: 'Amazon', symbol: "GOOGL", currentValue: 6169.52, change: -45.50, changePercentage: -5.2 },
-])
-*/
+
 const stocks = ref<Stock[]>([])
 
 function resetSearch() {
@@ -84,7 +79,7 @@ async function poll() {
 
 onMounted(async () => {
   try {
-    const response = await fetch(`/api/stocks`)
+    const response = await fetch("/api/stocks")
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
@@ -100,6 +95,10 @@ onUnmounted( () => {
   console.log("Clearing interval for polling")
   clearInterval(pollingIntervalID)
 })
+
+function resetSearch() {
+  searchField.value = ''
+}
 
 function searchContent() {
   console.log('searching for:', searchField.value)

@@ -1,6 +1,6 @@
 <template>
   <div class="stock-detail">
-    <h2>{{ stock.name }} - Detailansicht</h2>
+    <h2>{{ stock.symbol }} - Detailansicht</h2>
     <p><strong>Symbol:</strong> {{ stock.symbol }}</p>
     <p><strong>FIGI:</strong> {{ stock.figi }}</p>
     <p :class="{ 'just-changed': stock.justChanged}"><strong>Aktueller Wert:</strong> {{ stock.cprice }} {{stock.currency}}</p>

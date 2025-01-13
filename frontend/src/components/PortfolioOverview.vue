@@ -2,16 +2,17 @@
   <div class="invest-depot">
     <div class="header">
       <div class="title">
-        <h1>InvestDepot</h1>
-        <p>{{ username }}</p>
+        <h1>Investment-Depot</h1>
+        <p v-if="investmentAccount && investmentAccount.owner">{{ investmentAccount.owner.name }}</p>
+        <p v-if="investmentAccount && investmentAccount.owner">{{ investmentAccount.owner.mail }}</p>
       </div>
-      <div class="total-value">
-        <p>Depotwert: <strong>{{ totalPortfolioValue }} €</strong></p>
+      <div class="total-value" v-if="investmentAccount && investmentAccount.owner">
+        <p>Depotwert: <strong>{{ investmentAccount.totalValue }} €</strong></p>
       </div>
     </div>
 
-    <h2>Positionen</h2>
-    <table>
+    <h2>Portfolio-Wertpapiere</h2>
+    <table v-if="investmentAccount && investmentAccount.portfolio">
       <thead>
       <tr>
         <th>Name</th>
@@ -22,14 +23,25 @@
       </tr>
       </thead>
       <tbody>
-      <tr class="table-row" :class="{ 'just-changed': stock.justChanged}" v-for="stock in stocks" :key="stock.symbol" @click="navigateToStockDetail(stock.symbol)">
-        <td>{{ stock.name }}</td>
-        <td>{{ stock.symbol }}</td>
-        <td>{{positions.get(stock.symbol)}}</td>
-        <td>{{ stock.cprice }}</td>
-        <!--<td :class="{ 'positive': position.change >= 0, 'negative': position.change < 0 }">
-          {{ position.change }} € ({{ position.changePercentage }}%)
-        </td>-->
+      <tr class="table-row" :class="{ 'just-changed': stock.justChanged}" v-for="portfolioEntry in investmentAccount!.portfolio" :key="portfolioEntry.id"
+          @click="navigateToStockDetail(portfolioEntry.stockSymbol)">
+        <td>{{ portfolioEntry.stock.description }}</td>
+        <td>{{ portfolioEntry.stockSymbol }}</td>
+        <td>{{ portfolioEntry.currentValue }} €</td>    <!--reactive value-->
+        <td>{{ portfolioEntry.amount }}</td>    <!--reactive value-->
+        <td :class="{ 'positive': portfolioEntry.change >= 0, 'negative': portfolioEntry.change < 0 }">
+          {{ portfolioEntry.change }} € ({{ portfolioEntry.changePercentage }}%)
+        </td>         <!--reactive value-->
+        <!--
+     <tr class="table-row" :class="{ 'just-changed': stock.justChanged}" v-for="stock in stocks" :key="stock.symbol" @click="navigateToStockDetail(stock.symbol)">
+       <td>{{ stock.name }}</td>
+       <td>{{ stock.symbol }}</td>
+       <td>{{positions.get(stock.symbol)}}</td>
+       <td>{{ stock.cprice }}</td>
+       <td :class="{ 'positive': position.change >= 0, 'negative': position.change < 0 }">
+         {{ position.change }} € ({{ position.changePercentage }}%)
+       </td>
+       -->
         <td>{{ stockValueMap.get(stock.symbol) }} </td>
       </tr>
       </tbody>
@@ -38,22 +50,41 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onBeforeMount, onUnmounted, ref} from 'vue';
 import {useRoute, useRouter} from "vue-router";
+import type {InvestmentAccount} from "@/types/types.ts";
+import {computed, onBeforeMount, onUnmounted, ref, onMounted} from 'vue';
 import type {PortfolioEntry, Stock, UserInfo} from "@/types/types.ts";
 
 const router = useRouter()
-const route = useRoute();
-const totalValue = ref(2345.56)
+const route = useRoute()
+const investmentAccountId = route.params.investmentAccountId
+const totalValue = ref(0.0)
+const investmentAccount = ref<InvestmentAccount>()
 let pollingIntervalID: number
 const investmentAccountId = route.params.investmentAccountId
 const username = ref<string>()
-
 const stocks = ref<Stock[]>([])
 const portfolio = ref<PortfolioEntry[]>([])
 const positions = ref<Map<string, number>>(new Map());
 let stockValueMap = <Map<string, computed<number>>>(new Map)
 let totalPortfolioValue = computed<number>(0)
+
+
+onMounted(async () => {
+  try {
+    const responsePortfolio = await fetch(`/api/portfolio?investmentAccountId=${investmentAccountId}`)
+
+    if (!responsePortfolio.ok) {
+      throw new Error(`HTTP error! status: ${responsePortfolio.status}`)
+    }
+
+    investmentAccount.value = await responsePortfolio.json() as InvestmentAccount
+
+    //   totalValue.value = await responseTotalValue.json() as number
+  } catch (e) {
+    console.error(e)
+  }
+})
 
 onBeforeMount(async () => {
 

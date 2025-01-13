@@ -43,7 +43,7 @@ const router = createRouter({
       path: '',
       redirect: (to: any) => {
         const { hash, params, query } = to
-        return '/depot-uebersicht'
+        return '/depot-uebersicht/1'
       },
     },
   ],
