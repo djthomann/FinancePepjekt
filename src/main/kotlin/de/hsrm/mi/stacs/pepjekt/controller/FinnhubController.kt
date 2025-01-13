@@ -1,5 +1,6 @@
 package de.hsrm.mi.stacs.pepjekt.controller
 
+import de.hsrm.mi.stacs.pepjekt.entities.Quote
 import de.hsrm.mi.stacs.pepjekt.handler.FinnhubHandler
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -18,10 +19,10 @@ class FinnhubController(
     private val logger = LoggerFactory.getLogger(FinnhubController::class.java)
 
     @GetMapping("/stock")
-    fun getStockQuote(@RequestParam symbol: String): Mono<ResponseEntity<QuoteDTD>> {
+    fun getStockQuote(@RequestParam symbol: String): Mono<ResponseEntity<Quote>> {
         logger.info("Getting stock quote by symbol: $symbol")
 
-        val quoteMono: Mono<QuoteDTD> = finnhubHandler.fetchStockQuote(symbol)
+        val quoteMono: Mono<Quote> = finnhubHandler.fetchStockQuote(symbol)
         return quoteMono.map { response ->
             ResponseEntity.ok(response)
         }

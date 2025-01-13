@@ -40,7 +40,7 @@ import {useRouter, useRoute} from "vue-router";
 import type {Order} from '@/types/types.ts'
 
 const router = useRouter()
-const route = useRoute();
+const route = useRoute()
 const investmentAccountId = route.params.investmentAccountId
 const orders = ref<Order[]>([])
 
@@ -57,7 +57,7 @@ onMounted(async () => {
 })
 
 const navigateToStockDetail = (symbol: string) => {
-  router.push({name: 'wertpapier-detail', params: {symbol}});
+  router.push({name: 'wertpapier-detail', params: {symbol}})
 }
 
 </script>

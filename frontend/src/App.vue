@@ -4,13 +4,13 @@
       <li id="icon"></li>
       <nav  id="header-navigation">
           <li title="Depotübersicht">
-            <RouterLink to="/depot-uebersicht" class="buttons" title="Depotübersicht">Depotübersicht</RouterLink>
+            <RouterLink :to="`/depot-uebersicht/${investmentAccountId}`" class="buttons">Depotübersicht</RouterLink>
           </li>
           <li>
             <RouterLink to="/wertpapier-uebersicht" class="buttons">Wertpapierübersicht</RouterLink>
           </li>
           <li>
-            <RouterLink to="/order-management-overview/1" class="buttons">Orderübersicht</RouterLink>    <!--TODO replace the hardcoded investmentAccountId-->
+            <RouterLink :to="`/order-management-overview/${investmentAccountId}`" class="buttons">Orderübersicht</RouterLink>    <!--TODO replace the hardcoded investmentAccountId-->
           </li>
 
       </nav>
@@ -20,6 +20,9 @@
 </template>
 
 <script setup lang="ts">
+import {ref} from 'vue';
+
+const investmentAccountId = ref(1)
 </script>
 
 <style>

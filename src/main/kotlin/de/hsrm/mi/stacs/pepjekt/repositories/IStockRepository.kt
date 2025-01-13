@@ -9,4 +9,6 @@ import reactor.core.publisher.Mono
 interface IStockRepository : R2dbcRepository<Stock, String> {
 
     fun findBySymbol(symbol: String): Mono<Stock>
+
+    fun findByDescription(description: String): Mono<Stock>
 }
