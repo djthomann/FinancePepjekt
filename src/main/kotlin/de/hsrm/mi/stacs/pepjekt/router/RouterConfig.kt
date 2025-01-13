@@ -1,9 +1,6 @@
 package de.hsrm.mi.stacs.pepjekt.router
 
-import de.hsrm.mi.stacs.pepjekt.handler.BankAccountHandler
-import de.hsrm.mi.stacs.pepjekt.handler.InvestmentAccountHandler
-import de.hsrm.mi.stacs.pepjekt.handler.OrderHandler
-import de.hsrm.mi.stacs.pepjekt.handler.StockHandler
+import de.hsrm.mi.stacs.pepjekt.handler.*
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.server.router
@@ -27,11 +24,12 @@ class RouterConfig {
      * @return Configured main router with all nested routes.
      */
     @Bean
-    fun mainRouter(bankAccountHandler: BankAccountHandler, investmentAccountHandler: InvestmentAccountHandler, stockHandler: StockHandler, orderHandler: OrderHandler) = router {
+    fun mainRouter(bankAccountHandler: BankAccountHandler, investmentAccountHandler: InvestmentAccountHandler, stockHandler: StockHandler, orderHandler: OrderHandler, cryptoHandler: CryptoHandler) = router {
         add(bankAccountRouter(bankAccountHandler))
         add(investmentAccountRouter(investmentAccountHandler))
         add(stockRouter(stockHandler))
         add(orderRouter(orderHandler))
+        add(cryptoRouter(cryptoHandler))
     }
 
     /**
@@ -84,6 +82,24 @@ class RouterConfig {
             GET("/stock/history/name", stockHandler::getStockHistoryByName)
             GET("/stock/average-price", stockHandler::getStockAveragePrice)
             GET("/stocks", stockHandler::getStocks)
+        }
+    }
+
+    /**
+     * Defines the router for crypto related functionalities
+     *
+     * @param cryptoHandler Handler for crypto operations
+     * @return Router with Crypto Endpoints
+     */
+    @Bean
+    fun cryptoRouter(cryptoHandler: CryptoHandler) = router {
+        "/api".nest {
+            GET("/crypto") { request ->
+                when {
+                    request.queryParam("symbol").isPresent -> cryptoHandler.getCryptoBySymbol(request)
+                    else -> cryptoHandler.getAllCryptos(request)
+                }
+            }
         }
     }
 
