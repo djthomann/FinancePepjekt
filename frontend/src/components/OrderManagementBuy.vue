@@ -1,6 +1,6 @@
 <template>
       <div class="stock-purchase">
-            <h2>{{ stock.symbol }} - Kaufansicht</h2>
+            <h2>{{ stock.name }} - Kaufansicht</h2>
             <p><strong>FIGI:</strong> {{ stock.figi }}</p>
             <p><strong>Aktueller Wert:</strong> {{ stock.currentValue }} €</p>
 
@@ -23,15 +23,11 @@
 </template>
 
 <script lang="ts" setup>
-import {onBeforeMount, onMounted, ref} from 'vue';
+import {onBeforeMount, ref} from 'vue';
 import {useRoute} from "vue-router";
 import type {Stock} from "@/types/types.ts";
 
 const stock = ref<Stock>({})
-
-const route = useRoute();
-const isin = route.params.isin;
-console.log("ISIN", isin)
 
 const amount = ref(10);
 

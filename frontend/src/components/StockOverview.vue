@@ -20,7 +20,7 @@
                         </tr>
                   </thead>
                   <tbody>
-                        <tr v-for="position in positions" :key="position.id" @click="navigateToStockDetail(position.symbol)">
+                        <tr v-for="position in stocks" :key="position.id" @click="navigateToStockDetail(position.symbol)">
                               <td>{{ position.name }}</td>
                               <td>{{ position.symbol }}</td>
                               <td>{{ position.currentValue }} €</td>
@@ -37,19 +37,34 @@
 <script lang="ts" setup>
 import {onMounted, ref} from 'vue';
 import {useRouter} from "vue-router";
-import type {Order} from "@/types/types.ts";
+import type {Order, Stock} from "@/types/types.ts";
 
 const router = useRouter()
 const searchField = ref('')
-const positions = ref([
+/*const stocks = ref([
   { id: 1, name: 'Apple', symbol: "AAPL", currentValue: 1450.90, change: 33.39, changePercentage: 13.6 },
   { id: 2, name: 'Tesla', symbol: "TSLA", currentValue: 3565.35, change: 120.75, changePercentage: 20.1 },
   { id: 3, name: 'Amazon', symbol: "GOOGL", currentValue: 6169.52, change: -45.50, changePercentage: -5.2 },
 ])
+*/
+const stocks = ref<Stock[]>([])
 
 function resetSearch() {
   searchField.value = ''
 }
+
+onMounted(async () => {
+  try {
+    const response = await fetch(`/api/stocks`)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    stocks.value = await response.json() as Stock[]
+    console.log(stocks.value)
+  } catch (e) {
+    console.error(e)
+  }
+})
 
 function searchContent() {
   console.log('searching for:', searchField.value)
