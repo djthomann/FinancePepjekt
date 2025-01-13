@@ -1,11 +1,13 @@
 package de.hsrm.mi.stacs.pepjekt.schedule
 
 import de.hsrm.mi.stacs.pepjekt.controller.CoinQuoteDTD
+import de.hsrm.mi.stacs.pepjekt.controller.MetalQuoteDTD
 import de.hsrm.mi.stacs.pepjekt.controller.QuoteDTD
 import de.hsrm.mi.stacs.pepjekt.entities.Crypto
 import de.hsrm.mi.stacs.pepjekt.entities.Stock
 import de.hsrm.mi.stacs.pepjekt.handler.CoinbaseHandler
 import de.hsrm.mi.stacs.pepjekt.handler.FinnhubHandler
+import de.hsrm.mi.stacs.pepjekt.handler.ForexHandler
 import de.hsrm.mi.stacs.pepjekt.services.CryptoService
 import de.hsrm.mi.stacs.pepjekt.services.StockService
 import jakarta.annotation.PostConstruct
@@ -21,7 +23,7 @@ import java.time.Duration
 class ScheduledApiCall(
     private val coinbaseHandler: CoinbaseHandler,
     private val finnhubHandler: FinnhubHandler,
-    private val handler: FinnhubHandler,
+    private val forexHandler: ForexHandler,
     private val stockService: StockService,
     private val cryptoService: CryptoService
 ) {
@@ -30,7 +32,7 @@ class ScheduledApiCall(
 
     @PostConstruct
     fun scheduleApiCall() {
-        Flux.interval(Duration.ofSeconds(5))
+        /*Flux.interval(Duration.ofSeconds(5))
             .flatMap {
                 callFinnhub()
             }
@@ -44,6 +46,16 @@ class ScheduledApiCall(
         Flux.interval(Duration.ofSeconds(1))
             .flatMap {
                 callCoinbase()
+            }
+            .subscribe(
+                { response ->
+                    logger.info(response.toString())
+                },
+                { error -> logger.error("Error occurred: ${error.message}", error) }
+            )*/
+        Flux.interval(Duration.ofSeconds(2))
+            .flatMap {
+                callForex()
             }
             .subscribe(
                 { response ->
@@ -74,6 +86,10 @@ class ScheduledApiCall(
                         }
                     }
             }
+    }
+
+    fun callForex(): Mono<MetalQuoteDTD> {
+        return forexHandler.fetchMetalPrice("XAG")
     }
 
 }

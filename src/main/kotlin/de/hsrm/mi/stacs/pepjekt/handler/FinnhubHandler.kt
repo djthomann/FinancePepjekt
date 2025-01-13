@@ -36,11 +36,12 @@ class FinnhubHandler(
      * will be triggered. If the market is open then finnhub itself.
      */
     fun fetchStockQuote(symbol: String): Mono<QuoteDTD> {
-        val webClient = if (isMarketOpen) {
+        /*val webClient = if (isMarketOpen) {
             finnhub_webClient
         } else {
             dummy_finnhub_webClient
-        }
+        }*/
+        val webClient = dummy_finnhub_webClient
 
         logger.info(
             "Fetching StockQuote of symbol {} from {}",
