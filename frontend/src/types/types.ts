@@ -21,6 +21,15 @@ export interface Stock {
   justChanged: boolean
 }
 
+export interface Coin {
+  symbol: string;
+  name: string,
+  description: string;
+  currency: Currency;
+  cprice: number;
+  justChanged: boolean
+}
+
 export interface PortfolioEntry {
   investmentAccountId: number,
   stockSymbol: string,
