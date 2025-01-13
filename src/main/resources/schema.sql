@@ -17,7 +17,8 @@ CREATE TABLE stock
     name        VARCHAR(50),
     description VARCHAR(255) NOT NULL,
     figi        VARCHAR(50)  NOT NULL,
-    currency    VARCHAR(3)   NOT NULL -- ISO 4217
+    currency    VARCHAR(3)   NOT NULL, -- ISO 4217
+    cprice      DECIMAL(18, 4)
 );
 
 ---------------------------------------Owner-------------------------------------------------------
@@ -84,9 +85,9 @@ CREATE TABLE stock_order
     id                 SERIAL PRIMARY KEY,
     volume             FLOAT       NOT NULL,
     type               VARCHAR(4)  NOT NULL CHECK (type IN ('BUY', 'SELL')),
-    portfolio_entry_id BIGINT      NOT NULL,
+    investment_account_id BIGINT      NOT NULL,
     stock_symbol       VARCHAR(50) NOT NULL,
-    FOREIGN KEY (portfolio_entry_id) REFERENCES investmentaccount (id) ON DELETE CASCADE,
+    FOREIGN KEY (investment_account_id) REFERENCES investmentaccount (id) ON DELETE CASCADE,
     FOREIGN KEY (stock_symbol) REFERENCES stock (symbol) ON DELETE CASCADE
 );
 

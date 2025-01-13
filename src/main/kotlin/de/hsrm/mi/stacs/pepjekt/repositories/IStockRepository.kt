@@ -11,4 +11,6 @@ interface IStockRepository : R2dbcRepository<Stock, String> {
     fun findBySymbol(symbol: String): Mono<Stock>
 
     fun findByDescription(description: String): Mono<Stock>
+
+    fun save(stock: Stock): Mono<Stock>
 }

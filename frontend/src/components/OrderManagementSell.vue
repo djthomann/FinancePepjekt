@@ -5,13 +5,14 @@
             <p><strong>Aktueller Wert:</strong> {{ stock.currentValue }} €</p>
 
             <div>
-                  <form @submit.prevent="purchase">
+                  <form @submit.prevent="sell">
                         <label for="amount">Anzahl</label>
                         <input v-model.number="amount" type="number" id="amount" />
                         <label for="timestamp">Zeitpunkt</label>
                         <input v-model="date" type="date" id="timestamp" />
 
                         <button type="submit" class="purchase-button">Verkaufen</button>
+                        <p>{{serverResponse}}</p>
                   </form>
             </div>
       </div>
@@ -25,6 +26,7 @@ import type {Stock} from "@/types/types.ts";
 const stock = ref<Stock>({})
 
 const amount = ref(0);
+const serverResponse = ref<string>()
 
 const url = "/api/sell/stock"
 
@@ -46,7 +48,7 @@ onBeforeMount(async () => {
   }
 })
 
-async function purchase() {
+async function sell() {
   console.log(amount.value + ' Stück verkaufen zum Zeitpunkt: ' + date.value)
   const curl = url + `?investmentAccountId=1&stockSymbol=${stock.value.symbol}&volume=${amount.value}&executionTime=${date.value}`
   console.log(curl)
@@ -56,10 +58,12 @@ async function purchase() {
     });
 
     if (!response.ok) {
+      serverResponse.value = "Error: Order invalid"
       throw new Error("Network response was not ok");
     }
-    console.log("Success: Sell Order Placed");
+    serverResponse.value = "Success: Sell Order Placed"
   } catch (error) {
+    serverResponse.value = "Server Error: Order Not Placed"
     console.error("Error: Order Not Placed", error);
   }
 }

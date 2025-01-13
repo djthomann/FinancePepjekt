@@ -21,7 +21,7 @@ import java.time.LocalDateTime
  * @param orderService The service for interacting with stock orders (this is injected but currently not used).
  */
 @Component
-class StockHandler(private val stockService: IStockService, private val orderService: IStockService) {
+class StockHandler(private val stockService: IStockService) {
 
     /**
      * Handles a request to retrieve all stocks from the database.
@@ -32,17 +32,21 @@ class StockHandler(private val stockService: IStockService, private val orderSer
      * TODO return StockDT0
      */
     fun getStocks(request: ServerRequest): Mono<ServerResponse> {
-        return Flux.merge(stockService.getAllStocks())
+        return stockService.getAllStocks()
+            .flatMap { stock ->
+                stockService.getLatestQuoteBySymbol(stock.symbol)
+                    .map { quote -> StockDTO.mapToDto(stock, quote) }
+            }
             .collectList()
-            .flatMap { stocks ->
-                if (stocks.isNotEmpty()) {
-                    val stockDtos = stocks.map { StockDTO.mapToDto(it) }
+            .flatMap { stockDtos ->
+                if (stockDtos.isNotEmpty()) {
                     ServerResponse.ok().bodyValue(stockDtos)
                 } else {
                     ServerResponse.notFound().build()
                 }
             }
     }
+
 
     /**
      * Handles a request to retrieve stock data by its symbol.
@@ -60,7 +64,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
 
         return stockService.getStockBySymbol(symbol)
             .flatMap { stock ->
-                val stockDetails = StockDetailsDTO.mapToDto(stock, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
+                val stockDetails =
+                    StockDetailsDTO.mapToDto(stock, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
                 ServerResponse.ok().bodyValue(stockDetails)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
@@ -83,7 +88,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
 
         return stockService.getStockByDescription(name)
             .flatMap { stock ->
-                val stockDetails = StockDetailsDTO.mapToDto(stock, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
+                val stockDetails =
+                    StockDetailsDTO.mapToDto(stock, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
                 ServerResponse.ok().bodyValue(stockDetails)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
@@ -101,45 +107,20 @@ class StockHandler(private val stockService: IStockService, private val orderSer
      * TODO return StockDTO
      */
     fun getStockBySymbol(request: ServerRequest): Mono<ServerResponse> {
-        val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
+        val symbol = request.queryParam("symbol")
+            .orElseThrow { IllegalArgumentException("symbol is required") }
 
         return stockService.getStockBySymbol(symbol)
             .flatMap { stock ->
-                val stockDetails = StockDetailsDTO.mapToDto(stock, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
-                ServerResponse.ok().bodyValue(stockDetails)
+                stockService.getLatestQuoteBySymbol(symbol)
+                    .map { quote ->
+                        StockDTO.mapToDto(stock, quote)
+                    }
+                    .flatMap { stockDto ->
+                        ServerResponse.ok().bodyValue(stockDto)
+                    }
             }
             .switchIfEmpty(ServerResponse.notFound().build())
-    }
-
-    /**
-     * Handles a request to retrieve stocks by their symbol.
-     *
-     * Extracts the stock symbols from the request's query parameters and retrieves the stocks data for the given symbols.
-     *
-     * @param request The incoming server request containing the stock symbol.
-     * @return A Mono containing the server response with the stocks data or a 404 Not Found if the stocks is not found.
-     * @throws IllegalArgumentException If the stock symbol is not provided in the request.
-     *
-     * TODO return StockDTO
-     */
-    fun getStocksBySymbols(request: ServerRequest): Mono<ServerResponse> {
-        val symbols = request.queryParam("symbols").orElseThrow { IllegalArgumentException("symbols are required") }
-        val symbolParts = symbols.split(";")
-
-        val stockMonos = symbolParts.map { symbol ->
-            stockService.getStockBySymbol(symbol)
-        }
-
-        return Flux.merge(stockMonos)
-            .collectList()
-            .flatMap { stocks ->
-                if (stocks.isNotEmpty()) {
-                    val stockDtos = stocks.map { StockDTO.mapToDto(it) }
-                    ServerResponse.ok().bodyValue(stockDtos)
-                } else {
-                    ServerResponse.notFound().build()
-                }
-            }
     }
 
     /**
@@ -158,7 +139,8 @@ class StockHandler(private val stockService: IStockService, private val orderSer
 
         return stockService.getStockByDescription(name)
             .flatMap { stock ->
-                val stockDetails = StockDetailsDTO.mapToDto(stock, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
+                val stockDetails =
+                    StockDetailsDTO.mapToDto(stock, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
                 ServerResponse.ok().bodyValue(stockDetails)
             }
             .switchIfEmpty(ServerResponse.notFound().build())

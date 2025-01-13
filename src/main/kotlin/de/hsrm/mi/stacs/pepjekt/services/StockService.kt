@@ -4,6 +4,8 @@ import de.hsrm.mi.stacs.pepjekt.entities.Quote
 import de.hsrm.mi.stacs.pepjekt.entities.Stock
 import de.hsrm.mi.stacs.pepjekt.repositories.IQuoteRepository
 import de.hsrm.mi.stacs.pepjekt.repositories.IStockRepository
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -25,6 +27,7 @@ class StockService(
     val databaseClient: DatabaseClient
 ) : IStockService {
 
+    val logger: Logger = LoggerFactory.getLogger(StockService::class.java)
     /**
      * Retrieves a stock by its symbol.
      *
@@ -48,7 +51,6 @@ class StockService(
     override fun getStocks(): Flux<Stock> {
         return stockRepository.findAll()
     }
-
 
     /**
      * Calculates the average price of a stock within a given time range.

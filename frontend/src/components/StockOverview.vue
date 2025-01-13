@@ -15,20 +15,22 @@
         <tr>
           <th>Name</th>
           <th>Symbol</th>
-          <th>FIGI</th>
+          <th>Währung</th>
           <th>Aktueller Wert</th>
           <th>Gewinn/Verlust</th>
         </tr>
         </thead>
         <tbody>
-        <tr v-for="position in stocks" :key="position.symbol" @click="navigateToStockDetail(position.symbol)">
-          <td>{{ position.description }}</td>
-          <td>{{ position.symbol }}</td>
-          <td>{{ position.figi }}</td>
-          <td>{{ position.currentValue }} €</td>    <!--reactive value-->
-          <td :class="{ 'positive': position.change >= 0, 'negative': position.change < 0 }">
-            {{ position.change }} € ({{ position.changePercentage }}%)
-          </td>    <!--reactive value-->
+
+        <tr class="table-row" v-for="stock in stocks" :key="stock.figi" :class="{ 'just-changed':
+                       stock.justChanged}" @click="navigateToStockDetail(stock.symbol)">
+          <td>{{ stock.name }}</td>
+          <td>{{ stock.symbol }}</td>
+          <td>{{ stock.currency }}</td>
+          <td>{{ stock.currentValue }}</td>
+          <td :class="{ 'positive': stock.change >= 0, 'negative': stock.change < 0 }">
+            {{ stock.change }} € ({{ stock.changePercentage }}%)
+          </td>
         </tr>
         </tbody>
       </table>
@@ -37,14 +39,43 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref} from 'vue';
+import {onMounted, onUnmounted, ref} from 'vue';
 import {useRouter} from "vue-router";
 import type {Stock} from "@/types/types.ts";
 
 const router = useRouter()
+let pollingIntervalID: number
 const searchField = ref('')
 
 const stocks = ref<Stock[]>([])
+
+
+async function poll() {
+
+  console.log("polling")
+
+  for (const stock of stocks.value) {
+    try {
+      const response = await fetch(`/api/stock/by/symbol?symbol=${stock.symbol}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const stockData = await response.json() as Stock;
+
+      if (stock.currentValue !== stockData.currentValue) {
+        stock.currentValue = stockData.currentValue
+        stock.justChanged = true
+
+        setTimeout(() => {
+          stock.justChanged = false;
+        }, 200);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+}
 
 onMounted(async () => {
   try {
@@ -56,6 +87,13 @@ onMounted(async () => {
   } catch (e) {
     console.error(e)
   }
+
+  pollingIntervalID = setInterval(poll, 3000)
+})
+
+onUnmounted(() => {
+  console.log("Clearing interval for polling")
+  clearInterval(pollingIntervalID)
 })
 
 function resetSearch() {
@@ -74,4 +112,12 @@ const navigateToStockDetail = (symbol: string) => {
 
 <style lang="scss">
 @use "./style.scss";
+
+.just-changed {
+  background-color: var(--main-color-light);
+}
+
+.table-row {
+  transition: background-color 200ms;
+}
 </style>

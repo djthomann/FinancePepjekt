@@ -2,11 +2,9 @@
   <div class="invest-depot">
     <div class="header">
       <div class="title">
-        <h1>Ordermanagement-Übersicht</h1>
+        <h1>Orderübersicht</h1>
       </div>
     </div>
-
-    <h2>Orders</h2>
     <table>
       <thead>
       <tr>
@@ -61,11 +59,6 @@ const navigateToStockDetail = (symbol: string) => {
 }
 
 </script>
-
-<style lang="scss">
-@use "./style.scss";
-</style>
-
 
 <style lang="scss">
 @use "./style.scss";

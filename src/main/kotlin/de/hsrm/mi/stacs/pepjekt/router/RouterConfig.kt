@@ -76,14 +76,12 @@ class RouterConfig {
             GET("/stock-details/symbol", stockHandler::getStockDetailsBySymbol)
             GET("/stock-details/name", stockHandler::getStockDetailsByName)
             GET("/stock/by/symbol", stockHandler::getStockBySymbol)
-            GET("/stocks/by/symbols", stockHandler::getStocksBySymbols)
             GET("/stock/by/name", stockHandler::getStockByName)
-            GET("/current/stock/value", stockHandler::getCurrentStockValue) // by stock symbol
+            GET("/stock/current-value", stockHandler::getCurrentStockValue) // by stock symbol
             GET("/stock/day-low", stockHandler::getStockDayLow)
             GET("/stock/day-high", stockHandler::getStockDayHigh)
             GET("/stock/history/symbol", stockHandler::getStockHistoryBySymbol)
             GET("/stock/average-price", stockHandler::getStockAveragePrice)
-            GET("/stocks", stockHandler::getStocks)
         }
     }
 

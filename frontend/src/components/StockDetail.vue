@@ -3,7 +3,7 @@
     <h2>{{ stock.symbol }} - Detailansicht</h2>
     <p><strong>Symbol:</strong> {{ stock.symbol }}</p>
     <p><strong>FIGI:</strong> {{ stock.figi }}</p>
-    <p><strong>Aktueller Wert:</strong> {{ stock.currentValue }} €</p>
+    <p :class="{ 'just-changed': stock.justChanged}"><strong>Aktueller Wert:</strong> {{ stock.cprice }} {{stock.currency}}</p>
     <p><strong>Beschreibung:</strong> {{ stock.description }}</p>
 
     <div class="purchase-buttons">
@@ -56,11 +56,36 @@
 </template>
 
 <script lang="ts" setup>
-import {onBeforeMount, ref} from 'vue';
+import {onBeforeMount, onUnmounted, ref} from 'vue';
 import {useRoute, useRouter} from "vue-router";
 import type { Stock} from '@/types/types.ts'
 
 const stock = ref<Stock>({})
+let pollingIntervalID: number
+
+async function poll() {
+
+  console.log("polling")
+
+  try {
+    const response = await fetch(`/api/stock/by/symbol?symbol=${stock.value.symbol}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const stockData = await response.json() as Stock;
+    if(stock.value.cprice !== stockData.cprice) {
+      stock.value.cprice = stockData.cprice
+      stock.value.justChanged = true
+
+      setTimeout(() => {
+        stock.value.justChanged = false;
+      }, 200);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
+}
 
 onBeforeMount(async () => {
 
@@ -79,6 +104,13 @@ onBeforeMount(async () => {
   } catch (e) {
     console.error(e)
   }
+
+  pollingIntervalID = setInterval(poll, 3000)
+})
+
+onUnmounted( () => {
+  console.log("Clearing interval for polling")
+  clearInterval(pollingIntervalID)
 })
 
 const router = useRouter()
@@ -97,5 +129,8 @@ function purchase(symbol: string) {
 
 <style lang="scss">
 @use "./style.scss";
+.just-changed {
+  background-color: var(--main-color-light);
+}
 </style>
 

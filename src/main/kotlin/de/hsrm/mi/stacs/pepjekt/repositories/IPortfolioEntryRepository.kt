@@ -1,6 +1,7 @@
 package de.hsrm.mi.stacs.pepjekt.repositories
 
 import de.hsrm.mi.stacs.pepjekt.entities.PortfolioEntry
+import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.r2dbc.repository.R2dbcRepository
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
@@ -13,5 +14,4 @@ interface IPortfolioEntryRepository: R2dbcRepository<PortfolioEntry, Long> {
 
     fun findByInvestmentAccountIdAndStockSymbol(investmentAccountId: Long, stockSymbol: String): Mono<PortfolioEntry>
 
-    fun findAllByInvestmentAccountId(investmentAccountId: Long): Flux<PortfolioEntry>
 }

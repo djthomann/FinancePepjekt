@@ -21,6 +21,8 @@ export interface Stock {
   currentValue: number,
   change: number,
   changePercentage: number
+
+  justChanged: boolean //Just for frontend
 }
 
 export interface StockDetails {
@@ -33,6 +35,30 @@ export interface StockDetails {
   changePercentage: number,
   amount: number
 }
+
+/*
+export interface Stock {
+  symbol: string;
+  name: string,
+  description: string;
+  figi: string;
+  currency: Currency;
+  cprice: number;
+  justChanged: boolean
+}
+
+export interface PortfolioEntry {
+  investmentAccountId: number,
+  stockSymbol: string,
+  quantity: number
+}
+
+export interface UserInfo {
+  id: number,
+  name: string,
+  mail: string
+}
+ */
 
 export enum Currency {
   USD = 'USD',
@@ -54,8 +80,7 @@ export interface PortfolioEntry {
   stockSymbol: string,
   quantity: number,
   stock: Stock,
-  currentValue: number,
-  amount: number,
+  totalValue: number,
   change: number,
   changePercentage: number
 }

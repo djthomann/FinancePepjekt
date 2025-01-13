@@ -16,6 +16,7 @@
                         <input v-model="date" type="date" id="timestamp" />
 
                         <button type="submit" class="purchase-button">Kaufen</button>
+                        <p>{{serverResponse}}</p>
                   </form>
             </div>
 
@@ -30,7 +31,7 @@ import type {Stock} from "@/types/types.ts";
 const stock = ref<Stock>({})
 
 const amount = ref(10);
-
+const serverResponse = ref<string>()
 
 const url = "/api/buy/stock"
 
@@ -46,7 +47,6 @@ onBeforeMount(async () => {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
     stock.value = await response.json() as Stock
-    console.log(stock.value)
   } catch (e) {
     console.error(e)
   }
@@ -62,10 +62,12 @@ async function purchase() {
     });
 
     if (!response.ok) {
+      serverResponse.value = "Error: Order invalid"
       throw new Error("Network response was not ok");
     }
-    console.log("Success: Buy Order Placed");
+    serverResponse.value = "Success: Buy Order Placed"
   } catch (error) {
+    serverResponse.value = "Server Error: Order Not Placed"
     console.error("Error: Order Not Placed", error);
   }
 }
