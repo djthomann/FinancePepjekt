@@ -26,11 +26,11 @@
 
       <tr class="table-row" :class="{ 'just-changed': portfolioEntry.stock.justChanged}"
           v-for="portfolioEntry in investmentAccount.portfolio" :key="portfolioEntry.stock.symbol"
-          @click="navigateToStockDetail(portfolioEntry.stock.symbol)">
+          @click="navigateToStockDetail(portfolioEntry.stock.symbol, investmentAccountId)">
         <td>{{ portfolioEntry.stock.name }}</td>
         <td>{{ portfolioEntry.stock.symbol }}</td>
         <td>{{ portfolioEntry.quantity }}</td>
-        <td>{{ portfolioEntry.stock.currentValue }}</td>
+        <td>{{ portfolioEntry.stock.latestQuote.currentPrice }}</td>
         <td :class="{ 'positive': portfolioEntry.stock.change >= 0, 'negative': portfolioEntry.stock.change < 0 }">
           {{ portfolioEntry.totalValue }} € ({{ portfolioEntry.changePercentage }}%)
         </td>
@@ -49,7 +49,7 @@ const router = useRouter()
 const route = useRoute()
 const investmentAccount = ref<InvestmentAccount>()
 let pollingIntervalID: number
-const investmentAccountId = route.params.investmentAccountId
+const investmentAccountId = route.params.investmentAccountId as string
 
 onBeforeMount(async () => {
   try {
@@ -80,8 +80,8 @@ async function poll() {
         (entry) => portfolioEntry.id === entry.id
       );
 
-      if (matchingEntry && portfolioEntry.stock.currentValue !== matchingEntry.stock.currentValue) {
-        portfolioEntry.stock.currentValue = matchingEntry.stock.currentValue;
+      if (matchingEntry && portfolioEntry.stock.latestQuote.currentPrice !== matchingEntry.stock.latestQuote.currentPrice) {
+        portfolioEntry.stock.latestQuote.currentPrice = matchingEntry.stock.latestQuote.currentPrice;
         portfolioEntry.stock.justChanged = true;
 
         setTimeout(() => {
@@ -100,8 +100,8 @@ onUnmounted(() => {
 })
 
 
-const navigateToStockDetail = (symbol: string) => {
-  router.push({name: 'wertpapier-detail', params: {symbol}});
+const navigateToStockDetail = (symbol: string, investmentAccountId: string) => {
+  router.push({name: 'wertpapier-detail', params: {symbol, investmentAccountId}});
 }
 
 
