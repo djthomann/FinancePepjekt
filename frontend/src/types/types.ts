@@ -12,53 +12,24 @@ export enum OrderType {
   SELL = 'SELL'
 }
 
+
 export interface Stock {
   symbol: string,
-  name:string,
+  name: string,
   description: string,
   figi: string,
   currency: Currency,
-  currentValue: number,
   change: number,
-  changePercentage: number
+  changePercentage: number,
+  latestQuote: Quote,
 
   justChanged: boolean //Just for frontend
 }
 
 export interface StockDetails {
-  symbol: string,
-  description: string,
-  figi: string,
-  currency: Currency,
-  currentValue: number,
-  change: number,
-  changePercentage: number,
-  amount: number
+  stock: Stock,
+  portfolioEntry: PortfolioEntry,
 }
-
-/*
-export interface Stock {
-  symbol: string;
-  name: string,
-  description: string;
-  figi: string;
-  currency: Currency;
-  cprice: number;
-  justChanged: boolean
-}
-
-export interface PortfolioEntry {
-  investmentAccountId: number,
-  stockSymbol: string,
-  quantity: number
-}
-
-export interface UserInfo {
-  id: number,
-  name: string,
-  mail: string
-}
- */
 
 export enum Currency {
   USD = 'USD',
@@ -69,9 +40,21 @@ export interface InvestmentAccount {
   id: number,
   bankAccountId: number,
   portfolio: PortfolioEntry[],
-  totalValue: number,
+  totalue: number,
   bankAccount: BankAccount,
   owner: Owner
+}
+
+export interface Quote {
+  currentPrice: number,
+  change: number,
+  percentChange: number,
+  highPriceOfTheDay: number,
+  lowPriceOfTheDay: number,
+  openPriceOfTheDay: number,
+  previousClosePrice: number,
+  timeStamp: string,
+  stockSymbol: string
 }
 
 export interface PortfolioEntry {
