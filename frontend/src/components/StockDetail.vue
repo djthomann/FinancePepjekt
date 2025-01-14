@@ -66,7 +66,7 @@
 </template>
 
 <script lang="ts" setup>
-import {onBeforeMount, onUnmounted, ref} from 'vue';
+import {computed, onBeforeMount, onUnmounted, ref} from 'vue';
 import {useRoute, useRouter} from "vue-router";
 import type {StockDetails} from '@/types/types.ts'
 import {CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Title, Tooltip} from 'chart.js'
@@ -88,8 +88,8 @@ interface DataPoint {
 
 const dataPoints = ref<DataPoint[]>([]);
 
-const data = {
-  labels: ['-18s', '-15s', '-12s', '9s', '-6s', '-3s', 'jetzt'],
+const data = computed(() => ({
+  labels: ['-18s', '-15s', '-12s', '-9s', '-6s', '-3s', 'jetzt'],
   datasets: [
     {
       label: '',
@@ -97,7 +97,8 @@ const data = {
       data: dataPoints.value.map(point => point.content)
     }
   ]
-}
+}));
+
 
 const options = {
   maintainAspectRatio: false,
@@ -144,10 +145,10 @@ async function poll() {
     if (dataPoints.value.length > 6) {
       dataPoints.value.shift();
     }
-    dataPoints.value.push({content: stockData.stock.latestQuote.currentPrice})
-    console.log("Data Points" + dataPoints);
+    if (stockData.stock.latestQuote && stockData.stock.latestQuote.currentPrice != null) {
+      dataPoints.value.push({content: stockData.stock.latestQuote.currentPrice});
+    }
     if (lineChart.value) {
-      console.log("Instanz aktualisieren")
       lineChart.value.chart.update();
     } else {
       console.log("Instanz ist null")
@@ -169,11 +170,15 @@ onBeforeMount(async () => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     stockDetails.value = await response.json() as StockDetails
+    console.log(stockDetails.value)
 
   } catch (e) {
     console.error(e);
   }
 
+  if (pollingIntervalID) {
+    clearInterval(pollingIntervalID);
+  }
   pollingIntervalID = setInterval(poll, 3000)
 })
 
