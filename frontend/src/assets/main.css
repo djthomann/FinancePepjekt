@@ -151,3 +151,8 @@ tr {
 .purchase-button:hover {
   font-weight: bold;
 }
+
+.stock-order {
+  max-width: 800px;
+  margin: 0 auto;
+}

@@ -7,7 +7,8 @@
             <RouterLink :to="`/depot-uebersicht/${investmentAccountId}`" class="buttons">Depotübersicht</RouterLink>
           </li>
           <li>
-            <RouterLink to="/wertpapier-uebersicht" class="buttons">Wertpapierübersicht</RouterLink>
+            <RouterLink :to="`/wertpapier-uebersicht/${investmentAccountId}`" class="buttons">Wertpapier
+              übersicht</RouterLink>
           </li>
           <li>
             <RouterLink :to="`/order-management-overview/${investmentAccountId}`" class="buttons">Orderübersicht</RouterLink>    <!--TODO replace the hardcoded investmentAccountId-->

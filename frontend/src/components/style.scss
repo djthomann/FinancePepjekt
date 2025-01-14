@@ -108,6 +108,8 @@
 }
 
 .stock-detail {
+  max-width: 800px;
+  margin: 0 auto;
   h2 {
     font-size: 24px;
     color: #333;
@@ -177,7 +179,7 @@
   }
 }
 
-.stock-purchase {
+.stock-order {
   h2 {
     font-size: 24px;
     color: #333;

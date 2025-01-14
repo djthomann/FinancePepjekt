@@ -1,7 +1,9 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
+import de.hsrm.mi.stacs.pepjekt.entities.InvestmentAccount
 import de.hsrm.mi.stacs.pepjekt.entities.Quote
 import de.hsrm.mi.stacs.pepjekt.entities.Stock
+import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDetailsDTO
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
@@ -16,6 +18,8 @@ import java.time.LocalDateTime
 interface IStockService {
 
     fun getStockBySymbol(symbol: String): Mono<Stock>
+
+    fun getStockDetails(symbol: String, investmentAccountId: Long): Mono<StockDetailsDTO>
 
     fun getStockByDescription(description: String): Mono<Stock>
 

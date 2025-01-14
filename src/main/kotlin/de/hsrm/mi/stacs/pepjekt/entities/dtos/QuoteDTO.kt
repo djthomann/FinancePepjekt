@@ -8,8 +8,6 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 
 class QuoteDTO(
-    @Id
-    var id: Long? = null,
     var currentPrice: BigDecimal,
     var change: Float,
     var percentChange: Float,
@@ -17,7 +15,7 @@ class QuoteDTO(
     var lowPriceOfTheDay: BigDecimal,
     var openPriceOfTheDay: BigDecimal,
     var previousClosePrice: BigDecimal,
-    var timeStamp: LocalDateTime,
+    var timeStamp: String,
     var stockSymbol: String
 ) {
     companion object {
@@ -25,7 +23,6 @@ class QuoteDTO(
             quote: Quote,
         ): QuoteDTO {
             return QuoteDTO(
-                id = quote.id,
                 currentPrice = quote.currentPrice,
                 change = quote.change,
                 percentChange = quote.percentChange,
@@ -33,7 +30,7 @@ class QuoteDTO(
                 lowPriceOfTheDay = quote.lowPriceOfTheDay,
                 openPriceOfTheDay = quote.openPriceOfTheDay,
                 previousClosePrice = quote.previousClosePrice,
-                timeStamp = quote.timeStamp,
+                timeStamp = quote.timeStamp.toString(),
                 stockSymbol = quote.stockSymbol
             )
         }

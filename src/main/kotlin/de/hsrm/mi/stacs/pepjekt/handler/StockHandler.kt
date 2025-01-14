@@ -57,40 +57,15 @@ class StockHandler(private val stockService: IStockService) {
      * @return A Mono containing the server response with the stock data or a 404 Not Found if the stock is not found.
      * @throws IllegalArgumentException If the stock symbol is not provided in the request.
      *
-     * TODO return StockDetailsDTO -> has to be done, already in use
+     * TODO return StockDetailsDTO
      */
     fun getStockDetailsBySymbol(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
+        val investmentAccountId = request.queryParam("investmentAccountId").orElseThrow { IllegalArgumentException("investmentAccountId") }
 
-        return stockService.getStockBySymbol(symbol)
-            .flatMap { stock ->
-                val stockDetails =
-                    StockDetailsDTO.mapToDto(stock, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
-                ServerResponse.ok().bodyValue(stockDetails)
-            }
-            .switchIfEmpty(ServerResponse.notFound().build())
-    }
-
-
-    /**
-     * Handles a request to retrieve stock data by its description/name.
-     *
-     * Extracts the stock symbol from the request's query parameters and retrieves the stock data for the given description/name.
-     *
-     * @param request The incoming server request containing the stock description/name.
-     * @return A Mono containing the server response with the stock data or a 404 Not Found if the stock is not found.
-     * @throws IllegalArgumentException If the stock description/name is not provided in the request.
-     *
-     * TODO return StockDetailsDTO
-     */
-    fun getStockDetailsByName(request: ServerRequest): Mono<ServerResponse> {
-        val name = request.queryParam("name").orElseThrow { IllegalArgumentException("name is required") }
-
-        return stockService.getStockByDescription(name)
-            .flatMap { stock ->
-                val stockDetails =
-                    StockDetailsDTO.mapToDto(stock, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
-                ServerResponse.ok().bodyValue(stockDetails)
+        return stockService.getStockDetails(symbol, investmentAccountId.toLong())
+            .flatMap {
+                ServerResponse.ok().bodyValue(it)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
     }
@@ -123,6 +98,7 @@ class StockHandler(private val stockService: IStockService) {
             .switchIfEmpty(ServerResponse.notFound().build())
     }
 
+
     /**
      * Handles a request to retrieve stock data by its description/name.
      *
@@ -134,6 +110,7 @@ class StockHandler(private val stockService: IStockService) {
      *
      * TODO return StockDTO
      */
+    /*
     fun getStockByName(request: ServerRequest): Mono<ServerResponse> {
         val name = request.queryParam("name").orElseThrow { IllegalArgumentException("name is required") }
 
@@ -145,6 +122,8 @@ class StockHandler(private val stockService: IStockService) {
             }
             .switchIfEmpty(ServerResponse.notFound().build())
     }
+
+     */
 
     /**
      * Handles a request to retrieve the latest stock value by its symbol.

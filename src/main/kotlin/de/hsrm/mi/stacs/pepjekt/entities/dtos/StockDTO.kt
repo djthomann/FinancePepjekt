@@ -12,11 +12,7 @@ class StockDTO(
     val name: String,
     val figi: String,
     val currency: Currency,
-    val currentValue: BigDecimal,
-    /*
-    val change: number,
-    val changePercentage: number
-     */
+    val latestQuote: QuoteDTO,
 ) {
     companion object {
         fun mapToDto(
@@ -29,7 +25,7 @@ class StockDTO(
                 figi = stock.figi,
                 currency = stock.currency,
                 name = stock.name,
-                currentValue = quote.currentPrice
+                latestQuote = QuoteDTO.mapToDto(quote)
             )
         }
     }

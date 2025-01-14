@@ -23,11 +23,11 @@
         <tbody>
 
         <tr class="table-row" v-for="stock in stocks" :key="stock.figi" :class="{ 'just-changed':
-                       stock.justChanged}" @click="navigateToStockDetail(stock.symbol)">
+                       stock.justChanged}" @click="navigateToStockDetail(stock.symbol, investmentAccountId)">
           <td>{{ stock.name }}</td>
           <td>{{ stock.symbol }}</td>
           <td>{{ stock.currency }}</td>
-          <td>{{ stock.currentValue }}</td>
+          <td>{{ stock.latestQuote.currentPrice }}</td>
           <td :class="{ 'positive': stock.change >= 0, 'negative': stock.change < 0 }">
             {{ stock.change }} € ({{ stock.changePercentage }}%)
           </td>
@@ -40,12 +40,14 @@
 
 <script lang="ts" setup>
 import {onMounted, onUnmounted, ref} from 'vue';
-import {useRouter} from "vue-router";
-import type {Stock} from "@/types/types.ts";
+import {useRoute, useRouter} from "vue-router";
+import type {InvestmentAccount, Stock} from "@/types/types.ts";
 
 const router = useRouter()
+const route = useRoute()
 let pollingIntervalID: number
 const searchField = ref('')
+const investmentAccountId = route.params.investmentAccountId as string
 
 const stocks = ref<Stock[]>([])
 
@@ -62,8 +64,8 @@ async function poll() {
       }
       const stockData = await response.json() as Stock;
 
-      if (stock.currentValue !== stockData.currentValue) {
-        stock.currentValue = stockData.currentValue
+      if (stock.latestQuote.currentPrice !== stockData.latestQuote.currentPrice) {
+        stock.latestQuote.currentPrice = stockData.latestQuote.currentPrice
         stock.justChanged = true
 
         setTimeout(() => {
@@ -104,8 +106,8 @@ function searchContent() {
   console.log('searching for:', searchField.value)
 }
 
-const navigateToStockDetail = (symbol: string) => {
-  router.push({name: 'wertpapier-detail', params: {symbol}});
+const navigateToStockDetail = (symbol: string, investmentAccountId: string) => {
+  router.push({name: 'wertpapier-detail', params: {symbol, investmentAccountId}});
 }
 
 </script>

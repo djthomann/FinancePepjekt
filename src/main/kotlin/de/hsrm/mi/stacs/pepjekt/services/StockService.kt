@@ -1,7 +1,11 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
+import de.hsrm.mi.stacs.pepjekt.entities.PortfolioEntry
 import de.hsrm.mi.stacs.pepjekt.entities.Quote
 import de.hsrm.mi.stacs.pepjekt.entities.Stock
+import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDetailsDTO
+import de.hsrm.mi.stacs.pepjekt.repositories.IInvestmentAccountRepository
+import de.hsrm.mi.stacs.pepjekt.repositories.IPortfolioEntryRepository
 import de.hsrm.mi.stacs.pepjekt.repositories.IQuoteRepository
 import de.hsrm.mi.stacs.pepjekt.repositories.IStockRepository
 import org.slf4j.Logger
@@ -24,10 +28,13 @@ import java.time.LocalDateTime
 class StockService(
     val stockRepository: IStockRepository,
     val quoteRepository: IQuoteRepository,
-    val databaseClient: DatabaseClient
+    val databaseClient: DatabaseClient,
+    val investmentAccountRepository: IInvestmentAccountRepository,
+    val portfolioEntryRepository: IPortfolioEntryRepository
 ) : IStockService {
 
-    val logger: Logger = LoggerFactory.getLogger(StockService::class.java)
+    val log: Logger = LoggerFactory.getLogger(StockService::class.java)
+
     /**
      * Retrieves a stock by its symbol.
      *
@@ -37,6 +44,31 @@ class StockService(
     override fun getStockBySymbol(symbol: String): Mono<Stock> {
         return stockRepository.findBySymbol(symbol)
     }
+
+
+    //TODO Add kdoc
+    override fun getStockDetails(symbol: String, investmentAccountId: Long): Mono<StockDetailsDTO> {
+        log.info("Getting stockdetails by symbol $symbol and investmentAccountId $investmentAccountId")
+
+        val stockMono = getStockBySymbol(symbol)
+        val quoteMono = getLatestQuoteBySymbol(symbol)
+
+        return investmentAccountRepository.findById(investmentAccountId)
+            .switchIfEmpty(Mono.error(RuntimeException("InvestmentAccount not found")))
+            .flatMap { account ->
+                portfolioEntryRepository.findByInvestmentAccountIdAndStockSymbol(account.id!!, symbol)
+                    .map { portfolioEntry -> // Wenn ein Eintrag gefunden wurde
+                        Mono.zip(stockMono, quoteMono).map { tuple ->
+                            StockDetailsDTO.mapToDto(tuple.t1, tuple.t2, portfolioEntry)
+                        }
+                    }
+                    .defaultIfEmpty(Mono.zip(stockMono, quoteMono).map { tuple ->
+                        StockDetailsDTO.mapToDto(tuple.t1, tuple.t2, null)
+                    })
+                    .flatMap { it }
+            }
+    }
+
 
     /**
      * Retrieves a stock by its description.
@@ -118,7 +150,8 @@ class StockService(
     }
 
     override fun getDayLow(stockSymbol: String, timeStamp: LocalDateTime): Mono<Quote> {
-        return databaseClient.sql("""
+        return databaseClient.sql(
+            """
         SELECT * FROM quote o
         WHERE o.stock_symbol = :stockSymbol
         AND DATE(o.time_stamp) = DATE(:timeStamp)
@@ -129,7 +162,8 @@ class StockService(
             AND DATE(time_stamp) = DATE(:timeStamp)
         )
         LIMIT 1
-    """)
+    """
+        )
             .bind("stockSymbol", stockSymbol)
             .bind("timeStamp", timeStamp)
             .map { row, metadata ->
@@ -150,7 +184,8 @@ class StockService(
     }
 
     override fun getDayHigh(stockSymbol: String, timeStamp: LocalDateTime): Mono<Quote> {
-        return databaseClient.sql("""
+        return databaseClient.sql(
+            """
         SELECT * FROM quote o
         WHERE o.stock_symbol = :stockSymbol
         AND DATE(o.time_stamp) = DATE(:timeStamp)
@@ -161,7 +196,8 @@ class StockService(
             AND DATE(time_stamp) = DATE(:timeStamp)
         )
         LIMIT 1
-    """)
+    """
+        )
             .bind("stockSymbol", stockSymbol)
             .bind("timeStamp", timeStamp)
             .map { row, metadata ->
