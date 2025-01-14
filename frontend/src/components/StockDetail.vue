@@ -2,20 +2,20 @@
   <div class="stock-detail">
     <div class="stock-detail-header">
       <div class="stock-detail-header-info">
-        <h2>{{ stock.name }} - Detailansicht</h2>
-        <p><strong>Symbol:</strong> {{ stock.symbol }}</p>
-        <p><strong>FIGI:</strong> {{ stock.figi }}</p>
-        <p><strong>Aktueller Wert:</strong> {{ stock.cprice }} {{stock.currency}}</p>
-        <p :class="{ 'just-changed': stock.justChanged}"><strong>Aktueller Wert:</strong> {{ stock.cprice }} {{stock.currency}}</p>
-        <p><strong>Beschreibung:</strong> {{ stock.description }}</p>
+        <h2>{{ stockDetails.stock.name }} - Detailansicht</h2>
+        <p><strong>Symbol:</strong> {{ stockDetails.stock.symbol }}</p>
+        <p><strong>FIGI:</strong> {{ stockDetails.stock.figi }}</p>
+        <p :class="{ 'just-changed': stockDetails.stock.justChanged}"><strong>Aktueller Wert:</strong>
+          {{ stockDetails.stock.latestQuote.currentPrice }} {{ stockDetails.stock.currency }}</p>
+        <p><strong>Beschreibung:</strong> {{ stockDetails.stock.description }}</p>
 
         <div class="purchase-buttons">
-          <button class="purchase-button" @click="purchase(stock.symbol)">Kaufen</button>
-          <button class="purchase-button" @click="sell(stock.symbol)">Verkaufen</button>
+          <button class="purchase-button" @click="purchase(stockDetails.stock.symbol)">Kaufen</button>
+          <button class="purchase-button" @click="sell(stockDetails.stock.symbol)">Verkaufen</button>
         </div>
       </div>
       <div class="stock-detail-header-chart">
-        <Line ref="lineChart"  :data="data" :options="options" />
+        <Line ref="lineChart" :data="data" :options="options"/>
       </div>
     </div>
 
@@ -24,22 +24,24 @@
       <table>
         <tbody>
         <tr>
-          <td>{{ stock.amount }} Stück</td>
-          <td>{{ stock.currentValue * stock.amount }} €</td>
+          <td>Stück</td>
+          <td>{{ stockDetails.portfolioEntry.quantity }}</td>
         </tr>
         <tr>
           <td>Seit Kauf</td>
-          <td :class="{ 'positive': stock.change >= 0, 'negative': stock.change < 0 }">
-            {{ stock.change }} € ({{ stock.changePercentage }}%)
+          <td :class="{ 'positive': stockDetails.stock.latestQuote.change >= 0, 'negative':
+          stockDetails.stock.latestQuote.change
+           < 0 }">
+            {{ stockDetails.stock.latestQuote.change }} € ({{ stockDetails.stock.latestQuote.percentChange }}%)
           </td>
         </tr>
         <tr>
           <td>Kaufpreis gesamt</td>
-          <td>{{ stock.currentValue * stock.amount }} €</td>
+          <td>{{ stockDetails.portfolioEntry.totalValue }} {{ stockDetails.stock.currency }}</td>
         </tr>
         <tr>
           <td>Kaufpreis Stück</td>
-          <td>{{ stock.currentValue }} €</td>
+          <td>{{ stockDetails.stock.latestQuote.currentPrice }} {{ stockDetails.stock.currency }}</td>
         </tr>
         </tbody>
       </table>
@@ -51,11 +53,11 @@
         <tbody>
         <tr>
           <td>Tagestief</td>
-          <td>{{ stock.currentValue }} €</td>
+          <td>{{ stockDetails.stock.latestQuote.lowPriceOfTheDay }} €</td>
         </tr>
         <tr>
           <td>Tageshoch</td>
-          <td>{{ stock.currentValue }} €</td>
+          <td>{{ stockDetails.stock.latestQuote.highPriceOfTheDay }} €</td>
         </tr>
         </tbody>
       </table>
@@ -66,18 +68,9 @@
 <script lang="ts" setup>
 import {onBeforeMount, onUnmounted, ref} from 'vue';
 import {useRoute, useRouter} from "vue-router";
-import type { Stock} from '@/types/types.ts'
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-} from 'chart.js'
-import { Line } from 'vue-chartjs'
+import type {StockDetails} from '@/types/types.ts'
+import {CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Title, Tooltip} from 'chart.js'
+import {Line} from 'vue-chartjs'
 
 ChartJS.register(
   CategoryScale,
@@ -89,7 +82,11 @@ ChartJS.register(
   Legend
 )
 
-const dataPoints = []
+interface DataPoint {
+  content: number;
+}
+
+const dataPoints = ref<DataPoint[]>([]);
 
 const data = {
   labels: ['-18s', '-15s', '-12s', '9s', '-6s', '-3s', 'jetzt'],
@@ -97,7 +94,7 @@ const data = {
     {
       label: '',
       backgroundColor: '#f87979',
-      data: dataPoints
+      data: dataPoints.value.map(point => point.content)
     }
   ]
 }
@@ -120,31 +117,34 @@ const options = {
 }
 
 const lineChart = ref(null)
-
-const stock = ref<Stock>({})
+const stockDetails = ref<StockDetails>({})
 let pollingIntervalID: number
 
 async function poll() {
-
-  console.log("polling")
+  const route = useRoute()
+  const stockSymbol = route.params.symbol
+  const investmentAccountId = route.params.investmentAccountId
 
   try {
-    const response = await fetch(`/api/stock/by/symbol?symbol=${stock.value.symbol}`);
+    const response = await
+      fetch(`/api/stock-details/symbol?symbol=${stockSymbol}&investmentAccountId=${investmentAccountId}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const stockData = await response.json() as Stock;
-    if(stock.value.cprice !== stockData.cprice) {
-      stock.value.cprice = stockData.cprice
-      stock.value.justChanged = true
+    const stockData = await response.json() as StockDetails;
+
+    if (stockDetails.value.stock.latestQuote.currentPrice !== stockData.stock.latestQuote.currentPrice) {
+      stockDetails.value.stock.latestQuote.currentPrice = stockData.stock.latestQuote.currentPrice
+      stockDetails.value.stock.justChanged = true
+
       setTimeout(() => {
-        stock.value.justChanged = false;
+        stockDetails.value.stock.justChanged = false;
       }, 200);
     }
-    if(dataPoints.length > 6) {
-      dataPoints.shift();
+    if (dataPoints.value.length > 6) {
+      dataPoints.value.shift();
     }
-    dataPoints.push(stockData.cprice)
+    dataPoints.value.push({content: stockData.stock.latestQuote.currentPrice})
     console.log("Data Points" + dataPoints);
     if (lineChart.value) {
       console.log("Instanz aktualisieren")
@@ -155,31 +155,29 @@ async function poll() {
   } catch (e) {
     console.error(e);
   }
-
 }
 
 onBeforeMount(async () => {
-
-  const route = useRoute();
-
-  const symbol = route.params.symbol;
-  console.log("Symbol", symbol)
+  const route = useRoute()
+  const stockSymbol = route.params.symbol
+  const investmentAccountId = route.params.investmentAccountId
 
   try {
-    const response = await fetch(`/api/stock-details/symbol?symbol=${symbol}`)
+    const response = await
+      fetch(`/api/stock-details/symbol?symbol=${stockSymbol}&investmentAccountId=${investmentAccountId}`);
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-    stock.value = await response.json() as Stock
-    console.log(stock.value)
+    stockDetails.value = await response.json() as StockDetails
+
   } catch (e) {
-    console.error(e)
+    console.error(e);
   }
 
   pollingIntervalID = setInterval(poll, 3000)
 })
 
-onUnmounted( () => {
+onUnmounted(() => {
   console.log("Clearing interval for polling")
   clearInterval(pollingIntervalID)
 })
