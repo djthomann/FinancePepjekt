@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS bankaccount;
 DROP TABLE IF EXISTS quote;
 DROP TABLE IF EXISTS stock;
 DROP TABLE IF EXISTS crypto;
+DROP TABLE IF EXISTS metal;
 DROP TABLE IF EXISTS finance_owner;
 
 ---------------------------------------Stock-------------------------------------------------------
@@ -24,6 +25,15 @@ CREATE TABLE stock
 ---------------------------------------Crypto-------------------------------------------------------
 
 CREATE TABLE crypto
+(
+    symbol      VARCHAR(50) PRIMARY KEY,
+    name        VARCHAR(50),
+    cprice      DECIMAL(18, 4)
+);
+
+---------------------------------------Metals-------------------------------------------------------
+
+CREATE TABLE metal
 (
     symbol      VARCHAR(50) PRIMARY KEY,
     name        VARCHAR(50),
