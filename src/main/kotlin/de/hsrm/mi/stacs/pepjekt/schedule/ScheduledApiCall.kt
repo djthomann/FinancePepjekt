@@ -17,13 +17,13 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.math.BigDecimal
 import java.time.Duration
 
 @Component
 class ScheduledApiCall(
     private val coinbaseHandler: CoinbaseHandler,
     private val finnhubHandler: FinnhubHandler,
-    private val handler: FinnhubHandler,
     private val stockService: StockService,
     private val cryptoService: CryptoService,
     private val quoteRepository: IQuoteRepository,
@@ -75,7 +75,7 @@ class ScheduledApiCall(
                 coinbaseHandler.fetchCoinRate(crypto.symbol)
                     .flatMap { quote ->
                         cryptoService.setCurrentPrice(BigDecimal(quote.rate.toString()), crypto.symbol).doOnNext {
-                            logger.info("Crypto Rate updated for BTC to ${quote.rate}")
+                            logger.info("Crypto Rate updated for ${crypto.symbol} to ${quote.rate}")
                         }
                     }
             }

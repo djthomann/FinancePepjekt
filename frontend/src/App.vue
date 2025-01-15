@@ -7,8 +7,7 @@
             <RouterLink :to="`/depot-uebersicht/${investmentAccountId}`" class="buttons">Depotübersicht</RouterLink>
           </li>
           <li>
-            <RouterLink :to="`/wertpapier-uebersicht/${investmentAccountId}`" class="buttons">Wertpapier
-              übersicht</RouterLink>
+            <RouterLink :to="`/wertpapier-uebersicht/${investmentAccountId}`" class="buttons">Wertpapierübersicht</RouterLink>
           </li>
           <li>
             <RouterLink to="/krypto-uebersicht" class="buttons">Kryptoübersicht</RouterLink>
