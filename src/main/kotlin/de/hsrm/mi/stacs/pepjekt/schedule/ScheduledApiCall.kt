@@ -1,12 +1,15 @@
 package de.hsrm.mi.stacs.pepjekt.schedule
 
+import de.hsrm.mi.stacs.pepjekt.entities.Quote
 import de.hsrm.mi.stacs.pepjekt.controller.CoinQuoteDTD
+
 import de.hsrm.mi.stacs.pepjekt.controller.MetalQuoteDTD
 import de.hsrm.mi.stacs.pepjekt.controller.QuoteDTD
 import de.hsrm.mi.stacs.pepjekt.entities.Crypto
 import de.hsrm.mi.stacs.pepjekt.entities.Stock
 import de.hsrm.mi.stacs.pepjekt.handler.CoinbaseHandler
 import de.hsrm.mi.stacs.pepjekt.handler.FinnhubHandler
+import de.hsrm.mi.stacs.pepjekt.repositories.IQuoteRepository
 import de.hsrm.mi.stacs.pepjekt.handler.ForexHandler
 import de.hsrm.mi.stacs.pepjekt.services.CryptoService
 import de.hsrm.mi.stacs.pepjekt.services.StockService
@@ -14,6 +17,7 @@ import jakarta.annotation.PostConstruct
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
@@ -25,14 +29,16 @@ class ScheduledApiCall(
     private val finnhubHandler: FinnhubHandler,
     private val forexHandler: ForexHandler,
     private val stockService: StockService,
-    private val cryptoService: CryptoService
+    private val cryptoService: CryptoService,
+    private val quoteRepository: IQuoteRepository,
+    private val operator: TransactionalOperator,
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(ScheduledApiCall::class.java)
 
     @PostConstruct
     fun scheduleApiCall() {
-        /*Flux.interval(Duration.ofSeconds(5))
+        Flux.interval(Duration.ofSeconds(5))
             .flatMap {
                 callFinnhub()
             }
@@ -52,7 +58,7 @@ class ScheduledApiCall(
                     logger.info(response.toString())
                 },
                 { error -> logger.error("Error occurred: ${error.message}", error) }
-            )*/
+            )
         Flux.interval(Duration.ofSeconds(2))
             .flatMap {
                 callForex()
@@ -65,15 +71,16 @@ class ScheduledApiCall(
             )
     }
 
-    fun callFinnhub(): Flux<Stock> {
+    fun callFinnhub(): Mono<Void> {
         return stockService.getStocks()
             .flatMap { stock ->
-                finnhubHandler.fetchStockQuote(stock.symbol).flatMap { quote ->
-                    stockService.setCurrentPrice(BigDecimal(quote.c.toString()), stock.symbol).doOnNext {
-                        logger.info("Stock Price updated for ${stock.name}")
+                finnhubHandler.fetchStockQuote(stock.symbol)
+                    .flatMap { quote ->
+                        quoteRepository.save(quote)
                     }
-                }
             }
+            .`as`(operator::transactional)
+            .then()
     }
 
     fun callCoinbase(): Flux<Crypto> {
@@ -82,7 +89,7 @@ class ScheduledApiCall(
                 coinbaseHandler.fetchCoinRate(crypto.symbol)
                     .flatMap { quote ->
                         cryptoService.setCurrentPrice(BigDecimal(quote.rate.toString()), crypto.symbol).doOnNext {
-                            logger.info("Crypto Rate updated for BTC to ${quote.rate}")
+                            logger.info("Crypto Rate updated for ${crypto.symbol} to ${quote.rate}")
                         }
                     }
             }

@@ -1,5 +1,7 @@
-package de.hsrm.mi.stacs.pepjekt.entities
+package de.hsrm.mi.stacs.pepjekt.entities.dtos
 
+import de.hsrm.mi.stacs.pepjekt.entities.OrderType
+import de.hsrm.mi.stacs.pepjekt.entities.Stock
 import org.springframework.data.annotation.*
 
 class OrderDTO(

@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono
 @Repository
 interface IInvestmentAccountRepository : R2dbcRepository<InvestmentAccount, Long> {
 
-    fun findByUserId(ownerId: Long): Mono<InvestmentAccount>
+    fun findByOwnerId(ownerId: Long): Mono<InvestmentAccount>
 
-    fun findByBankAccountId(accountId: Long): Mono<InvestmentAccount>
+    fun findByBankAccountId(bankAccountId: Long): Mono<InvestmentAccount>
 }

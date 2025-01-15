@@ -17,12 +17,12 @@ const router = createRouter({
       component: DepotUebersicht,
     },
     {
-      path: '/wertpapier-uebersicht',
+      path: '/wertpapier-uebersicht/:investmentAccountId',
       name: 'wertpapier-uebersicht',
       component: WertpapierUebersicht,
     },
     {
-      path: '/wertpapier-detail/:symbol',
+      path: '/wertpapier-detail/:symbol/:investmentAccountId',
       name: 'wertpapier-detail',
       component: WertpapierDetail,
     },
@@ -55,7 +55,7 @@ const router = createRouter({
       path: '',
       redirect: (to: any) => {
         const { hash, params, query } = to
-        return '/depot-uebersicht'
+        return '/depot-uebersicht/1'
       },
     },
   ],
