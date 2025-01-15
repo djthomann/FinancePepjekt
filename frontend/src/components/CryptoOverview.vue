@@ -3,7 +3,7 @@
     <div>
       <h1>Kryptowährungen</h1>
       <div id="searchField">
-        <input v-model="searchField" placeholder="Symbol/Name" />
+        <input  placeholder="Symbol/Name" />
         <button class="details-button" @click="resetSearch">Reset</button>
         <button class="details-button" @click="searchContent">Search</button>
       </div>
@@ -13,10 +13,10 @@
       <table>
         <thead>
         <tr>
-          <th ><button @click="sortByName">Name</button></th>
+          <th><button :class="{ 'sorting-button-down': nameDescending}" class="sorting-button" @click="sortByName">Name</button></th>
           <th>Symbol</th>
           <th>Währung</th>
-          <th ><button @click="sortByPrice">Aktueller Wert</button></th>
+          <th><button :class="{ 'sorting-button-down': priceDescending}" class="sorting-button" @click="sortByPrice">Aktueller Wert</button></th>
           <th>Gewinn/Verlust</th>
         </tr>
         </thead>
@@ -37,14 +37,17 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref, computed} from "vue";
-import {Coin, type Stock} from "@/types/types.ts";
+import {onMounted, onUnmounted, ref } from "vue";
+import {Coin} from "@/types/types.ts";
 import {useRouter} from "vue-router";
 
 const router = useRouter()
 let pollingIntervalID: number
 
-let coins = ref<Coin[]>([])
+const priceDescending = ref<boolean>(false)
+const nameDescending = ref<boolean>(false)
+
+const coins = ref<Coin[]>([])
 
 async function poll() {
 
@@ -73,11 +76,29 @@ async function poll() {
 }
 
 function sortByPrice() {
-  coins.value = [...coins.value].sort((a, b) => b.cprice - a.cprice)
+  priceDescending.value = !priceDescending.value
+  if(nameDescending.value == true) {
+    nameDescending.value = false
+  }
+  console.log(priceDescending.value)
+  if(priceDescending.value) {
+    coins.value = [...coins.value].sort((a, b) => b.cprice - a.cprice)
+  } else {
+    coins.value = [...coins.value].sort((a, b) => a.cprice - b.cprice)
+  }
+
 }
 
 function sortByName() {
-  coins.value = [...coins.value].sort((a, b) => a.symbol.localeCompare(b.symbol)); // Absteigend
+  nameDescending.value = !nameDescending.value
+  if(priceDescending.value == true) {
+    priceDescending.value = false
+  }
+  if(nameDescending.value) {
+    coins.value = [...coins.value].sort((a, b) => a.symbol.localeCompare(b.symbol)); // Absteigend
+  } else {
+    coins.value = [...coins.value].sort((a, b) => b.symbol.localeCompare(a.symbol)); // Absteigend
+  }
 }
 
 onMounted(async () => {
@@ -87,9 +108,7 @@ onMounted(async () => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
-    let responseJSON = await response.json()
-    console.log(responseJSON)
-    coins.value = responseJSON as Crypto[]
+    coins.value = await response.json() as Crypto[]
   } catch (e) {
     console.error(e)
   }
@@ -117,4 +136,33 @@ const navigateToCryptoDetail = (symbol: string) => {
 .table-row {
   transition: background-color 200ms;
 }
+
+.sorting-button {
+  display: flex;
+  align-items: center;
+  background: 0;
+  border: none;
+  font-weight: bold;
+  font-size: 15px;
+  color: #333;
+}
+
+.sorting-button:hover {
+  cursor: pointer;
+}
+
+.sorting-button::before {
+  margin-right: 10px;
+  width: 10px;
+  height: 10px;
+  content: '';
+  background: url('@/assets/arrow_down.svg') no-repeat center center;
+  background-size: contain;
+  transition: transform 200ms;
+  transform: rotate(180deg);
+}
+.sorting-button-down::before {
+  transform: rotate(0deg);
+}
+
 </style>
