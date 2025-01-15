@@ -12,7 +12,10 @@
           <li>
             <RouterLink to="/krypto-uebersicht" class="buttons">Kryptoübersicht</RouterLink>
           </li>
-          <li>    <!--TODO replace the hardcoded investmentAccountId-->
+          <li>
+            <RouterLink to="/metall-uebersicht" class="buttons">Metallübersicht</RouterLink>
+          </li>
+          <li>
             <RouterLink :to="`/order-management-overview/${investmentAccountId}`" class="buttons">Orderübersicht</RouterLink>    <!--TODO replace the hardcoded investmentAccountId-->
           </li>
 
