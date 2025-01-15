@@ -7,10 +7,12 @@
             <RouterLink :to="`/depot-uebersicht/${investmentAccountId}`" class="buttons">Depotübersicht</RouterLink>
           </li>
           <li>
-            <RouterLink :to="`/wertpapier-uebersicht/${investmentAccountId}`" class="buttons">Wertpapier
-              übersicht</RouterLink>
+            <RouterLink :to="`/wertpapier-uebersicht/${investmentAccountId}`" class="buttons">Wertpapierübersicht</RouterLink>
           </li>
           <li>
+            <RouterLink to="/krypto-uebersicht" class="buttons">Kryptoübersicht</RouterLink>
+          </li>
+          <li>    <!--TODO replace the hardcoded investmentAccountId-->
             <RouterLink :to="`/order-management-overview/${investmentAccountId}`" class="buttons">Orderübersicht</RouterLink>    <!--TODO replace the hardcoded investmentAccountId-->
           </li>
 

@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS exchange;
 DROP TABLE IF EXISTS bankaccount;
 DROP TABLE IF EXISTS quote;
 DROP TABLE IF EXISTS stock;
-DROP TABLE IF EXISTS finance_user;
+DROP TABLE IF EXISTS crypto;
 DROP TABLE IF EXISTS finance_owner;
 
 ---------------------------------------Stock-------------------------------------------------------
@@ -18,6 +18,15 @@ CREATE TABLE stock
     description VARCHAR(255) NOT NULL,
     figi        VARCHAR(50)  NOT NULL,
     currency    VARCHAR(3)   NOT NULL, -- ISO 4217
+    cprice      DECIMAL(18, 4)
+);
+
+---------------------------------------Crypto-------------------------------------------------------
+
+CREATE TABLE crypto
+(
+    symbol      VARCHAR(50) PRIMARY KEY,
+    name        VARCHAR(50),
     cprice      DECIMAL(18, 4)
 );
 

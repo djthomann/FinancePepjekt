@@ -39,9 +39,9 @@ body {
 }
 
 #header-navigation {
-  width: 60%;
+  width: 80%;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   font: 120% system-ui;
   text-align: center;
 }

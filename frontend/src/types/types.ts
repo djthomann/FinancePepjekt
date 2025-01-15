@@ -57,6 +57,15 @@ export interface Quote {
   stockSymbol: string
 }
 
+export interface Coin {
+  symbol: string;
+  name: string,
+  description: string;
+  currency: Currency;
+  cprice: number;
+  justChanged: boolean
+}
+
 export interface PortfolioEntry {
   id: number,
   investmentAccountId: number,

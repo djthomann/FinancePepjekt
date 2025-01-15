@@ -4,6 +4,13 @@ VALUES ('AAPL', 'Apple', 'Apple Inc.', 'BBG000B9XRY4', 'USD', 1.0),
        ('NVDA', 'Nvidia', 'Nvidia Inc.', 'BBG001S5N8V8', 'USD', 1.0),
        ('SAP', 'SAP','SAP SE', 'BBG000BB1CX2', 'EUR', 1.0);
 
+INSERT INTO crypto(symbol, name, cprice)
+VALUES('BTC', 'Bitcoin', 1.0),
+      ('ETH', 'Ethereum', 1.0),
+      ('SOL', 'Solana', 1.0),
+      ('DOGE', 'Dogecoin', 1.0),
+      ('XRP', 'XRP', 1.0);
+
 INSERT INTO finance_owner (id, name, mail)
 VALUES (1, 'Alice Smith', 'alice.smith@example.com'),
        (2, 'Bob Johnson', 'bob.johnson@example.com'),
