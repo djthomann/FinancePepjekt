@@ -12,5 +12,4 @@ data class Stock(
     val description: String,
     val figi: String,
     val currency: Currency,
-    var cprice: BigDecimal
 )
