@@ -1,10 +1,7 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
 import de.hsrm.mi.stacs.pepjekt.entities.Crypto
-import de.hsrm.mi.stacs.pepjekt.entities.CryptoQuote
-import de.hsrm.mi.stacs.pepjekt.entities.Stock
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.CryptoDTO
-import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDTO
 import de.hsrm.mi.stacs.pepjekt.services.ICryptoService
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
@@ -30,7 +27,7 @@ class CryptoHandler(private val cryptoService: ICryptoService) {
             .switchIfEmpty(ServerResponse.notFound().build())
     }
 
-    fun getAllCryptos(request: ServerRequest): Mono<ServerResponse> {
+    fun getCryptos(request: ServerRequest): Mono<ServerResponse> {
 
         return ServerResponse.ok().body(cryptoService.getAllCryptos(), Crypto::class.java)
             .switchIfEmpty(ServerResponse.noContent().build())

@@ -102,7 +102,7 @@ class RouterConfig {
             GET("/crypto") { request ->
                 when {
                     request.queryParam("symbol").isPresent -> cryptoHandler.getCryptoBySymbol(request)
-                    else -> cryptoHandler.getAllCryptos(request)
+                    else -> cryptoHandler.getCryptos(request)
                 }
             }
         }
