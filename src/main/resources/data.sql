@@ -1,20 +1,20 @@
-INSERT INTO stock (symbol, name, description, figi, currency, cprice)
-VALUES ('AAPL', 'Apple', 'Apple Inc.', 'BBG000B9XRY4', 'USD', 1.0),
-       ('TSLA', 'Tesla', 'Tesla Inc.', 'BBG000N9MNX3', 'USD', 1.0),
-       ('NVDA', 'Nvidia', 'Nvidia Inc.', 'BBG001S5N8V8', 'USD', 1.0),
-       ('SAP', 'SAP','SAP SE', 'BBG000BB1CX2', 'EUR', 1.0);
+INSERT INTO stock (symbol, name, description, figi, currency)
+VALUES ('AAPL', 'Apple', 'Apple Inc.', 'BBG000B9XRY4', 'USD'),
+       ('TSLA', 'Tesla', 'Tesla Inc.', 'BBG000N9MNX3', 'USD'),
+       ('NVDA', 'Nvidia', 'Nvidia Inc.', 'BBG001S5N8V8', 'USD'),
+       ('SAP', 'SAP','SAP SE', 'BBG000BB1CX2', 'EUR');
 
-INSERT INTO crypto(symbol, name, cprice)
-VALUES('BTC', 'Bitcoin', 1.0),
-      ('ETH', 'Ethereum', 1.0),
-      ('SOL', 'Solana', 1.0),
-      ('DOGE', 'Dogecoin', 1.0),
-      ('XRP', 'XRP', 1.0);
+INSERT INTO crypto(symbol, name)
+VALUES('BTC', 'Bitcoin'),
+      ('ETH', 'Ethereum'),
+      ('SOL', 'Solana'),
+      ('DOGE', 'Dogecoin'),
+      ('XRP', 'XRP');
 
-INSERT INTO metal(symbol, name, cprice)
-VALUES('XAG', 'Silber', 1.0),
-      ('XAU', 'Gold', 1.0),
-      ('XPT', 'Platin', 1.0);
+INSERT INTO metal(symbol, name)
+VALUES('XAG', 'Silber'),
+      ('XAU', 'Gold'),
+      ('XPT', 'Platin');
 
 INSERT INTO finance_owner (id, name, mail)
 VALUES (1, 'Alice Smith', 'alice.smith@example.com'),
