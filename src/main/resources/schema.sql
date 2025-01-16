@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS stock_order;
 DROP TABLE IF EXISTS investmentaccount;
 DROP TABLE IF EXISTS exchange;
 DROP TABLE IF EXISTS bankaccount;
+DROP TABLE IF EXISTS latest_stock_quote;
 DROP TABLE IF EXISTS stock_quote;
 DROP TABLE IF EXISTS latest_crypto_quote;
 DROP TABLE IF EXISTS crypto_quote;
@@ -69,6 +70,17 @@ CREATE TABLE stock_quote
     stock_symbol          VARCHAR(50)    NOT NULL,
     FOREIGN KEY (stock_symbol) REFERENCES stock (symbol) ON DELETE CASCADE
 );
+
+-------------------------------------------Latest Stock Quote---------------------------------------------------
+
+CREATE TABLE latest_stock_quote
+(
+    stock_symbol         VARCHAR(50)      PRIMARY KEY,
+    quote_id              BIGINT UNIQUE,
+    FOREIGN KEY (stock_symbol) REFERENCES stock (symbol) ON DELETE CASCADE,
+    FOREIGN KEY (quote_id) REFERENCES stock_quote (id) ON DELETE CASCADE
+);
+
 
 -------------------------------------------Crypto Quotes---------------------------------------------------
 

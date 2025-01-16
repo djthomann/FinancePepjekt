@@ -1,12 +1,11 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
+import de.hsrm.mi.stacs.pepjekt.entities.CryptoQuoteLatest
 import de.hsrm.mi.stacs.pepjekt.entities.StockQuote
 import de.hsrm.mi.stacs.pepjekt.entities.Stock
+import de.hsrm.mi.stacs.pepjekt.entities.StockQuoteLatest
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDetailsDTO
-import de.hsrm.mi.stacs.pepjekt.repositories.IInvestmentAccountRepository
-import de.hsrm.mi.stacs.pepjekt.repositories.IPortfolioEntryRepository
-import de.hsrm.mi.stacs.pepjekt.repositories.IStockQuoteRepository
-import de.hsrm.mi.stacs.pepjekt.repositories.IStockRepository
+import de.hsrm.mi.stacs.pepjekt.repositories.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.r2dbc.core.DatabaseClient
@@ -27,6 +26,7 @@ import java.time.LocalDateTime
 class StockService(
     val stockRepository: IStockRepository,
     val stockQuoteRepository: IStockQuoteRepository,
+    val stockQuoteLatestRepository: IStockQuoteLatestRepository,
     val databaseClient: DatabaseClient,
     val investmentAccountRepository: IInvestmentAccountRepository,
     val portfolioEntryRepository: IPortfolioEntryRepository
@@ -140,12 +140,34 @@ class StockService(
         return stockRepository.findAll()
     }
 
+    override fun saveStockQuote(stockQuote: StockQuote): Mono<StockQuote> {
+        return stockQuoteRepository.save(stockQuote)
+    }
+
+    override fun saveLatestQuote(stockQuote: StockQuote): Mono<StockQuoteLatest> {
+        val quote = StockQuoteLatest(stockQuote.stockSymbol, stockQuote.id!!)
+
+        return stockQuoteLatestRepository.findById(stockQuote.stockSymbol)
+            .flatMap { existingQuote ->
+                existingQuote.quote_id = stockQuote.id!!
+                stockQuoteLatestRepository.save(existingQuote)
+            }
+            .switchIfEmpty(
+                Mono.defer {
+                    stockQuoteLatestRepository.save(quote)
+                }
+            )
+    }
+
     /**
      * @param symbol the symbol of the stock
      * @return a [Mono] emitting the [StockQuote] latest instance
      */
     override fun getLatestQuoteBySymbol(symbol: String): Mono<StockQuote> {
-        return stockQuoteRepository.findTopByStockSymbolOrderByTimeStampDesc(symbol)
+        return stockQuoteLatestRepository.findById(symbol)
+            .flatMap { entry ->
+                stockQuoteRepository.findById(entry.quote_id)
+            }
     }
 
     override fun getDayLow(stockSymbol: String, timeStamp: LocalDateTime): Mono<StockQuote> {

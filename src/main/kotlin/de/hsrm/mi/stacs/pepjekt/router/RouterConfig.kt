@@ -24,6 +24,7 @@ class RouterConfig {
      * @return Configured main router with all nested routes.
      */
     @Bean
+
     fun mainRouter(
         bankAccountHandler: BankAccountHandler,
         investmentAccountHandler: InvestmentAccountHandler,

@@ -90,7 +90,7 @@ async function poll() {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const coinData = await response.json() as Stock;
+    const coinData = await response.json() as Coin;
     if(coin.value.cprice !== coinData.cprice) {
       coin.value.cprice = coinData.cprice
       coin.value.justChanged = true
@@ -100,11 +100,11 @@ async function poll() {
     }
     if(dataPoints.length >= numDataPoints) {
       dataPoints.shift();
+      labels.shift();
     }
     dataPoints.push(coinData.cprice)
-    console.log("Data Points" + dataPoints);
+    labels.push('0')
     if (lineChart.value) {
-      console.log("Instanz aktualisieren")
       lineChart.value.chart.update();
     } else {
       console.log("Instanz ist null")

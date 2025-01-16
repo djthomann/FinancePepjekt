@@ -1,7 +1,6 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
-import de.hsrm.mi.stacs.pepjekt.entities.StockQuote
-import de.hsrm.mi.stacs.pepjekt.entities.Stock
+import de.hsrm.mi.stacs.pepjekt.entities.*
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDetailsDTO
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -29,6 +28,10 @@ interface IStockService {
     fun getStockHistoryBySymbol(symbol: String, from: LocalDateTime, to: LocalDateTime): Flux<StockQuote>
 
     fun getAllStocks(): Flux<Stock>
+
+    fun saveStockQuote(stockQuote: StockQuote): Mono<StockQuote>
+
+    fun saveLatestQuote(stockQuote: StockQuote): Mono<StockQuoteLatest>
 
     fun getLatestQuoteBySymbol(symbol: String): Mono<StockQuote>
 

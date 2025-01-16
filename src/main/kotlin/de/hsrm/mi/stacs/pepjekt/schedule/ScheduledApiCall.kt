@@ -27,8 +27,6 @@ class ScheduledApiCall(
     private val stockService: StockService,
     private val cryptoService: CryptoService,
     private val metalService: MetalService,
-    private val quoteRepository: IStockQuoteRepository,
-    private val metalQuoteRepository: IMetalQuoteRepository,
     private val operator: TransactionalOperator,
 ) {
 
@@ -36,7 +34,7 @@ class ScheduledApiCall(
 
     @PostConstruct
     fun scheduleApiCall() {
-        Flux.interval(Duration.ofSeconds(1))
+        Flux.interval(Duration.ofSeconds(2))
             .flatMap {
                 callFinnhub()
             }
@@ -46,7 +44,7 @@ class ScheduledApiCall(
                 },
                 { error -> logger.info("Error occurred: ${error.message}") }
             )
-        Flux.interval(Duration.ofSeconds(1))
+        Flux.interval(Duration.ofSeconds(2))
             .flatMap {
                 callCoinbase()
             }
@@ -74,7 +72,13 @@ class ScheduledApiCall(
             .flatMap { stock ->
                 finnhubHandler.fetchStockQuote(stock.symbol)
                     .flatMap { quote ->
-                        quoteRepository.save(quote)
+                        stockService.saveStockQuote(quote)
+                            .doOnTerminate {
+                                // Warten bis garantiert gespeichert ist. WICHTIG
+                            }
+                            .flatMap { savedQuote ->
+                                stockService.saveLatestQuote(savedQuote)
+                            }
                     }
             }
             .`as`(operator::transactional)

@@ -148,7 +148,6 @@ async function poll() {
       labels.shift();
     }
     dataPoints.push(stockData.stock.latestQuote.currentPrice);
-    dataPoints.push(metalData.cprice)
     labels.push('0')
     if (lineChart.value) {
       lineChart.value.chart.update();
@@ -181,7 +180,7 @@ onBeforeMount(async () => {
   if (pollingIntervalID) {
     clearInterval(pollingIntervalID);
   }
-  pollingIntervalID = setInterval(poll, 3000)
+  pollingIntervalID = setInterval(poll, 1000)
 })
 
 onUnmounted(() => {
