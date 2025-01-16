@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS bankaccount;
 DROP TABLE IF EXISTS stock_quote;
 DROP TABLE IF EXISTS latest_crypto_quote;
 DROP TABLE IF EXISTS crypto_quote;
+DROP TABLE IF EXISTS latest_metal_quote;
 DROP TABLE IF EXISTS metal_quote;
 DROP TABLE IF EXISTS stock;
 DROP TABLE IF EXISTS crypto;
@@ -99,6 +100,16 @@ CREATE TABLE metal_quote
     time_stamp            TIMESTAMP      NOT NULL,
     metal_symbol          VARCHAR(50)    NOT NULL,
     FOREIGN KEY (metal_symbol) REFERENCES metal (symbol) ON DELETE CASCADE
+);
+
+-------------------------------------------Latest Metal Quotes---------------------------------------------------
+
+CREATE TABLE latest_metal_quote
+(
+    metal_symbol            VARCHAR(50)      PRIMARY KEY,
+    quote_id                BIGINT UNIQUE,
+    FOREIGN KEY (metal_symbol) REFERENCES metal (symbol) ON DELETE CASCADE,
+    FOREIGN KEY (quote_id) REFERENCES metal_quote (id) ON DELETE CASCADE
 );
 
 --------------------------------------------BankAccount--------------------------------------------------

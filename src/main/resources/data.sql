@@ -21,19 +21,6 @@ VALUES (1, 'Alice Smith', 'alice.smith@example.com'),
        (2, 'Bob Johnson', 'bob.johnson@example.com'),
        (3, 'Charlie Brown', 'charlie.brown@example.com');
 
-
-INSERT INTO crypto_quote(
-    current_price,
-    time_stamp,
-    crypto_symbol
-)
-VALUES
-    (1, '2023-12-13 10:30:00', 'BTC'),
-    (1, '2023-12-13 10:30:00', 'ETH'),
-    (1, '2023-12-13 10:30:00', 'SOL'),
-    (1, '2023-12-13 10:30:00', 'DOGE'),
-    (1, '2023-12-13 10:30:00', 'XRP');
-
 INSERT INTO stock_quote (
     current_price,
     change,
@@ -56,6 +43,18 @@ VALUES
     (123.45, -0.55, -0.44, 124.00, 123.00, 123.80, 124.00, '2023-12-12 13:00:00', 'SAP');
 
 
+INSERT INTO crypto_quote(
+    current_price,
+    time_stamp,
+    crypto_symbol
+)
+VALUES
+    (1, '2023-12-13 10:30:00', 'BTC'),
+    (1, '2023-12-13 10:30:00', 'ETH'),
+    (1, '2023-12-13 10:30:00', 'SOL'),
+    (1, '2023-12-13 10:30:00', 'DOGE'),
+    (1, '2023-12-13 10:30:00', 'XRP');
+
 INSERT INTO latest_crypto_quote(
     crypto_symbol,
     quote_id
@@ -66,6 +65,25 @@ VALUES
     ( 'SOL', 3 ),
     ( 'DOGE', 4 ),
     ( 'XRP', 5 );
+
+INSERT INTO metal_quote(
+    current_price,
+    time_stamp,
+    metal_symbol
+)
+VALUES
+    (1, '2023-12-13 10:30:00', 'XAG'),
+    (1, '2023-12-13 10:30:00', 'XAU'),
+    (1, '2023-12-13 10:30:00', 'XPT');
+
+INSERT INTO latest_metal_quote(
+    metal_symbol,
+    quote_id
+)
+VALUES
+    ( 'XAG', 1 ),
+    ( 'XAU', 2 ),
+    ( 'XPT', 3 );
 
 INSERT INTO bankaccount (currency, balance)
 VALUES ('USD', 1000.50),

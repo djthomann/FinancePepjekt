@@ -36,7 +36,7 @@ class ScheduledApiCall(
 
     @PostConstruct
     fun scheduleApiCall() {
-        Flux.interval(Duration.ofSeconds(5))
+        Flux.interval(Duration.ofSeconds(1))
             .flatMap {
                 callFinnhub()
             }
@@ -89,7 +89,7 @@ class ScheduledApiCall(
                     .flatMap { quote ->
                         cryptoService.saveCryptoQuote(quote)
                             .doOnTerminate {
-                                logger.info("Quote gespeichert")
+                                // Warten bis garantiert gespeichert ist. WICHTIG
                             }
                             .flatMap { savedQuote ->
                                 cryptoService.saveLatestQuote(savedQuote)
@@ -106,11 +106,18 @@ class ScheduledApiCall(
             .flatMap { metal ->
                 forexHandler.fetchMetalPrice(metal.symbol)
                     .flatMap { quote ->
-                        metalQuoteRepository.save(quote)
+                        metalService.saveMetalQuote(quote)
+                            .doOnTerminate {
+                                // Warten bis garantiert gespeichert ist. WICHTIG
+                            }
+                            .flatMap { savedQuote ->
+                                metalService.saveLatestQuote(savedQuote)
+                            }
                     }
             }
             .`as`(operator::transactional)
             .then()
+
     }
 
 }
