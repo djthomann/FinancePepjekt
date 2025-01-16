@@ -23,12 +23,20 @@ export interface Stock {
   changePercentage: number,
   latestQuote: Quote,
 
-  justChanged: boolean //Just for frontend
+  justChanged: boolean // Just for frontend
 }
 
 export interface StockDetails {
   stock: Stock,
   portfolioEntry: PortfolioEntry,
+}
+
+export interface Metal {
+  symbol: string,
+  name: string,
+  cprice: number,
+
+  justChanged: boolean // Just for frontend
 }
 
 export enum Currency {
@@ -63,7 +71,8 @@ export interface Coin {
   description: string;
   currency: Currency;
   cprice: number;
-  justChanged: boolean
+
+  justChanged: boolean //Just for frontend
 }
 
 export interface PortfolioEntry {

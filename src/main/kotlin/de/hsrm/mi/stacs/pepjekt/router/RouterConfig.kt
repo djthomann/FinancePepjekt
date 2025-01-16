@@ -24,12 +24,20 @@ class RouterConfig {
      * @return Configured main router with all nested routes.
      */
     @Bean
-    fun mainRouter(bankAccountHandler: BankAccountHandler, investmentAccountHandler: InvestmentAccountHandler, stockHandler: StockHandler, orderHandler: OrderHandler, cryptoHandler: CryptoHandler) = router {
+    fun mainRouter(
+        bankAccountHandler: BankAccountHandler,
+        investmentAccountHandler: InvestmentAccountHandler,
+        stockHandler: StockHandler,
+        orderHandler: OrderHandler,
+        cryptoHandler: CryptoHandler,
+        metalHandler: MetalHandler,)
+    = router {
         add(bankAccountRouter(bankAccountHandler))
         add(investmentAccountRouter(investmentAccountHandler))
         add(stockRouter(stockHandler))
         add(orderRouter(orderHandler))
         add(cryptoRouter(cryptoHandler))
+        add(metalRouter(metalHandler))
     }
 
     /**
@@ -95,6 +103,24 @@ class RouterConfig {
                 when {
                     request.queryParam("symbol").isPresent -> cryptoHandler.getCryptoBySymbol(request)
                     else -> cryptoHandler.getAllCryptos(request)
+                }
+            }
+        }
+    }
+
+    /**
+     * Defines the router for metal related functionalities
+     *
+     * @param metalHandler Handler for metal operations
+     * @return Router with Metal Endpoints
+     */
+    @Bean
+    fun metalRouter(metalHandler: MetalHandler) = router {
+        "/api".nest {
+            GET("/metal") { request ->
+                when {
+                    request.queryParam("symbol").isPresent -> metalHandler.getMetalBySymbol(request)
+                    else -> metalHandler.getMetals(request)
                 }
             }
         }

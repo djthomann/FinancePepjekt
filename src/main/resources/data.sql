@@ -11,6 +11,11 @@ VALUES('BTC', 'Bitcoin', 1.0),
       ('DOGE', 'Dogecoin', 1.0),
       ('XRP', 'XRP', 1.0);
 
+INSERT INTO metal(symbol, name, cprice)
+VALUES('XAG', 'Silber', 1.0),
+      ('XAU', 'Gold', 1.0),
+      ('XPT', 'Platin', 1.0);
+
 INSERT INTO finance_owner (id, name, mail)
 VALUES (1, 'Alice Smith', 'alice.smith@example.com'),
        (2, 'Bob Johnson', 'bob.johnson@example.com'),

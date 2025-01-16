@@ -7,6 +7,8 @@ import OrderManagementBuy from "@/components/OrderManagementBuy.vue";
 import OrderManagementOverview from "@/components/OrderManagementOverview.vue";
 import CryptoOverview from "@/components/CryptoOverview.vue";
 import CryptoDetail from "@/components/CryptoDetail.vue";
+import MetalOverview from "@/components/MetalOverview.vue";
+import MetalDetail from "@/components/MetalDetail.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,6 +37,16 @@ const router = createRouter({
       path: '/krypto-detail/:symbol',
       name: 'krypto-detail',
       component: CryptoDetail,
+    },
+    {
+      path: '/metall-uebersicht',
+      name: 'metall-uebersicht',
+      component: MetalOverview,
+    },
+    {
+      path: '/metall-detail/:symbol',
+      name: 'metall-detail',
+      component: MetalDetail,
     },
     {
       path: '/order-management-sell/:symbol',

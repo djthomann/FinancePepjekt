@@ -1,9 +1,9 @@
 <template>
   <div class="invest-depot">
     <div>
-      <h1>Wertpapiere</h1>
+      <h1>Edelmetalle</h1>
       <div id="searchField">
-        <input v-model="searchField" placeholder="Symbol/Name"/>
+        <input  placeholder="Symbol/Name" />
         <button class="details-button" @click="resetSearch">Reset</button>
         <button class="details-button" @click="searchContent">Search</button>
       </div>
@@ -21,15 +21,13 @@
         </tr>
         </thead>
         <tbody>
-
-        <tr class="table-row" v-for="stock in stocks" :key="stock.figi" :class="{ 'just-changed':
-                       stock.justChanged}" @click="navigateToStockDetail(stock.symbol, investmentAccountId)">
-          <td>{{ stock.name }}</td>
-          <td>{{ stock.symbol }}</td>
-          <td>{{ stock.currency }}</td>
-          <td>{{ stock.latestQuote.currentPrice }}</td>
-          <td :class="{ 'positive': stock.change >= 0, 'negative': stock.change < 0 }">
-            {{ stock.change }} € ({{ stock.changePercentage }}%)
+        <tr class="table-row" v-for="metal in metals" :key="metal.symbol" :class="{ 'just-changed': metal.justChanged}" @click="navigateToMetalDetail(metal.symbol)">
+          <td>{{ metal.name }}</td>
+          <td>{{ metal.symbol }}</td>
+          <td>USD</td>
+          <td>{{ metal.cprice }}</td>
+          <td :class="{ 'positive': metal.change >= 0, 'negative': metal.change < 0 }">
+            {{ metal.change }} € ({{ metal.changePercentage }}%)
           </td>
         </tr>
         </tbody>
@@ -38,47 +36,44 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-import {onMounted, onUnmounted, ref} from 'vue';
-import {useRoute, useRouter} from "vue-router";
-import type {InvestmentAccount, Stock} from "@/types/types.ts";
+<script setup lang="ts">
+import {onMounted, onUnmounted, ref} from "vue";
+import {type Metal} from "@/types/types.ts";
+import {useRouter} from "vue-router";
 
 const router = useRouter()
-const route = useRoute()
 let pollingIntervalID: number
-const searchField = ref('')
-const investmentAccountId = route.params.investmentAccountId as string
 
 const priceDescending = ref<boolean>(false)
 const nameDescending = ref<boolean>(false)
 
-const stocks = ref<Stock[]>([])
+const metals = ref<Metal[]>([])
 
 async function poll() {
 
   console.log("polling")
 
-  for (const stock of stocks.value) {
+  for (const metal of metals.value) {
     try {
-      const response = await fetch(`/api/stock/by/symbol?symbol=${stock.symbol}`);
+      const response = await fetch(`/api/metal?symbol=${metal.symbol}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const stockData = await response.json() as Stock;
-
-      if (stock.latestQuote.currentPrice !== stockData.latestQuote.currentPrice) {
-        stock.latestQuote.currentPrice = stockData.latestQuote.currentPrice
-        stock.justChanged = true
+      const metalData = await response.json() as Metal;
+      console.log(metalData)
+      if (metal.cprice !== metalData.cprice) {
+        metal.cprice = metalData.cprice
+        metal.justChanged = true
 
         setTimeout(() => {
-          stock.justChanged = false;
+          metal.justChanged = false;
         }, 200);
       }
     } catch (e) {
       console.error(e);
     }
-  }
 
+  }
 }
 
 function sortByPrice() {
@@ -88,9 +83,9 @@ function sortByPrice() {
   }
   console.log(priceDescending.value)
   if(priceDescending.value) {
-    stocks.value = [...stocks.value].sort((a, b) => a.latestQuote.currentPrice - b.latestQuote.currentPrice)
+    metals.value = [...metals.value].sort((a, b) => a.cprice - b.cprice)
   } else {
-    stocks.value = [...stocks.value].sort((a, b) => b.latestQuote.currentPrice - a.latestQuote.currentPrice)
+    metals.value = [...metals.value].sort((a, b) => b.cprice - a.cprice)
   }
 
 }
@@ -101,48 +96,41 @@ function sortByName() {
     priceDescending.value = false
   }
   if(nameDescending.value) {
-    stocks.value = [...stocks.value].sort((a, b) => a.name.localeCompare(b.name));
+    metals.value = [...metals.value].sort((a, b) => a.name.localeCompare(b.name));
   } else {
-    stocks.value = [...stocks.value].sort((a, b) => b.name.localeCompare(a.name));
+    metals.value = [...metals.value].sort((a, b) => b.name.localeCompare(a.name));
   }
 }
 
 onMounted(async () => {
+
   try {
-    const response = await fetch("/api/stocks")
+    const response = await fetch("/api/metal")
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
-    stocks.value = await response.json() as Stock[]
+    metals.value = await response.json() as Metal[]
   } catch (e) {
     console.error(e)
   }
 
   pollingIntervalID = setInterval(poll, 3000)
+
 })
 
-onUnmounted(() => {
+onUnmounted( () => {
   console.log("Clearing interval for polling")
   clearInterval(pollingIntervalID)
 })
 
-function resetSearch() {
-  searchField.value = ''
-}
-
-function searchContent() {
-  console.log('searching for:', searchField.value)
-}
-
-const navigateToStockDetail = (symbol: string, investmentAccountId: string) => {
-  router.push({name: 'wertpapier-detail', params: {symbol, investmentAccountId}});
+const navigateToMetalDetail = (symbol: string) => {
+  console.log("Trying to navigate")
+  router.push({name: 'metall-detail', params: {symbol}});
 }
 
 </script>
 
-<style lang="scss">
-@use "./style.scss";
-
+<style scoped lang="scss">
 .just-changed {
   background-color: var(--main-color-light);
 }
@@ -175,6 +163,7 @@ const navigateToStockDetail = (symbol: string, investmentAccountId: string) => {
   transition: transform 200ms;
   transform: rotate(180deg);
 }
+
 .sorting-button-down::before {
   transform: rotate(0deg);
 }
