@@ -118,6 +118,7 @@ onMounted(async () => {
     console.error(e)
   }
 
+  sortByName()
   pollingIntervalID = setInterval(poll, 3000)
 })
 
