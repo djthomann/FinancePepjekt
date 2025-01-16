@@ -24,7 +24,7 @@ class CoinbaseHandler(
 
     fun fetchCoinRate(symbol: String): Mono<CryptoQuote> {
 
-        logger.info("Fetching coin: $symbol")
+        logger.info("Fetching Crypto: $symbol")
 
         return coinbase_client.get()
             .uri { uriBuilder: UriBuilder ->
