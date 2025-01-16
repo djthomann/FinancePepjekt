@@ -17,4 +17,6 @@ interface ICryptoService {
 
     fun saveLatestQuote(cryptoQuote: CryptoQuote): Mono<CryptoQuoteLatest>
 
+    fun getLatestCryptoQuote(symbol: String): Mono<CryptoQuote>
+
 }

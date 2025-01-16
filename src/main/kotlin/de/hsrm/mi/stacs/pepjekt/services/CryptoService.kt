@@ -52,4 +52,11 @@ class CryptoService(
                 }
             )
     }
+
+    override fun getLatestCryptoQuote(symbol: String): Mono<CryptoQuote> {
+        return cryptoQuoteLatestRepository.findById(symbol)
+            .flatMap { entry ->
+                cryptoQuoteRepository.findById(entry.quote_id)
+        }
+    }
 }

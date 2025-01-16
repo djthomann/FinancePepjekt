@@ -1,7 +1,10 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
 import de.hsrm.mi.stacs.pepjekt.entities.Crypto
+import de.hsrm.mi.stacs.pepjekt.entities.CryptoQuote
 import de.hsrm.mi.stacs.pepjekt.entities.Stock
+import de.hsrm.mi.stacs.pepjekt.entities.dtos.CryptoDTO
+import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDTO
 import de.hsrm.mi.stacs.pepjekt.services.ICryptoService
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
@@ -16,7 +19,13 @@ class CryptoHandler(private val cryptoService: ICryptoService) {
 
         return cryptoService.getCryptoBySymbol(symbol)
             .flatMap { crypto ->
-                ServerResponse.ok().bodyValue(crypto)
+                cryptoService.getLatestCryptoQuote(symbol)
+                    .map { quote ->
+                        CryptoDTO(crypto.symbol, crypto.name, quote.currentPrice)
+                    }
+                    .flatMap { stockDto ->
+                        ServerResponse.ok().bodyValue(stockDto)
+                    }
             }
             .switchIfEmpty(ServerResponse.notFound().build())
     }

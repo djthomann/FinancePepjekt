@@ -1,4 +1,9 @@
 package de.hsrm.mi.stacs.pepjekt.entities.dtos
 
-class CryptoDTO {
-}
+import java.math.BigDecimal
+
+class CryptoDTO (
+    val symbol: String,
+    val name: String,
+    var cprice: BigDecimal,
+)
