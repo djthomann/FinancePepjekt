@@ -4,19 +4,19 @@
       <li id="icon"></li>
       <nav  id="header-navigation">
           <li title="Depotübersicht">
-            <RouterLink :to="`/depot-uebersicht/${investmentAccountId}`" class="buttons">Depotübersicht</RouterLink>
+            <RouterLink :to="`/depot-uebersicht/${investmentAccountId}`" class="buttons">Depot</RouterLink>
           </li>
           <li>
-            <RouterLink :to="`/wertpapier-uebersicht/${investmentAccountId}`" class="buttons">Wertpapierübersicht</RouterLink>
+            <RouterLink :to="`/wertpapier-uebersicht/${investmentAccountId}`" class="buttons">Wertpapiere</RouterLink>
           </li>
           <li>
-            <RouterLink to="/krypto-uebersicht" class="buttons">Kryptoübersicht</RouterLink>
+            <RouterLink to="/krypto-uebersicht" class="buttons">Krypto</RouterLink>
           </li>
           <li>
-            <RouterLink to="/metall-uebersicht" class="buttons">Metallübersicht</RouterLink>
+            <RouterLink to="/metall-uebersicht" class="buttons">Edelmetalle</RouterLink>
           </li>
           <li>
-            <RouterLink :to="`/order-management-overview/${investmentAccountId}`" class="buttons">Orderübersicht</RouterLink>    <!--TODO replace the hardcoded investmentAccountId-->
+            <RouterLink :to="`/order-management-overview/${investmentAccountId}`" class="buttons">Orders</RouterLink>    <!--TODO replace the hardcoded investmentAccountId-->
           </li>
 
       </nav>
