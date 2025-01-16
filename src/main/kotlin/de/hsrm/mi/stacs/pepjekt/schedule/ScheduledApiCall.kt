@@ -6,12 +6,14 @@ import de.hsrm.mi.stacs.pepjekt.controller.CoinQuoteDTD
 import de.hsrm.mi.stacs.pepjekt.controller.MetalQuoteDTD
 import de.hsrm.mi.stacs.pepjekt.controller.QuoteDTD
 import de.hsrm.mi.stacs.pepjekt.entities.Crypto
+import de.hsrm.mi.stacs.pepjekt.entities.Metal
 import de.hsrm.mi.stacs.pepjekt.entities.Stock
 import de.hsrm.mi.stacs.pepjekt.handler.CoinbaseHandler
 import de.hsrm.mi.stacs.pepjekt.handler.FinnhubHandler
 import de.hsrm.mi.stacs.pepjekt.repositories.IQuoteRepository
 import de.hsrm.mi.stacs.pepjekt.handler.ForexHandler
 import de.hsrm.mi.stacs.pepjekt.services.CryptoService
+import de.hsrm.mi.stacs.pepjekt.services.MetalService
 import de.hsrm.mi.stacs.pepjekt.services.StockService
 import jakarta.annotation.PostConstruct
 import org.slf4j.Logger
@@ -30,6 +32,7 @@ class ScheduledApiCall(
     private val forexHandler: ForexHandler,
     private val stockService: StockService,
     private val cryptoService: CryptoService,
+    private val metalService: MetalService,
     private val quoteRepository: IQuoteRepository,
     private val operator: TransactionalOperator,
 ) {
@@ -44,8 +47,7 @@ class ScheduledApiCall(
             }
             .subscribe(
                 { response ->
-                    logger.info(response.toString())
-
+                    // logger.info(response.toString())
                 },
                 { error -> logger.info("Error occurred: ${error.message}") }
             )
@@ -55,7 +57,7 @@ class ScheduledApiCall(
             }
             .subscribe(
                 { response ->
-                    logger.info(response.toString())
+                    // logger.info(response.toString())
                 },
                 { error -> logger.error("Error occurred: ${error.message}", error) }
             )
@@ -65,7 +67,7 @@ class ScheduledApiCall(
             }
             .subscribe(
                 { response ->
-                    logger.info(response.toString())
+                    // logger.info(response.toString())
                 },
                 { error -> logger.error("Error occurred: ${error.message}", error) }
             )
@@ -95,8 +97,19 @@ class ScheduledApiCall(
             }
     }
 
-    fun callForex(): Mono<MetalQuoteDTD> {
-        return forexHandler.fetchMetalPrice("XAG")
+    fun callForex(): Flux<Metal> {
+        return metalService.getAllMetals()
+            .flatMap { metal ->
+                forexHandler.fetchMetalPrice(metal.symbol)
+                    .flatMap { quote ->
+                        metalService.setCurrentPrice(BigDecimal(quote.price.toString()), metal.symbol).doOnNext{
+                            if(!BigDecimal(quote.price.toString()).equals(metal.cprice)) {
+                                logger.info("Metal Rate updated for ${metal.symbol} to ${quote.price}")
+                            }
+                        }
+
+                    }
+            }
     }
 
 }
