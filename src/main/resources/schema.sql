@@ -5,6 +5,8 @@ DROP TABLE IF EXISTS investmentaccount;
 DROP TABLE IF EXISTS exchange;
 DROP TABLE IF EXISTS bankaccount;
 DROP TABLE IF EXISTS quote;
+DROP TABLE IF EXISTS crypto_quote;
+DROP TABLE IF EXISTS metal_quote;
 DROP TABLE IF EXISTS stock;
 DROP TABLE IF EXISTS crypto;
 DROP TABLE IF EXISTS metal;
@@ -49,9 +51,9 @@ CREATE TABLE finance_owner
     mail VARCHAR(255) UNIQUE NOT NULL
 );
 
--------------------------------------------Quote---------------------------------------------------
+-------------------------------------------Stock Quotes---------------------------------------------------
 
-CREATE TABLE quote
+CREATE TABLE stock_quote
 (
     id                    SERIAL PRIMARY KEY,
     current_price         DECIMAL(18, 4) NOT NULL,
@@ -64,6 +66,28 @@ CREATE TABLE quote
     time_stamp            TIMESTAMP      NOT NULL,
     stock_symbol          VARCHAR(50)    NOT NULL,
     FOREIGN KEY (stock_symbol) REFERENCES stock (symbol) ON DELETE CASCADE
+);
+
+-------------------------------------------Crypto Quotes---------------------------------------------------
+
+CREATE TABLE crypto_quote
+(
+    id                    SERIAL PRIMARY KEY,
+    current_price         DECIMAL(18, 4) NOT NULL,
+    time_stamp            TIMESTAMP      NOT NULL,
+    crypto_symbol          VARCHAR(50)    NOT NULL,
+    FOREIGN KEY (crypto_symbol) REFERENCES crypto (symbol) ON DELETE CASCADE
+);
+
+-------------------------------------------Metal Quotes---------------------------------------------------
+
+CREATE TABLE metal_quote
+(
+    id                    SERIAL PRIMARY KEY,
+    current_price         DECIMAL(18, 4) NOT NULL,
+    time_stamp            TIMESTAMP      NOT NULL,
+    metal_symbol          VARCHAR(50)    NOT NULL,
+    FOREIGN KEY (metal_symbol) REFERENCES metal (symbol) ON DELETE CASCADE
 );
 
 --------------------------------------------BankAccount--------------------------------------------------

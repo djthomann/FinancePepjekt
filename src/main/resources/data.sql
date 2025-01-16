@@ -21,7 +21,7 @@ VALUES (1, 'Alice Smith', 'alice.smith@example.com'),
        (2, 'Bob Johnson', 'bob.johnson@example.com'),
        (3, 'Charlie Brown', 'charlie.brown@example.com');
 
-INSERT INTO quote (
+INSERT INTO stock_quote (
     current_price,
     change,
     percent_change,
