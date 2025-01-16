@@ -125,7 +125,7 @@ onUnmounted( () => {
 
 const navigateToMetalDetail = (symbol: string) => {
   console.log("Trying to navigate")
-  router.push({name: 'krypto-detail', params: {symbol}});
+  router.push({name: 'metall-detail', params: {symbol}});
 }
 
 </script>
