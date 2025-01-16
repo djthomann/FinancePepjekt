@@ -9,5 +9,4 @@ class Metal(
     @Id
     val symbol: String,
     var name: String,
-    var cprice: BigDecimal,
 )

@@ -2,6 +2,7 @@ package de.hsrm.mi.stacs.pepjekt.handler
 
 import de.hsrm.mi.stacs.pepjekt.entities.Crypto
 import de.hsrm.mi.stacs.pepjekt.entities.Metal
+import de.hsrm.mi.stacs.pepjekt.entities.dtos.MetalDTO
 import de.hsrm.mi.stacs.pepjekt.services.IMetalService
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
@@ -15,13 +16,20 @@ class MetalHandler(val metalService: IMetalService) {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
 
         return metalService.getMetalBySymbol(symbol)
-            .flatMap {
-                ServerResponse.ok().bodyValue(it)
+            .flatMap { metal ->
+                metalService.getLatestMetalQuote(metal.symbol)
+                    .map { quote ->
+                        MetalDTO(metal.symbol, metal.name, quote.currentPrice)
+                    }
+                    .flatMap {
+                        ServerResponse.ok().bodyValue(it)
+                    }
             }
             .switchIfEmpty(ServerResponse.notFound().build())
     }
 
     fun getMetals(request: ServerRequest): Mono<ServerResponse> {
+
         return ServerResponse.ok().body(metalService.getAllMetals(), Metal::class.java)
             .switchIfEmpty(ServerResponse.noContent().build())
     }
