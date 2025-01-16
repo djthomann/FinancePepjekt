@@ -47,9 +47,10 @@ ChartJS.register(
 
 const numDataPoints = 60
 const dataPoints = []
+const labels = []
 
 const data = {
-  labels: new Array(numDataPoints).fill(0),
+  labels: labels,
   datasets: [
     {
       label: '',
@@ -77,7 +78,6 @@ const options = {
 }
 
 const lineChart = ref(null)
-
 const coin = ref<Coin>({})
 let pollingIntervalID: number
 

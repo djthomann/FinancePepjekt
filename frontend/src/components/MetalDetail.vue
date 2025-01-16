@@ -47,9 +47,10 @@ ChartJS.register(
 
 const numDataPoints = 60
 const dataPoints = []
+const labels = []
 
 const data = {
-  labels: new Array(numDataPoints).fill(0),
+  labels: labels,
   datasets: [
     {
       label: '',
@@ -77,7 +78,6 @@ const options = {
 }
 
 const lineChart = ref(null)
-
 const metal = ref<Metal>({})
 let pollingIntervalID: number
 
@@ -101,8 +101,10 @@ async function poll() {
     }
     if(dataPoints.length >= numDataPoints) {
       dataPoints.shift();
+      labels.shift();
     }
     dataPoints.push(metalData.cprice)
+    labels.push('0')
     if (lineChart.value) {
       lineChart.value.chart.update();
     } else {
