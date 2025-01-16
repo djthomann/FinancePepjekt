@@ -37,17 +37,13 @@ class CryptoService(
     override fun saveLatestQuote(cryptoQuote: CryptoQuote): Mono<CryptoQuoteLatest> {
         val quote = CryptoQuoteLatest(cryptoQuote.cryptoSymbol, cryptoQuote.id!!)
 
-        logger.info("Trying to save latest quote")
-
         return cryptoQuoteLatestRepository.findById(cryptoQuote.cryptoSymbol)
             .flatMap { existingQuote ->
-                logger.info("Updating existing quote for symbol: ${cryptoQuote.cryptoSymbol}")
                 existingQuote.quote_id = cryptoQuote.id!!
                 cryptoQuoteLatestRepository.save(existingQuote)
             }
             .switchIfEmpty(
                 Mono.defer {
-                    logger.info("No existing quote found for symbol: ${cryptoQuote.cryptoSymbol}. Creating new one.")
                     cryptoQuoteLatestRepository.save(quote)
                 }
             )
