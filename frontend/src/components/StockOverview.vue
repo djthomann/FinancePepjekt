@@ -13,10 +13,10 @@
       <table>
         <thead>
         <tr>
-          <th>Name</th>
+          <th><button :class="{ 'sorting-button-down': nameDescending}" class="sorting-button" @click="sortByName">Name</button></th>
           <th>Symbol</th>
           <th>Währung</th>
-          <th>Aktueller Wert</th>
+          <th><button :class="{ 'sorting-button-down': priceDescending}" class="sorting-button" @click="sortByPrice">Aktueller Wert</button></th>
           <th>Gewinn/Verlust</th>
         </tr>
         </thead>
@@ -49,8 +49,10 @@ let pollingIntervalID: number
 const searchField = ref('')
 const investmentAccountId = route.params.investmentAccountId as string
 
-const stocks = ref<Stock[]>([])
+const priceDescending = ref<boolean>(false)
+const nameDescending = ref<boolean>(false)
 
+const stocks = ref<Stock[]>([])
 
 async function poll() {
 
@@ -77,6 +79,32 @@ async function poll() {
     }
   }
 
+}
+
+function sortByPrice() {
+  priceDescending.value = !priceDescending.value
+  if(nameDescending.value == true) {
+    nameDescending.value = false
+  }
+  console.log(priceDescending.value)
+  if(priceDescending.value) {
+    stocks.value = [...stocks.value].sort((a, b) => a.latestQuote.currentPrice - b.latestQuote.currentPrice)
+  } else {
+    stocks.value = [...stocks.value].sort((a, b) => b.latestQuote.currentPrice - a.latestQuote.currentPrice)
+  }
+
+}
+
+function sortByName() {
+  nameDescending.value = !nameDescending.value
+  if(priceDescending.value == true) {
+    priceDescending.value = false
+  }
+  if(nameDescending.value) {
+    stocks.value = [...stocks.value].sort((a, b) => a.name.localeCompare(b.name));
+  } else {
+    stocks.value = [...stocks.value].sort((a, b) => b.name.localeCompare(a.name));
+  }
 }
 
 onMounted(async () => {
@@ -121,5 +149,33 @@ const navigateToStockDetail = (symbol: string, investmentAccountId: string) => {
 
 .table-row {
   transition: background-color 200ms;
+}
+
+.sorting-button {
+  display: flex;
+  align-items: center;
+  background: 0;
+  border: none;
+  font-weight: bold;
+  font-size: 15px;
+  color: #333;
+}
+
+.sorting-button:hover {
+  cursor: pointer;
+}
+
+.sorting-button::before {
+  margin-right: 10px;
+  width: 10px;
+  height: 10px;
+  content: '';
+  background: url('@/assets/arrow_down.svg') no-repeat center center;
+  background-size: contain;
+  transition: transform 200ms;
+  transform: rotate(180deg);
+}
+.sorting-button-down::before {
+  transform: rotate(0deg);
 }
 </style>

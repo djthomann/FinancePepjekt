@@ -82,9 +82,9 @@ function sortByPrice() {
   }
   console.log(priceDescending.value)
   if(priceDescending.value) {
-    coins.value = [...coins.value].sort((a, b) => b.cprice - a.cprice)
-  } else {
     coins.value = [...coins.value].sort((a, b) => a.cprice - b.cprice)
+  } else {
+    coins.value = [...coins.value].sort((a, b) => b.cprice - a.cprice)
   }
 
 }
@@ -95,9 +95,9 @@ function sortByName() {
     priceDescending.value = false
   }
   if(nameDescending.value) {
-    coins.value = [...coins.value].sort((a, b) => a.symbol.localeCompare(b.symbol)); // Absteigend
+    coins.value = [...coins.value].sort((a, b) => a.name.localeCompare(b.name));
   } else {
-    coins.value = [...coins.value].sort((a, b) => b.symbol.localeCompare(a.symbol)); // Absteigend
+    coins.value = [...coins.value].sort((a, b) => b.name.localeCompare(a.name));
   }
 }
 
