@@ -1,9 +1,7 @@
 package de.hsrm.mi.stacs.pepjekt.entities.dtos
 
-import de.hsrm.mi.stacs.pepjekt.entities.InvestmentAccount
 import de.hsrm.mi.stacs.pepjekt.entities.PortfolioEntry
-import de.hsrm.mi.stacs.pepjekt.entities.Quote
-import org.springframework.data.annotation.Id
+import de.hsrm.mi.stacs.pepjekt.entities.StockQuote
 import java.math.BigDecimal
 
 class PortfolioEntryDTO(
@@ -31,12 +29,12 @@ class PortfolioEntryDTO(
             )
         }
 
-        fun mapToDtoWithoutStock(portfolioEntry: PortfolioEntry, latestQuote: Quote): PortfolioEntryDTO {
+        fun mapToDtoWithoutStock(portfolioEntry: PortfolioEntry, latestStockQuote: StockQuote): PortfolioEntryDTO {
             return PortfolioEntryDTO(
                 id = portfolioEntry.id,
                 stockSymbol = portfolioEntry.stockSymbol,
                 quantity = portfolioEntry.quantity,
-                totalValue = latestQuote.currentPrice.multiply(portfolioEntry.quantity.toBigDecimal()),
+                totalValue = latestStockQuote.currentPrice.multiply(portfolioEntry.quantity.toBigDecimal()),
             )
 
         }

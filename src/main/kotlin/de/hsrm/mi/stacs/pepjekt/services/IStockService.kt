@@ -1,7 +1,6 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
-import de.hsrm.mi.stacs.pepjekt.entities.InvestmentAccount
-import de.hsrm.mi.stacs.pepjekt.entities.Quote
+import de.hsrm.mi.stacs.pepjekt.entities.StockQuote
 import de.hsrm.mi.stacs.pepjekt.entities.Stock
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDetailsDTO
 import reactor.core.publisher.Flux
@@ -25,17 +24,17 @@ interface IStockService {
 
     fun calculateAveragePrice(symbol: String, from: LocalDateTime, to: LocalDateTime): Mono<BigDecimal>
 
-    fun getStockHistoryBySymbol(symbol: String): Flux<Quote>
+    fun getStockHistoryBySymbol(symbol: String): Flux<StockQuote>
 
-    fun getStockHistoryBySymbol(symbol: String, from: LocalDateTime, to: LocalDateTime): Flux<Quote>
+    fun getStockHistoryBySymbol(symbol: String, from: LocalDateTime, to: LocalDateTime): Flux<StockQuote>
 
     fun getAllStocks(): Flux<Stock>
 
-    fun getLatestQuoteBySymbol(symbol: String): Mono<Quote>
+    fun getLatestQuoteBySymbol(symbol: String): Mono<StockQuote>
 
-    fun getDayLow(stockSymbol: String, timeStamp: LocalDateTime): Mono<Quote>
+    fun getDayLow(stockSymbol: String, timeStamp: LocalDateTime): Mono<StockQuote>
 
-    fun getDayHigh(stockSymbol: String, timeStamp: LocalDateTime): Mono<Quote>
+    fun getDayHigh(stockSymbol: String, timeStamp: LocalDateTime): Mono<StockQuote>
 
     fun getStocks(): Flux<Stock>
 

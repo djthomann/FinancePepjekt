@@ -1,8 +1,8 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
 import de.hsrm.mi.stacs.pepjekt.controller.MarketStatusDTD
-import de.hsrm.mi.stacs.pepjekt.controller.QuoteDTD
-import de.hsrm.mi.stacs.pepjekt.entities.Quote
+import de.hsrm.mi.stacs.pepjekt.controller.StockQuoteDTD
+import de.hsrm.mi.stacs.pepjekt.entities.StockQuote
 import jakarta.annotation.PostConstruct
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -38,7 +38,7 @@ class FinnhubHandler(
      * Fetches the Quote, depending on if the market is open or not. Is the market closed, the dummy finnhub webclient
      * will be triggered. If the market is open then finnhub itself.
      */
-    fun fetchStockQuote(symbol: String): Mono<Quote> {
+    fun fetchStockQuote(symbol: String): Mono<StockQuote> {
         val webClient = if (isMarketOpen) {
             finnhub_webClient
         } else {
@@ -65,7 +65,7 @@ class FinnhubHandler(
             }
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .retrieve()
-            .bodyToMono(QuoteDTD::class.java)
+            .bodyToMono(StockQuoteDTD::class.java)
             .map { quoteDTD -> mapToQuote(symbol, quoteDTD) }
     }
 
@@ -85,16 +85,16 @@ class FinnhubHandler(
             .bodyToMono(MarketStatusDTD::class.java)
     }
 
-    fun mapToQuote(symbol: String, quoteDTD: QuoteDTD): Quote {
-        return Quote(
-            currentPrice = BigDecimal.valueOf(quoteDTD.c.toDouble()),
-            change = quoteDTD.d,
-            percentChange = quoteDTD.dp,
-            highPriceOfTheDay = BigDecimal.valueOf(quoteDTD.h.toDouble()),
-            lowPriceOfTheDay = BigDecimal.valueOf(quoteDTD.l.toDouble()),
-            openPriceOfTheDay = BigDecimal.valueOf(quoteDTD.o.toDouble()),
-            previousClosePrice = BigDecimal.valueOf(quoteDTD.pc.toDouble()),
-            timeStamp = LocalDateTime.ofEpochSecond(quoteDTD.t, 0, java.time.ZoneOffset.UTC),
+    fun mapToQuote(symbol: String, stockQuoteDTD: StockQuoteDTD): StockQuote {
+        return StockQuote(
+            currentPrice = BigDecimal.valueOf(stockQuoteDTD.c.toDouble()),
+            change = stockQuoteDTD.d,
+            percentChange = stockQuoteDTD.dp,
+            highPriceOfTheDay = BigDecimal.valueOf(stockQuoteDTD.h.toDouble()),
+            lowPriceOfTheDay = BigDecimal.valueOf(stockQuoteDTD.l.toDouble()),
+            openPriceOfTheDay = BigDecimal.valueOf(stockQuoteDTD.o.toDouble()),
+            previousClosePrice = BigDecimal.valueOf(stockQuoteDTD.pc.toDouble()),
+            timeStamp = LocalDateTime.ofEpochSecond(stockQuoteDTD.t, 0, java.time.ZoneOffset.UTC),
             stockSymbol = symbol
         )
     }

@@ -5,8 +5,8 @@ import org.springframework.data.relational.core.mapping.Table
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
-@Table("quote")
-data class Quote(
+@Table("stock_quote")
+data class StockQuote(
     @Id
     var id: Long? = null,
     var currentPrice: BigDecimal,

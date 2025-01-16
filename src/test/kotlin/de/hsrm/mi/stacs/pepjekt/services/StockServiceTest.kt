@@ -1,9 +1,9 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
 import de.hsrm.mi.stacs.pepjekt.entities.Currency
-import de.hsrm.mi.stacs.pepjekt.entities.Quote
+import de.hsrm.mi.stacs.pepjekt.entities.StockQuote
 import de.hsrm.mi.stacs.pepjekt.entities.Stock
-import de.hsrm.mi.stacs.pepjekt.repositories.IQuoteRepository
+import de.hsrm.mi.stacs.pepjekt.repositories.IStockQuoteRepository
 import de.hsrm.mi.stacs.pepjekt.repositories.IStockRepository
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.Mockito.mock
@@ -23,7 +23,7 @@ import kotlin.test.Test
 class StockServiceTest {
 
     private val stockRepository: IStockRepository = mock(IStockRepository::class.java)
-    private val quoteRepository: IQuoteRepository = mock(IQuoteRepository::class.java)
+    private val quoteRepository: IStockQuoteRepository = mock(IStockQuoteRepository::class.java)
 
     private lateinit var stockService: StockService
 
@@ -34,17 +34,17 @@ class StockServiceTest {
     @BeforeEach
     fun setUp() {
         val stock = Stock(symbol = "AAPL", description = "Apple Inc.", figi = "BBG000B9XRY4", currency = Currency.USD)
-        val quotes = listOf(
-            Quote(value = BigDecimal(100), timeStamp = LocalDateTime.now().minusDays(1), stock = stock),
-            Quote(value = BigDecimal(100), timeStamp = LocalDateTime.now().minusDays(21), stock = stock),
-            Quote(value = BigDecimal(150), timeStamp = LocalDateTime.now().minusDays(5), stock = stock),
-            Quote(value = BigDecimal(300), timeStamp = LocalDateTime.now().minusHours(1), stock = stock),
-            Quote(value = BigDecimal(350), timeStamp = LocalDateTime.now().minusHours(15), stock = stock)
+        val stockQuotes = listOf(
+            StockQuote(value = BigDecimal(100), timeStamp = LocalDateTime.now().minusDays(1), stock = stock),
+            StockQuote(value = BigDecimal(100), timeStamp = LocalDateTime.now().minusDays(21), stock = stock),
+            StockQuote(value = BigDecimal(150), timeStamp = LocalDateTime.now().minusDays(5), stock = stock),
+            StockQuote(value = BigDecimal(300), timeStamp = LocalDateTime.now().minusHours(1), stock = stock),
+            StockQuote(value = BigDecimal(350), timeStamp = LocalDateTime.now().minusHours(15), stock = stock)
         )
 
         stockService = StockService(stockRepository, quoteRepository)
         `when`(stockRepository.findBySymbol("AAPL")).thenReturn(Mono.just(stock))
-        `when`(quoteRepository.findByStock(stock)).thenReturn(Flux.fromIterable(quotes))
+        `when`(quoteRepository.findByStock(stock)).thenReturn(Flux.fromIterable(stockQuotes))
     }
 
     /**

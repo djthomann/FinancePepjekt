@@ -1,9 +1,8 @@
 package de.hsrm.mi.stacs.pepjekt.schedule
 
-import de.hsrm.mi.stacs.pepjekt.entities.Metal
 import de.hsrm.mi.stacs.pepjekt.handler.CoinbaseHandler
 import de.hsrm.mi.stacs.pepjekt.handler.FinnhubHandler
-import de.hsrm.mi.stacs.pepjekt.repositories.IQuoteRepository
+import de.hsrm.mi.stacs.pepjekt.repositories.IStockQuoteRepository
 import de.hsrm.mi.stacs.pepjekt.handler.ForexHandler
 import de.hsrm.mi.stacs.pepjekt.repositories.ICryptoQuoteRepository
 import de.hsrm.mi.stacs.pepjekt.repositories.IMetalQuoteRepository
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import java.math.BigDecimal
 import java.time.Duration
 
 @Component
@@ -28,7 +26,7 @@ class ScheduledApiCall(
     private val stockService: StockService,
     private val cryptoService: CryptoService,
     private val metalService: MetalService,
-    private val quoteRepository: IQuoteRepository,
+    private val quoteRepository: IStockQuoteRepository,
     private val cryptoQuoteRepository: ICryptoQuoteRepository,
     private val metalQuoteRepository: IMetalQuoteRepository,
     private val operator: TransactionalOperator,
