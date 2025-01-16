@@ -1,17 +1,12 @@
 package de.hsrm.mi.stacs.pepjekt.schedule
 
-import de.hsrm.mi.stacs.pepjekt.entities.Quote
-import de.hsrm.mi.stacs.pepjekt.controller.CoinQuoteDTD
-
-import de.hsrm.mi.stacs.pepjekt.controller.MetalQuoteDTD
-import de.hsrm.mi.stacs.pepjekt.controller.QuoteDTD
-import de.hsrm.mi.stacs.pepjekt.entities.Crypto
 import de.hsrm.mi.stacs.pepjekt.entities.Metal
-import de.hsrm.mi.stacs.pepjekt.entities.Stock
 import de.hsrm.mi.stacs.pepjekt.handler.CoinbaseHandler
 import de.hsrm.mi.stacs.pepjekt.handler.FinnhubHandler
 import de.hsrm.mi.stacs.pepjekt.repositories.IQuoteRepository
 import de.hsrm.mi.stacs.pepjekt.handler.ForexHandler
+import de.hsrm.mi.stacs.pepjekt.repositories.ICryptoQuoteRepository
+import de.hsrm.mi.stacs.pepjekt.repositories.IMetalQuoteRepository
 import de.hsrm.mi.stacs.pepjekt.services.CryptoService
 import de.hsrm.mi.stacs.pepjekt.services.MetalService
 import de.hsrm.mi.stacs.pepjekt.services.StockService
@@ -34,6 +29,8 @@ class ScheduledApiCall(
     private val cryptoService: CryptoService,
     private val metalService: MetalService,
     private val quoteRepository: IQuoteRepository,
+    private val cryptoQuoteRepository: ICryptoQuoteRepository,
+    private val metalQuoteRepository: IMetalQuoteRepository,
     private val operator: TransactionalOperator,
 ) {
 
@@ -74,6 +71,7 @@ class ScheduledApiCall(
     }
 
     fun callFinnhub(): Mono<Void> {
+
         return stockService.getStocks()
             .flatMap { stock ->
                 finnhubHandler.fetchStockQuote(stock.symbol)
@@ -85,31 +83,30 @@ class ScheduledApiCall(
             .then()
     }
 
-    fun callCoinbase(): Flux<Crypto> {
+    fun callCoinbase(): Mono<Void> {
+
         return cryptoService.getAllCryptos()
             .flatMap { crypto ->
                 coinbaseHandler.fetchCoinRate(crypto.symbol)
                     .flatMap { quote ->
-                        cryptoService.setCurrentPrice(BigDecimal(quote.rate.toString()), crypto.symbol).doOnNext {
-                            logger.info("Crypto Rate updated for ${crypto.symbol} to ${quote.rate}")
-                        }
+                        cryptoQuoteRepository.save(quote)
                     }
             }
+            .`as`(operator::transactional)
+            .then()
     }
 
-    fun callForex(): Flux<Metal> {
+    fun callForex(): Mono<Void> {
+
         return metalService.getAllMetals()
             .flatMap { metal ->
                 forexHandler.fetchMetalPrice(metal.symbol)
                     .flatMap { quote ->
-                        metalService.setCurrentPrice(BigDecimal(quote.price.toString()), metal.symbol).doOnNext{
-                            if(!BigDecimal(quote.price.toString()).equals(metal.cprice)) {
-                                logger.info("Metal Rate updated for ${metal.symbol} to ${quote.price}")
-                            }
-                        }
-
+                        metalQuoteRepository.save(quote)
                     }
             }
+            .`as`(operator::transactional)
+            .then()
     }
 
 }

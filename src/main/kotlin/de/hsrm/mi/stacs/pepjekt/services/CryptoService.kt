@@ -1,6 +1,7 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
 import de.hsrm.mi.stacs.pepjekt.entities.Crypto
+import de.hsrm.mi.stacs.pepjekt.repositories.ICryptoQuoteRepository
 import de.hsrm.mi.stacs.pepjekt.repositories.ICryptoRepository
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -9,7 +10,8 @@ import java.math.BigDecimal
 
 @Service
 class CryptoService(
-    val cryptoRepository: ICryptoRepository
+    val cryptoRepository: ICryptoRepository,
+    val cryptoQuoteRepository: ICryptoQuoteRepository
 ) : ICryptoService {
 
     override fun getCryptoBySymbol(symbol: String): Mono<Crypto> {
