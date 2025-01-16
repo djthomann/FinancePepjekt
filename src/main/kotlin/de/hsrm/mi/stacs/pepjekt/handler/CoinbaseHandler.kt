@@ -40,6 +40,7 @@ class CoinbaseHandler(
                 CryptoQuoteDTD(symbol, Currency.USD, BigDecimal(usdRate))
             }
             .map { cryptoQuoteDTD -> mapToQuote(symbol, cryptoQuoteDTD) }
+
     }
 
     fun mapToQuote(symbol: String, cryptoQuoteDTD: CryptoQuoteDTD): CryptoQuote {

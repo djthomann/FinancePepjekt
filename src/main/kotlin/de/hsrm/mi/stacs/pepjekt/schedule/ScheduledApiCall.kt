@@ -4,6 +4,7 @@ import de.hsrm.mi.stacs.pepjekt.handler.CoinbaseHandler
 import de.hsrm.mi.stacs.pepjekt.handler.FinnhubHandler
 import de.hsrm.mi.stacs.pepjekt.repositories.IStockQuoteRepository
 import de.hsrm.mi.stacs.pepjekt.handler.ForexHandler
+import de.hsrm.mi.stacs.pepjekt.repositories.ICryptoQuoteLatestRepository
 import de.hsrm.mi.stacs.pepjekt.repositories.ICryptoQuoteRepository
 import de.hsrm.mi.stacs.pepjekt.repositories.IMetalQuoteRepository
 import de.hsrm.mi.stacs.pepjekt.services.CryptoService
@@ -27,7 +28,6 @@ class ScheduledApiCall(
     private val cryptoService: CryptoService,
     private val metalService: MetalService,
     private val quoteRepository: IStockQuoteRepository,
-    private val cryptoQuoteRepository: ICryptoQuoteRepository,
     private val metalQuoteRepository: IMetalQuoteRepository,
     private val operator: TransactionalOperator,
 ) {
@@ -87,7 +87,13 @@ class ScheduledApiCall(
             .flatMap { crypto ->
                 coinbaseHandler.fetchCoinRate(crypto.symbol)
                     .flatMap { quote ->
-                        cryptoQuoteRepository.save(quote)
+                        cryptoService.saveCryptoQuote(quote)
+                            .doOnTerminate {
+                                logger.info("Quote gespeichert")
+                            }
+                            .flatMap { savedQuote ->
+                                cryptoService.saveLatestQuote(savedQuote)
+                            }
                     }
             }
             .`as`(operator::transactional)

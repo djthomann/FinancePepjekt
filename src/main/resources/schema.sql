@@ -4,7 +4,8 @@ DROP TABLE IF EXISTS stock_order;
 DROP TABLE IF EXISTS investmentaccount;
 DROP TABLE IF EXISTS exchange;
 DROP TABLE IF EXISTS bankaccount;
-DROP TABLE IF EXISTS quote;
+DROP TABLE IF EXISTS stock_quote;
+DROP TABLE IF EXISTS latest_crypto_quote;
 DROP TABLE IF EXISTS crypto_quote;
 DROP TABLE IF EXISTS metal_quote;
 DROP TABLE IF EXISTS stock;
@@ -75,8 +76,18 @@ CREATE TABLE crypto_quote
     id                    SERIAL PRIMARY KEY,
     current_price         DECIMAL(18, 4) NOT NULL,
     time_stamp            TIMESTAMP      NOT NULL,
-    crypto_symbol          VARCHAR(50)    NOT NULL,
+    crypto_symbol         VARCHAR(50)    NOT NULL,
     FOREIGN KEY (crypto_symbol) REFERENCES crypto (symbol) ON DELETE CASCADE
+);
+
+-------------------------------------------Latest Crypto Quote---------------------------------------------------
+
+CREATE TABLE latest_crypto_quote
+(
+    crypto_symbol         VARCHAR(50)      PRIMARY KEY,
+    quote_id              BIGINT UNIQUE,
+    FOREIGN KEY (crypto_symbol) REFERENCES crypto (symbol) ON DELETE CASCADE,
+    FOREIGN KEY (quote_id) REFERENCES crypto_quote (id) ON DELETE CASCADE
 );
 
 -------------------------------------------Metal Quotes---------------------------------------------------
