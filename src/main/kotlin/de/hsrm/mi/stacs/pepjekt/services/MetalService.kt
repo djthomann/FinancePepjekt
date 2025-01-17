@@ -19,18 +19,30 @@ class MetalService(
     val metalQuoteLatestRepository: IMetalQuoteLatestRepository,
 ) : IMetalService {
 
+    /**
+     * Retrieve a single Metal from its symbol
+     */
     override fun getMetalBySymbol(symbol: String): Mono<Metal> {
         return metalRepository.findById(symbol)
     }
 
+    /**
+     * Retrieve all Metals from the Database
+     */
     override fun getAllMetals(): Flux<Metal> {
         return metalRepository.findAll()
     }
 
+    /**
+     * Store a new MetalQuote
+     */
     override fun saveMetalQuote(metalQuote: MetalQuote): Mono<MetalQuote> {
         return metalQuoteRepository.save(metalQuote)
     }
 
+    /**
+     * Store latest Quote for a metal
+     */
     override fun saveLatestQuote(metalQuote: MetalQuote): Mono<MetalQuoteLatest> {
         val quote = MetalQuoteLatest(metalQuote.metalSymbol, metalQuote.id!!)
 
@@ -46,6 +58,9 @@ class MetalService(
             )
     }
 
+    /**
+     * Get latest MetalQuote via metal symbol
+     */
     override fun getLatestMetalQuote(symbol: String): Mono<MetalQuote> {
         return metalQuoteLatestRepository.findById(symbol)
             .flatMap { entry ->

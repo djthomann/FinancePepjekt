@@ -22,6 +22,9 @@ class CoinbaseHandler(
     private val logger = LoggerFactory.getLogger(CoinbaseHandler::class.java)
     private final val coinbase_client = webClientBuilder.baseUrl("https://api.coinbase.com/v2/exchange-rates").build()
 
+    /**
+     * Fetches the current exchange rate for a given Crypto symbol
+     */
     fun fetchCoinRate(symbol: String): Mono<CryptoQuote> {
 
         logger.info("Fetching Crypto: $symbol")
@@ -43,6 +46,9 @@ class CoinbaseHandler(
 
     }
 
+    /**
+     * Map the API DTD to a CryptoQuote Object
+     */
     fun mapToQuote(symbol: String, cryptoQuoteDTD: CryptoQuoteDTD): CryptoQuote {
         return CryptoQuote(
             currentPrice = cryptoQuoteDTD.rate,

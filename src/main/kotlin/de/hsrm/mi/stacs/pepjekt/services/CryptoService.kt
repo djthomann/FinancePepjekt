@@ -22,18 +22,30 @@ class CryptoService(
 
     private val logger = LoggerFactory.getLogger(CryptoService::class.java)
 
+    /**
+     * Retrieve a cryptocurrency via its symbol
+     */
     override fun getCryptoBySymbol(symbol: String): Mono<Crypto> {
         return cryptoRepository.findById(symbol)
     }
 
+    /**
+     * Retrieve all cryptocurrencies from the Database
+     */
     override fun getAllCryptos(): Flux<Crypto> {
         return cryptoRepository.findAll()
     }
 
+    /**
+     * Save a new CryptoQuote
+     */
     override fun saveCryptoQuote(cryptoQuote: CryptoQuote): Mono<CryptoQuote> {
         return cryptoQuoteRepository.save(cryptoQuote)
     }
 
+    /**
+     * Overwrite or store the latest quote for a cryptocurrency
+     */
     override fun saveLatestQuote(cryptoQuote: CryptoQuote): Mono<CryptoQuoteLatest> {
         val quote = CryptoQuoteLatest(cryptoQuote.cryptoSymbol, cryptoQuote.id!!)
 
@@ -49,6 +61,9 @@ class CryptoService(
             )
     }
 
+    /**
+     * Get the latest CryptoQuote via stored latestQuote id
+     */
     override fun getLatestCryptoQuote(symbol: String): Mono<CryptoQuote> {
         return cryptoQuoteLatestRepository.findById(symbol)
             .flatMap { entry ->

@@ -86,6 +86,9 @@ class FinnhubHandler(
             .bodyToMono(MarketStatusDTD::class.java)
     }
 
+    /**
+     * Maps the API DTD to a StockQuote Object
+     */
     fun mapToQuote(symbol: String, stockQuoteDTD: StockQuoteDTD): StockQuote {
         return StockQuote(
             currentPrice = BigDecimal.valueOf(stockQuoteDTD.c.toDouble()),

@@ -22,6 +22,9 @@ class ForexHandler(
     private val logger = LoggerFactory.getLogger(ForexHandler::class.java)
     private final val forex_webclient = webClientBuilder.baseUrl("https://forex-data-feed.swissquote.com/public-quotes").build()
 
+    /**
+     * Fetches the current bidding price for a given metal symbol
+     */
     fun fetchMetalPrice(symbol: String): Mono<MetalQuote> {
 
         logger.info("Fetching Metal: $symbol")
@@ -42,6 +45,9 @@ class ForexHandler(
             .map{ metalQuoteDTD -> mapToQuote(symbol, metalQuoteDTD) }
     }
 
+    /**
+     * Map the API DTD to a MetalQuote Object
+     */
     fun mapToQuote(symbol: String, metalQuoteDTD: MetalQuoteDTD): MetalQuote {
         return MetalQuote(
             currentPrice = metalQuoteDTD.price,
