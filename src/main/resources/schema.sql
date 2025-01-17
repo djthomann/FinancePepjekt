@@ -19,30 +19,30 @@ DROP TABLE IF EXISTS finance_owner;
 
 CREATE TABLE stock
 (
-    symbol      VARCHAR(50) PRIMARY KEY,
-    name        VARCHAR(50),
-    description VARCHAR(255) NOT NULL,
-    figi        VARCHAR(50)  NOT NULL,
-    currency    VARCHAR(3)   NOT NULL, -- ISO 4217
-    cprice      DECIMAL(18, 4)
+    symbol        VARCHAR(50) PRIMARY KEY,
+    name          VARCHAR(50),
+    description   VARCHAR(255) NOT NULL,
+    figi          VARCHAR(50)  NOT NULL,
+    currency      VARCHAR(3)   NOT NULL, -- ISO 4217
+    current_price DECIMAL(18, 4)
 );
 
 ---------------------------------------Crypto-------------------------------------------------------
 
 CREATE TABLE crypto
 (
-    symbol      VARCHAR(50) PRIMARY KEY,
-    name        VARCHAR(50),
-    cprice      DECIMAL(18, 4)
+    symbol        VARCHAR(50) PRIMARY KEY,
+    name          VARCHAR(50),
+    current_price DECIMAL(18, 4)
 );
 
 ---------------------------------------Metals-------------------------------------------------------
 
 CREATE TABLE metal
 (
-    symbol      VARCHAR(50) PRIMARY KEY,
-    name        VARCHAR(50),
-    cprice      DECIMAL(18, 4)
+    symbol        VARCHAR(50) PRIMARY KEY,
+    name          VARCHAR(50),
+    current_price DECIMAL(18, 4)
 );
 
 ---------------------------------------Owner-------------------------------------------------------

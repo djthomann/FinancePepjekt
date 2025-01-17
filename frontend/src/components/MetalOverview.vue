@@ -25,7 +25,7 @@
           <td>{{ metal.name }}</td>
           <td>{{ metal.symbol }}</td>
           <td>USD</td>
-          <td>{{ metal.cprice }}</td>
+          <td>{{ metal.currentPrice }}</td>
           <td :class="{ 'positive': metal.change >= 0, 'negative': metal.change < 0 }">
             {{ metal.change }} € ({{ metal.changePercentage }}%)
           </td>
@@ -61,8 +61,8 @@ async function poll() {
       }
       const metalData = await response.json() as Metal;
       console.log(metalData)
-      if (metal.cprice !== metalData.cprice) {
-        metal.cprice = metalData.cprice
+      if (metal.currentPrice !== metalData.currentPrice) {
+        metal.currentPrice = metalData.currentPrice
         metal.justChanged = true
 
         setTimeout(() => {
@@ -83,9 +83,9 @@ function sortByPrice() {
   }
   console.log(priceDescending.value)
   if(priceDescending.value) {
-    metals.value = [...metals.value].sort((a, b) => a.cprice - b.cprice)
+    metals.value = [...metals.value].sort((a, b) => a.currentPrice - b.currentPrice)
   } else {
-    metals.value = [...metals.value].sort((a, b) => b.cprice - a.cprice)
+    metals.value = [...metals.value].sort((a, b) => b.currentPrice - a.currentPrice)
   }
 
 }

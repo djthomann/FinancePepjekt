@@ -4,7 +4,7 @@
       <div class="stock-detail-header-info">
         <h2>{{ coin.name }} - Detailansicht</h2>
         <p><strong>Symbol:</strong> {{ coin.symbol }}</p>
-        <p><strong>Aktueller Wert:</strong> {{ coin.cprice }} $</p>
+        <p><strong>Aktueller Wert:</strong> {{ coin.currentPrice }} $</p>
 
         <div class="purchase-buttons">
           <button class="purchase-button" @click="purchase(coin.symbol)">Kaufen</button>
@@ -91,8 +91,8 @@ async function poll() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const coinData = await response.json() as Coin;
-    if(coin.value.cprice !== coinData.cprice) {
-      coin.value.cprice = coinData.cprice
+    if(coin.value.currentPrice !== coinData.currentPrice) {
+      coin.value.currentPrice = coinData.currentPrice
       coin.value.justChanged = true
       setTimeout(() => {
         coin.value.justChanged = false;
@@ -102,7 +102,7 @@ async function poll() {
       dataPoints.shift();
       labels.shift();
     }
-    dataPoints.push(coinData.cprice)
+    dataPoints.push(coinData.currentPrice)
     labels.push('0')
     if (lineChart.value) {
       lineChart.value.chart.update();

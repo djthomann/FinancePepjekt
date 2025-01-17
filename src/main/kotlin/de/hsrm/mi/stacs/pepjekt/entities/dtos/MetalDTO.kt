@@ -5,5 +5,5 @@ import java.math.BigDecimal
 class MetalDTO (
     val symbol: String,
     val name: String,
-    var cprice: BigDecimal,
+    var currentPrice: BigDecimal,
 )

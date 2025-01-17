@@ -5,5 +5,5 @@ import java.math.BigDecimal
 class CryptoDTO (
     val symbol: String,
     val name: String,
-    var cprice: BigDecimal,
+    var currentPrice: BigDecimal,
 )

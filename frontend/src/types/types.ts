@@ -34,7 +34,7 @@ export interface StockDetails {
 export interface Metal {
   symbol: string,
   name: string,
-  cprice: number,
+  currentPrice: number,
 
   justChanged: boolean // Just for frontend
 }
@@ -70,7 +70,7 @@ export interface Coin {
   name: string,
   description: string;
   currency: Currency;
-  cprice: number;
+  currentPrice: number;
 
   justChanged: boolean //Just for frontend
 }
