@@ -26,4 +26,5 @@ interface IOrderService {
 
     fun getOrdersByInvestmentAccountId(investmentAccountId: String): Flux<Order>
 
+    fun processOrders(): Mono<Void>
 }
