@@ -95,7 +95,7 @@ VALUES
     ( 'XPT', 3 );
 
 INSERT INTO bankaccount (currency, balance)
-VALUES ('USD', 1000.50),
+VALUES ('USD', 100000.50),
        ('EUR', 250.00),
        ('JPY', 500000.00),
        ('GBP', 123.45);
@@ -119,7 +119,7 @@ VALUES (1, 'AAPL', 50.5),
 -- Order
 INSERT INTO stock_order (purchase_amount, type, execution_timestamp, investment_account_id, stock_symbol)
 VALUES
-    (100.0, 'BUY', '2025-01-18 09:00:00', 1, 'AAPL'), -- Order for 100 AAPL from Investmentkonto 1
+    (10000.0, 'BUY', '2025-01-18 09:00:00', 1, 'AAPL'), -- Order for 100 AAPL from Investmentkonto 1
     (50.0, 'SELL', '2025-01-18 09:30:00', 1, 'TSLA'), -- Order for 50 TSLA from Investmentkonto 1
     (25.5, 'BUY', '2025-01-18 10:00:00', 2, 'NVDA'), -- Order for 25.5 NVDA from Investmentkonto 2
     (10.0, 'SELL', '2025-01-18 10:30:00', 3, 'SAP'); -- Order for 10 SAP from Investmentkonto 3

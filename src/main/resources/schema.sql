@@ -23,8 +23,7 @@ CREATE TABLE stock
     name          VARCHAR(50),
     description   VARCHAR(255) NOT NULL,
     figi          VARCHAR(50)  NOT NULL,
-    currency      VARCHAR(3)   NOT NULL, -- ISO 4217
-    current_price DECIMAL(18, 4)
+    currency      VARCHAR(3)   NOT NULL -- ISO 4217
 );
 
 ---------------------------------------Crypto-------------------------------------------------------
@@ -32,8 +31,7 @@ CREATE TABLE stock
 CREATE TABLE crypto
 (
     symbol        VARCHAR(50) PRIMARY KEY,
-    name          VARCHAR(50),
-    current_price DECIMAL(18, 4)
+    name          VARCHAR(50)
 );
 
 ---------------------------------------Metals-------------------------------------------------------
@@ -41,8 +39,7 @@ CREATE TABLE crypto
 CREATE TABLE metal
 (
     symbol        VARCHAR(50) PRIMARY KEY,
-    name          VARCHAR(50),
-    current_price DECIMAL(18, 4)
+    name          VARCHAR(50)
 );
 
 ---------------------------------------Owner-------------------------------------------------------
