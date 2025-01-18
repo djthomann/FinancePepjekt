@@ -1,10 +1,8 @@
 package de.hsrm.mi.stacs.pepjekt.entities.dtos
 
 import de.hsrm.mi.stacs.pepjekt.entities.Currency
-import de.hsrm.mi.stacs.pepjekt.entities.Quote
+import de.hsrm.mi.stacs.pepjekt.entities.StockQuote
 import de.hsrm.mi.stacs.pepjekt.entities.Stock
-import org.springframework.data.annotation.*
-import java.math.BigDecimal
 
 class StockDTO(
     val symbol: String,
@@ -17,7 +15,7 @@ class StockDTO(
     companion object {
         fun mapToDto(
             stock: Stock,
-            quote: Quote
+            stockQuote: StockQuote
         ): StockDTO {
             return StockDTO(
                 symbol = stock.symbol,
@@ -25,7 +23,7 @@ class StockDTO(
                 figi = stock.figi,
                 currency = stock.currency,
                 name = stock.name,
-                latestQuote = QuoteDTO.mapToDto(quote)
+                latestQuote = QuoteDTO.mapToDto(stockQuote)
             )
         }
     }

@@ -4,7 +4,12 @@ DROP TABLE IF EXISTS stock_order;
 DROP TABLE IF EXISTS investmentaccount;
 DROP TABLE IF EXISTS exchange;
 DROP TABLE IF EXISTS bankaccount;
-DROP TABLE IF EXISTS quote;
+DROP TABLE IF EXISTS latest_stock_quote;
+DROP TABLE IF EXISTS stock_quote;
+DROP TABLE IF EXISTS latest_crypto_quote;
+DROP TABLE IF EXISTS crypto_quote;
+DROP TABLE IF EXISTS latest_metal_quote;
+DROP TABLE IF EXISTS metal_quote;
 DROP TABLE IF EXISTS stock;
 DROP TABLE IF EXISTS crypto;
 DROP TABLE IF EXISTS metal;
@@ -14,30 +19,30 @@ DROP TABLE IF EXISTS finance_owner;
 
 CREATE TABLE stock
 (
-    symbol      VARCHAR(50) PRIMARY KEY,
-    name        VARCHAR(50),
-    description VARCHAR(255) NOT NULL,
-    figi        VARCHAR(50)  NOT NULL,
-    currency    VARCHAR(3)   NOT NULL, -- ISO 4217
-    cprice      DECIMAL(18, 4)
+    symbol        VARCHAR(50) PRIMARY KEY,
+    name          VARCHAR(50),
+    description   VARCHAR(255) NOT NULL,
+    figi          VARCHAR(50)  NOT NULL,
+    currency      VARCHAR(3)   NOT NULL, -- ISO 4217
+    current_price DECIMAL(18, 4)
 );
 
 ---------------------------------------Crypto-------------------------------------------------------
 
 CREATE TABLE crypto
 (
-    symbol      VARCHAR(50) PRIMARY KEY,
-    name        VARCHAR(50),
-    cprice      DECIMAL(18, 4)
+    symbol        VARCHAR(50) PRIMARY KEY,
+    name          VARCHAR(50),
+    current_price DECIMAL(18, 4)
 );
 
 ---------------------------------------Metals-------------------------------------------------------
 
 CREATE TABLE metal
 (
-    symbol      VARCHAR(50) PRIMARY KEY,
-    name        VARCHAR(50),
-    cprice      DECIMAL(18, 4)
+    symbol        VARCHAR(50) PRIMARY KEY,
+    name          VARCHAR(50),
+    current_price DECIMAL(18, 4)
 );
 
 ---------------------------------------Owner-------------------------------------------------------
@@ -49,9 +54,9 @@ CREATE TABLE finance_owner
     mail VARCHAR(255) UNIQUE NOT NULL
 );
 
--------------------------------------------Quote---------------------------------------------------
+-------------------------------------------Stock Quotes---------------------------------------------------
 
-CREATE TABLE quote
+CREATE TABLE stock_quote
 (
     id                    SERIAL PRIMARY KEY,
     current_price         DECIMAL(18, 4) NOT NULL,
@@ -64,6 +69,59 @@ CREATE TABLE quote
     time_stamp            TIMESTAMP      NOT NULL,
     stock_symbol          VARCHAR(50)    NOT NULL,
     FOREIGN KEY (stock_symbol) REFERENCES stock (symbol) ON DELETE CASCADE
+);
+
+-------------------------------------------Latest Stock Quote---------------------------------------------------
+
+CREATE TABLE latest_stock_quote
+(
+    stock_symbol         VARCHAR(50)      PRIMARY KEY,
+    quote_id              BIGINT UNIQUE,
+    FOREIGN KEY (stock_symbol) REFERENCES stock (symbol) ON DELETE CASCADE,
+    FOREIGN KEY (quote_id) REFERENCES stock_quote (id) ON DELETE CASCADE
+);
+
+
+-------------------------------------------Crypto Quotes---------------------------------------------------
+
+CREATE TABLE crypto_quote
+(
+    id                    SERIAL PRIMARY KEY,
+    current_price         DECIMAL(18, 4) NOT NULL,
+    time_stamp            TIMESTAMP      NOT NULL,
+    crypto_symbol         VARCHAR(50)    NOT NULL,
+    FOREIGN KEY (crypto_symbol) REFERENCES crypto (symbol) ON DELETE CASCADE
+);
+
+-------------------------------------------Latest Crypto Quote---------------------------------------------------
+
+CREATE TABLE latest_crypto_quote
+(
+    crypto_symbol         VARCHAR(50)      PRIMARY KEY,
+    quote_id              BIGINT UNIQUE,
+    FOREIGN KEY (crypto_symbol) REFERENCES crypto (symbol) ON DELETE CASCADE,
+    FOREIGN KEY (quote_id) REFERENCES crypto_quote (id) ON DELETE CASCADE
+);
+
+-------------------------------------------Metal Quotes---------------------------------------------------
+
+CREATE TABLE metal_quote
+(
+    id                    SERIAL PRIMARY KEY,
+    current_price         DECIMAL(18, 4) NOT NULL,
+    time_stamp            TIMESTAMP      NOT NULL,
+    metal_symbol          VARCHAR(50)    NOT NULL,
+    FOREIGN KEY (metal_symbol) REFERENCES metal (symbol) ON DELETE CASCADE
+);
+
+-------------------------------------------Latest Metal Quotes---------------------------------------------------
+
+CREATE TABLE latest_metal_quote
+(
+    metal_symbol            VARCHAR(50)      PRIMARY KEY,
+    quote_id                BIGINT UNIQUE,
+    FOREIGN KEY (metal_symbol) REFERENCES metal (symbol) ON DELETE CASCADE,
+    FOREIGN KEY (quote_id) REFERENCES metal_quote (id) ON DELETE CASCADE
 );
 
 --------------------------------------------BankAccount--------------------------------------------------

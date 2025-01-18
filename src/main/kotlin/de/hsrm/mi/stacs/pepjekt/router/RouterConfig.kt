@@ -24,6 +24,7 @@ class RouterConfig {
      * @return Configured main router with all nested routes.
      */
     @Bean
+
     fun mainRouter(
         bankAccountHandler: BankAccountHandler,
         investmentAccountHandler: InvestmentAccountHandler,
@@ -102,7 +103,7 @@ class RouterConfig {
             GET("/crypto") { request ->
                 when {
                     request.queryParam("symbol").isPresent -> cryptoHandler.getCryptoBySymbol(request)
-                    else -> cryptoHandler.getAllCryptos(request)
+                    else -> cryptoHandler.getCryptos(request)
                 }
             }
         }

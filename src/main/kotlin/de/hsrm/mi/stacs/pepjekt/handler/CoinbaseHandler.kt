@@ -1,11 +1,10 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.hsrm.mi.stacs.pepjekt.controller.CoinQuoteDTD
-import de.hsrm.mi.stacs.pepjekt.controller.QuoteDTD
+import de.hsrm.mi.stacs.pepjekt.controller.CryptoQuoteDTD
+import de.hsrm.mi.stacs.pepjekt.entities.CryptoQuote
 import de.hsrm.mi.stacs.pepjekt.entities.Currency
 import org.slf4j.LoggerFactory
-import org.springframework.beans.propertyeditors.CurrencyEditor
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -13,6 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriBuilder
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
+import java.time.LocalDateTime
 
 @Component
 class CoinbaseHandler(
@@ -22,14 +22,17 @@ class CoinbaseHandler(
     private val logger = LoggerFactory.getLogger(CoinbaseHandler::class.java)
     private final val coinbase_client = webClientBuilder.baseUrl("https://api.coinbase.com/v2/exchange-rates").build()
 
-    fun fetchCoinRate(coin: String): Mono<CoinQuoteDTD> {
+    /**
+     * Fetches the current exchange rate for a given Crypto symbol
+     */
+    fun fetchCoinRate(symbol: String): Mono<CryptoQuote> {
 
-        logger.info("Fetching coin: $coin")
+        logger.info("Fetching Crypto: $symbol")
 
         return coinbase_client.get()
             .uri { uriBuilder: UriBuilder ->
                 uriBuilder
-                    .queryParam("currency", coin)
+                    .queryParam("currency", symbol)
                     .build()
             }
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -37,8 +40,21 @@ class CoinbaseHandler(
             .bodyToMono(JsonNode::class.java)
             .map { jsonNode ->
                 val usdRate = jsonNode["data"]["rates"]["USD"].asText()
-                CoinQuoteDTD(coin, Currency.USD, BigDecimal(usdRate))
+                CryptoQuoteDTD(symbol, Currency.USD, BigDecimal(usdRate))
             }
+            .map { cryptoQuoteDTD -> mapToQuote(symbol, cryptoQuoteDTD) }
+
+    }
+
+    /**
+     * Map the API DTD to a CryptoQuote Object
+     */
+    fun mapToQuote(symbol: String, cryptoQuoteDTD: CryptoQuoteDTD): CryptoQuote {
+        return CryptoQuote(
+            currentPrice = cryptoQuoteDTD.rate,
+            timeStamp = LocalDateTime.now(),
+            cryptoSymbol = symbol
+        )
     }
 
 }

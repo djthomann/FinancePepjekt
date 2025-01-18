@@ -1,9 +1,10 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.hsrm.mi.stacs.pepjekt.controller.CoinQuoteDTD
+import de.hsrm.mi.stacs.pepjekt.controller.CryptoQuoteDTD
 import de.hsrm.mi.stacs.pepjekt.controller.MetalQuoteDTD
-import de.hsrm.mi.stacs.pepjekt.entities.Currency
+import de.hsrm.mi.stacs.pepjekt.entities.CryptoQuote
+import de.hsrm.mi.stacs.pepjekt.entities.MetalQuote
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -12,6 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriBuilder
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
+import java.time.LocalDateTime
 
 @Component
 class ForexHandler(
@@ -20,9 +22,12 @@ class ForexHandler(
     private val logger = LoggerFactory.getLogger(ForexHandler::class.java)
     private final val forex_webclient = webClientBuilder.baseUrl("https://forex-data-feed.swissquote.com/public-quotes").build()
 
-    fun fetchMetalPrice(symbol: String): Mono<MetalQuoteDTD> {
+    /**
+     * Fetches the current bidding price for a given metal symbol
+     */
+    fun fetchMetalPrice(symbol: String): Mono<MetalQuote> {
 
-        logger.info("Fetching metal: $symbol")
+        logger.info("Fetching Metal: $symbol")
 
         return forex_webclient.get()
             .uri { uriBuilder: UriBuilder ->
@@ -37,6 +42,18 @@ class ForexHandler(
                 val usdRate = jsonNode[0]["spreadProfilePrices"][0]["bid"]
                 MetalQuoteDTD("metal", symbol, BigDecimal(usdRate.asText()))
             }
+            .map{ metalQuoteDTD -> mapToQuote(symbol, metalQuoteDTD) }
+    }
+
+    /**
+     * Map the API DTD to a MetalQuote Object
+     */
+    fun mapToQuote(symbol: String, metalQuoteDTD: MetalQuoteDTD): MetalQuote {
+        return MetalQuote(
+            currentPrice = metalQuoteDTD.price,
+            timeStamp = LocalDateTime.now(),
+            metalSymbol = symbol
+        )
     }
 
 }

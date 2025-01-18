@@ -4,9 +4,9 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import java.math.BigDecimal
 
-@Table("metal")
-class Metal(
+@Table("latest_crypto_quote")
+class CryptoQuoteLatest(
     @Id
-    val symbol: String,
-    var name: String,
+    var cryptoSymbol: String,
+    var quote_id: Long,
 )

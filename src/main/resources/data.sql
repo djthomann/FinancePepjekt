@@ -1,27 +1,27 @@
-INSERT INTO stock (symbol, name, description, figi, currency, cprice)
-VALUES ('AAPL', 'Apple', 'Apple Inc.', 'BBG000B9XRY4', 'USD', 1.0),
-       ('TSLA', 'Tesla', 'Tesla Inc.', 'BBG000N9MNX3', 'USD', 1.0),
-       ('NVDA', 'Nvidia', 'Nvidia Inc.', 'BBG001S5N8V8', 'USD', 1.0),
-       ('SAP', 'SAP','SAP SE', 'BBG000BB1CX2', 'EUR', 1.0);
+INSERT INTO stock (symbol, name, description, figi, currency)
+VALUES ('AAPL', 'Apple', 'Apple Inc.', 'BBG000B9XRY4', 'USD'),
+       ('TSLA', 'Tesla', 'Tesla Inc.', 'BBG000N9MNX3', 'USD'),
+       ('NVDA', 'Nvidia', 'Nvidia Inc.', 'BBG001S5N8V8', 'USD'),
+       ('SAP', 'SAP','SAP SE', 'BBG000BB1CX2', 'EUR');
 
-INSERT INTO crypto(symbol, name, cprice)
-VALUES('BTC', 'Bitcoin', 1.0),
-      ('ETH', 'Ethereum', 1.0),
-      ('SOL', 'Solana', 1.0),
-      ('DOGE', 'Dogecoin', 1.0),
-      ('XRP', 'XRP', 1.0);
+INSERT INTO crypto(symbol, name)
+VALUES('BTC', 'Bitcoin'),
+      ('ETH', 'Ethereum'),
+      ('SOL', 'Solana'),
+      ('DOGE', 'Dogecoin'),
+      ('XRP', 'XRP');
 
-INSERT INTO metal(symbol, name, cprice)
-VALUES('XAG', 'Silber', 1.0),
-      ('XAU', 'Gold', 1.0),
-      ('XPT', 'Platin', 1.0);
+INSERT INTO metal(symbol, name)
+VALUES('XAG', 'Silber'),
+      ('XAU', 'Gold'),
+      ('XPT', 'Platin');
 
 INSERT INTO finance_owner (id, name, mail)
 VALUES (1, 'Alice Smith', 'alice.smith@example.com'),
        (2, 'Bob Johnson', 'bob.johnson@example.com'),
        (3, 'Charlie Brown', 'charlie.brown@example.com');
 
-INSERT INTO quote (
+INSERT INTO stock_quote (
     current_price,
     change,
     percent_change,
@@ -34,14 +34,65 @@ INSERT INTO quote (
 )
 VALUES
     (182.50, 2.5, 1.39, 185.00, 20.00, 181.00, 180.00, '2023-12-13 10:30:00', 'AAPL'),
+    (250.75, -1.25, -0.50, 255.00, 249.00, 252.00, 252.00, '2023-12-04 11:00:00', 'TSLA'),
+    (132.20, 0.75, 0.57, 133.50, 131.00, 131.50, 131.00, '2023-12-13 12:15:00', 'NVDA'),
+    (123.45, -0.55, -0.44, 124.00, 123.00, 123.80, 124.00, '2023-12-12 13:00:00', 'SAP'),
     (120.50, 2.5, 1.39, 220.00, 50.00, 420.00, 180.00, '2023-01-03 10:30:00', 'AAPL'),
     (190.50, 2.5, 1.39, 200.00, 180.00, 181.00, 180.00, '2023-12-13 10:30:00', 'AAPL'),
     (182.50, 2.5, 1.39, 185.00, 180.00, 181.00, 180.00, '2023-12-12 10:30:00', 'AAPL'),
-    (182.50, 2.5, 1.39, 185.00, 180.00, 181.00, 180.00, '2023-12-15 10:45:00', 'AAPL'),
-    (250.75, -1.25, -0.50, 255.00, 249.00, 252.00, 252.00, '2023-12-04 11:00:00', 'TSLA'),
-    (132.20, 0.75, 0.57, 133.50, 131.00, 131.50, 131.00, '2023-12-13 12:15:00', 'NVDA'),
-    (123.45, -0.55, -0.44, 124.00, 123.00, 123.80, 124.00, '2023-12-12 13:00:00', 'SAP');
+    (182.50, 2.5, 1.39, 185.00, 180.00, 181.00, 180.00, '2023-12-15 10:45:00', 'AAPL');
 
+INSERT INTO latest_stock_quote(
+    stock_symbol,
+    quote_id
+)
+VALUES
+    ( 'AAPL', 1 ),
+    ( 'TSLA', 2 ),
+    ( 'NVDA', 3 ),
+    ( 'SAP', 4 );
+
+INSERT INTO crypto_quote(
+    current_price,
+    time_stamp,
+    crypto_symbol
+)
+VALUES
+    (1, '2023-12-13 10:30:00', 'BTC'),
+    (1, '2023-12-13 10:30:00', 'ETH'),
+    (1, '2023-12-13 10:30:00', 'SOL'),
+    (1, '2023-12-13 10:30:00', 'DOGE'),
+    (1, '2023-12-13 10:30:00', 'XRP');
+
+INSERT INTO latest_crypto_quote(
+    crypto_symbol,
+    quote_id
+)
+VALUES
+    ( 'BTC', 1 ),
+    ( 'ETH', 2 ),
+    ( 'SOL', 3 ),
+    ( 'DOGE', 4 ),
+    ( 'XRP', 5 );
+
+INSERT INTO metal_quote(
+    current_price,
+    time_stamp,
+    metal_symbol
+)
+VALUES
+    (1, '2023-12-13 10:30:00', 'XAG'),
+    (1, '2023-12-13 10:30:00', 'XAU'),
+    (1, '2023-12-13 10:30:00', 'XPT');
+
+INSERT INTO latest_metal_quote(
+    metal_symbol,
+    quote_id
+)
+VALUES
+    ( 'XAG', 1 ),
+    ( 'XAU', 2 ),
+    ( 'XPT', 3 );
 
 INSERT INTO bankaccount (currency, balance)
 VALUES ('USD', 1000.50),

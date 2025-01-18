@@ -4,7 +4,7 @@
       <div class="stock-detail-header-info">
         <h2>{{ coin.name }} - Detailansicht</h2>
         <p><strong>Symbol:</strong> {{ coin.symbol }}</p>
-        <p><strong>Aktueller Wert:</strong> {{ coin.cprice }} $</p>
+        <p><strong>Aktueller Wert:</strong> {{ coin.currentPrice }} $</p>
 
         <div class="purchase-buttons">
           <button class="purchase-button" @click="purchase(coin.symbol)">Kaufen</button>
@@ -47,9 +47,10 @@ ChartJS.register(
 
 const numDataPoints = 60
 const dataPoints = []
+const labels = []
 
 const data = {
-  labels: new Array(numDataPoints).fill(0),
+  labels: labels,
   datasets: [
     {
       label: '',
@@ -77,7 +78,6 @@ const options = {
 }
 
 const lineChart = ref(null)
-
 const coin = ref<Coin>({})
 let pollingIntervalID: number
 
@@ -90,9 +90,9 @@ async function poll() {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const coinData = await response.json() as Stock;
-    if(coin.value.cprice !== coinData.cprice) {
-      coin.value.cprice = coinData.cprice
+    const coinData = await response.json() as Coin;
+    if(coin.value.currentPrice !== coinData.currentPrice) {
+      coin.value.currentPrice = coinData.currentPrice
       coin.value.justChanged = true
       setTimeout(() => {
         coin.value.justChanged = false;
@@ -100,11 +100,11 @@ async function poll() {
     }
     if(dataPoints.length >= numDataPoints) {
       dataPoints.shift();
+      labels.shift();
     }
-    dataPoints.push(coinData.cprice)
-    console.log("Data Points" + dataPoints);
+    dataPoints.push(coinData.currentPrice)
+    labels.push('0')
     if (lineChart.value) {
-      console.log("Instanz aktualisieren")
       lineChart.value.chart.update();
     } else {
       console.log("Instanz ist null")

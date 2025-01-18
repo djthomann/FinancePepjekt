@@ -1,11 +1,7 @@
 package de.hsrm.mi.stacs.pepjekt.entities.dtos
 
-import de.hsrm.mi.stacs.pepjekt.entities.Quote
-import de.hsrm.mi.stacs.pepjekt.entities.Stock
-import org.springframework.data.annotation.Id
-import org.springframework.data.relational.core.mapping.Table
+import de.hsrm.mi.stacs.pepjekt.entities.StockQuote
 import java.math.BigDecimal
-import java.time.LocalDateTime
 
 class QuoteDTO(
     var currentPrice: BigDecimal,
@@ -20,18 +16,18 @@ class QuoteDTO(
 ) {
     companion object {
         fun mapToDto(
-            quote: Quote,
+            stockQuote: StockQuote,
         ): QuoteDTO {
             return QuoteDTO(
-                currentPrice = quote.currentPrice,
-                change = quote.change,
-                percentChange = quote.percentChange,
-                highPriceOfTheDay = quote.highPriceOfTheDay,
-                lowPriceOfTheDay = quote.lowPriceOfTheDay,
-                openPriceOfTheDay = quote.openPriceOfTheDay,
-                previousClosePrice = quote.previousClosePrice,
-                timeStamp = quote.timeStamp.toString(),
-                stockSymbol = quote.stockSymbol
+                currentPrice = stockQuote.currentPrice,
+                change = stockQuote.change,
+                percentChange = stockQuote.percentChange,
+                highPriceOfTheDay = stockQuote.highPriceOfTheDay,
+                lowPriceOfTheDay = stockQuote.lowPriceOfTheDay,
+                openPriceOfTheDay = stockQuote.openPriceOfTheDay,
+                previousClosePrice = stockQuote.previousClosePrice,
+                timeStamp = stockQuote.timeStamp.toString(),
+                stockSymbol = stockQuote.stockSymbol
             )
         }
     }

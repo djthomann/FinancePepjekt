@@ -8,6 +8,5 @@ import java.math.BigDecimal
 class Crypto(
     @Id
     val symbol: String,
-    var name: String,
-    var cprice: BigDecimal
+    var name: String
 )

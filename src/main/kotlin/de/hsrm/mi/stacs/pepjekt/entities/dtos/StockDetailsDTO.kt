@@ -1,7 +1,7 @@
 package de.hsrm.mi.stacs.pepjekt.entities.dtos
 
 import de.hsrm.mi.stacs.pepjekt.entities.PortfolioEntry
-import de.hsrm.mi.stacs.pepjekt.entities.Quote
+import de.hsrm.mi.stacs.pepjekt.entities.StockQuote
 import de.hsrm.mi.stacs.pepjekt.entities.Stock
 
 class StockDetailsDTO(
@@ -11,13 +11,13 @@ class StockDetailsDTO(
     companion object {
         fun mapToDto(
             stock: Stock,
-            quote: Quote,
+            stockQuote: StockQuote,
             portfolioEntryToMap: PortfolioEntry?
         ): StockDetailsDTO {
             return StockDetailsDTO(
-                stock = StockDTO.mapToDto(stock, quote),
+                stock = StockDTO.mapToDto(stock, stockQuote),
                 portfolioEntry = portfolioEntryToMap?.let {
-                    PortfolioEntryDTO.mapToDtoWithoutStock(it, quote)
+                    PortfolioEntryDTO.mapToDtoWithoutStock(it, stockQuote)
                 }
             )
         }

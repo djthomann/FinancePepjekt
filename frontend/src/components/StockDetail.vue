@@ -86,19 +86,20 @@ interface DataPoint {
   content: number;
 }
 
-const dataPoints = ref<DataPoint[]>([]);
+const numDataPoints = 60
+const dataPoints = []
+const labels = []
 
-const data = computed(() => ({
-  labels: ['-18s', '-15s', '-12s', '-9s', '-6s', '-3s', 'jetzt'],
+const data = {
+  labels: labels,
   datasets: [
     {
       label: '',
       backgroundColor: '#f87979',
-      data: dataPoints.value.map(point => point.content)
+      data: dataPoints
     }
   ]
-}));
-
+}
 
 const options = {
   maintainAspectRatio: false,
@@ -142,12 +143,12 @@ async function poll() {
         stockDetails.value.stock.justChanged = false;
       }, 200);
     }
-    if (dataPoints.value.length > 6) {
-      dataPoints.value.shift();
+    if(dataPoints.length >= numDataPoints) {
+      dataPoints.shift();
+      labels.shift();
     }
-    if (stockData.stock.latestQuote && stockData.stock.latestQuote.currentPrice != null) {
-      dataPoints.value.push({content: stockData.stock.latestQuote.currentPrice});
-    }
+    dataPoints.push(stockData.stock.latestQuote.currentPrice);
+    labels.push('0')
     if (lineChart.value) {
       lineChart.value.chart.update();
     } else {
@@ -179,7 +180,7 @@ onBeforeMount(async () => {
   if (pollingIntervalID) {
     clearInterval(pollingIntervalID);
   }
-  pollingIntervalID = setInterval(poll, 3000)
+  pollingIntervalID = setInterval(poll, 1000)
 })
 
 onUnmounted(() => {

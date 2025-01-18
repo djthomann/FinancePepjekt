@@ -25,7 +25,7 @@
           <td>{{ coin.name }}</td>
           <td>{{ coin.symbol }}</td>
           <td>USD</td>
-          <td>{{ coin.cprice }}</td>
+          <td>{{ coin.currentPrice }}</td>
           <td :class="{ 'positive': coin.change >= 0, 'negative': coin.change < 0 }">
             {{ coin.change }} € ({{ coin.changePercentage }}%)
           </td>
@@ -60,8 +60,8 @@ async function poll() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const cryptoData = await response.json() as Coin;
-      if(coin.cprice !== cryptoData.cprice) {
-        coin.cprice = cryptoData.cprice
+      if(coin.currentPrice !== cryptoData.currentPrice) {
+        coin.currentPrice = cryptoData.currentPrice
         coin.justChanged = true
 
         setTimeout(() => {
@@ -82,9 +82,9 @@ function sortByPrice() {
   }
   console.log(priceDescending.value)
   if(priceDescending.value) {
-    coins.value = [...coins.value].sort((a, b) => a.cprice - b.cprice)
+    coins.value = [...coins.value].sort((a, b) => a.currentPrice - b.currentPrice)
   } else {
-    coins.value = [...coins.value].sort((a, b) => b.cprice - a.cprice)
+    coins.value = [...coins.value].sort((a, b) => b.currentPrice - a.currentPrice)
   }
 
 }

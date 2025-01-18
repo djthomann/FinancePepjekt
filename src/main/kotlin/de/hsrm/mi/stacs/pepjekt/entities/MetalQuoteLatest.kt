@@ -2,11 +2,10 @@ package de.hsrm.mi.stacs.pepjekt.entities
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
-import java.math.BigDecimal
 
-@Table("metal")
-class Metal(
+@Table("latest_metal_quote")
+class MetalQuoteLatest(
     @Id
-    val symbol: String,
-    var name: String,
+    var metalSymbol: String,
+    var quote_id: Long,
 )

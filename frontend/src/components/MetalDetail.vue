@@ -4,7 +4,7 @@
       <div class="stock-detail-header-info">
         <h2>{{ metal.name }} - Detailansicht</h2>
         <p><strong>Symbol:</strong> {{ metal.symbol }}</p>
-        <p><strong>Aktueller Wert:</strong> {{ metal.cprice }} $</p>
+        <p><strong>Aktueller Wert:</strong> {{ metal.currentPrice }} $</p>
 
         <div class="purchase-buttons">
           <button class="purchase-button" @click="purchase(metal.symbol)">Kaufen</button>
@@ -47,9 +47,10 @@ ChartJS.register(
 
 const numDataPoints = 60
 const dataPoints = []
+const labels = []
 
 const data = {
-  labels: new Array(numDataPoints).fill(0),
+  labels: labels,
   datasets: [
     {
       label: '',
@@ -77,7 +78,6 @@ const options = {
 }
 
 const lineChart = ref(null)
-
 const metal = ref<Metal>({})
 let pollingIntervalID: number
 
@@ -91,8 +91,8 @@ async function poll() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const metalData = await response.json() as Metal;
-    if (metal.value.cprice !== metalData.cprice) {
-      metal.value.cprice = metalData.cprice
+    if (metal.value.currentPrice !== metalData.currentPrice) {
+      metal.value.currentPrice = metalData.currentPrice
       metal.value.justChanged = true
 
       setTimeout(() => {
@@ -101,8 +101,10 @@ async function poll() {
     }
     if(dataPoints.length >= numDataPoints) {
       dataPoints.shift();
+      labels.shift();
     }
-    dataPoints.push(metalData.cprice)
+    dataPoints.push(metalData.currentPrice)
+    labels.push('0')
     if (lineChart.value) {
       lineChart.value.chart.update();
     } else {
