@@ -1,87 +1,94 @@
 <template>
-      <div class="stock-order">
-            <h2>{{ stock.name }} - Kaufansicht</h2>
-            <p><strong>FIGI:</strong> {{ stock.figi }}</p>
-            <p><strong>Aktueller Wert:</strong> {{ stock.latestQuote.currentPrice }} €</p>
+  <div class="stock-order">
+    <h2>{{ stock.name }} - Kaufansicht</h2>
+    <p><strong>FIGI:</strong> {{ stock.figi }}</p>
+    <p><strong>Aktueller Wert:</strong> {{ stock.latestQuote.currentPrice }} €</p>
 
-            <div>
-                  <form @submit.prevent="purchase">
-                        <label for="amount">Anzahl</label>
-                        <input v-model.number="amount" type="number" id="amount" />
-                        oder
-                        <label for="sum">Summe</label>
-                        <input type="number" id="sum" />
-                        <br>
-                        <label for="timestamp">Zeitpunkt</label>
-                        <input v-model="date" type="date" id="timestamp" />
-
-                        <button type="submit" class="purchase-button">Kaufen</button>
-                        <p>{{serverResponse}}</p>
-                  </form>
-            </div>
-
-      </div>
+    <div>
+      <form @submit.prevent="purchase">
+        <!--  <label for="amount">Anzahl</label>
+        <input v-model.number="amount" type="number" id="amount" />
+         oder
+         -->
+        <label for="purchaseAmount">Kaufsumme</label>
+        <input v-model.number="purchaseAmount" type="number" id="sum"/>
+        <br>
+        <label for="timestamp-date">Datum</label>
+        <input v-model="date" type="date" id="timestamp-date"/>
+        <label for="timestamp-time">Uhrzeit</label>
+        <input v-model="time" type="time" id="timestamp-time"/>
+        <br>
+        <button type="submit" class="purchase-button">Kaufen</button>
+        <p>{{ serverResponse }}</p>
+      </form>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import {onBeforeMount, ref} from 'vue';
-import {useRoute} from "vue-router";
-import type {Stock} from "@/types/types.ts";
+import {useRoute} from 'vue-router';
+import type {Stock} from '@/types/types.ts';
 
-const stock = ref<Stock>({})
+// Daten und Referenzen
+const stock = ref<Stock>({});
+const purchaseAmount = ref<number>();
+const serverResponse = ref<string>();
 
-const amount = ref(10);
-const serverResponse = ref<string>()
+const date = ref(getTodayDate());
+const time = ref("12:00");
 
-const url = "/api/buy/stock"
+const route = useRoute();
 
 onBeforeMount(async () => {
-
-  const route = useRoute();
-
   const symbol = route.params.symbol;
 
   try {
-    const response = await fetch(`/api/stock/by/symbol?symbol=${symbol}`)
+    const response = await fetch(`/api/stock/by/symbol?symbol=${symbol}`);
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-    stock.value = await response.json() as Stock
+    stock.value = await response.json() as Stock;
   } catch (e) {
-    console.error(e)
+    console.error(e);
   }
-})
+});
 
 async function purchase() {
-  console.log(amount.value + ' Stück kaufen zum Zeitpunkt: ' + date.value)
-  const curl = url + `?investmentAccountId=1&stockSymbol=${stock.value.symbol}&volume=${amount.value}&executionTime=${date.value}`
-  console.log(curl)
+  const executionTime = `${date.value}T${time.value}`;
+
+  const baseUrl = "/api/placeBuyOrder";
+  const queryParams = new URLSearchParams({
+    investmentAccountId: "1",
+    stockSymbol: stock.value.symbol,
+    purchaseAmount: purchaseAmount.value!.toString(),
+    executionTime,
+  }).toString();
+
+  const requestUrl = `${baseUrl}?${queryParams}`;
+
   try {
-    const response = await fetch(curl, {
-      method: "POST"
-    });
+    const response = await fetch(requestUrl, {method: "POST"});
 
     if (!response.ok) {
-      serverResponse.value = "Error: Order invalid"
-      throw new Error("Network response was not ok");
+      serverResponse.value = "Fehler: Bestellung ungültig";
+      throw new Error("Netzwerkantwort war nicht in Ordnung");
     }
-    serverResponse.value = "Success: Buy Order Placed"
+
+    serverResponse.value = "Erfolg: Kaufauftrag erteilt";
   } catch (error) {
-    serverResponse.value = "Server Error: Order Not Placed"
-    console.error("Error: Order Not Placed", error);
+    serverResponse.value = "Serverfehler: Bestellung nicht durchgeführt";
+    console.error("Fehler: Bestellung nicht durchgeführt", error);
   }
 }
 
-const getTodayDate = () => {
+function getTodayDate() {
   const today = new Date();
   const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0'); // Monat von 0-11, daher +1
+  const month = String(today.getMonth() + 1).padStart(2, '0');
   const day = String(today.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
-};
-
-const date = ref(getTodayDate());
-
+}
 </script>
 
 <style lang="scss">
