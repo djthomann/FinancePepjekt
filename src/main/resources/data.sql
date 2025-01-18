@@ -116,12 +116,14 @@ VALUES (1, 'AAPL', 50.5),
        (2, 'SAP', 15.0),
        (3, 'AAPL', 25.0);
 
--- 
-INSERT INTO stock_order (volume, type, investment_account_id, stock_symbol)
-VALUES (100.0, 'BUY', 1, 'AAPL'), -- Order for 100 AAPL from Investmentkonto 1
-       (50.0, 'SELL', 1, 'TSLA'), -- Order for 50 TSLA from Investmentkonto 1
-       (25.5, 'BUY', 2, 'NVDA'), -- Order for 25.5 NVDA from Investmentkonto 2
-       (10.0, 'SELL', 3, 'SAP');
+-- Order
+INSERT INTO stock_order (purchase_amount, type, execution_timestamp, investment_account_id, stock_symbol)
+VALUES
+    (100.0, 'BUY', '2025-01-18 09:00:00', 1, 'AAPL'), -- Order for 100 AAPL from Investmentkonto 1
+    (50.0, 'SELL', '2025-01-18 09:30:00', 1, 'TSLA'), -- Order for 50 TSLA from Investmentkonto 1
+    (25.5, 'BUY', '2025-01-18 10:00:00', 2, 'NVDA'), -- Order for 25.5 NVDA from Investmentkonto 2
+    (10.0, 'SELL', '2025-01-18 10:30:00', 3, 'SAP'); -- Order for 10 SAP from Investmentkonto 3
+
 -- Order for 10 SAP from Investmentkonto 3
 
 INSERT INTO exchange (symbol, description)

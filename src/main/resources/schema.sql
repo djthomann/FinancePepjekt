@@ -75,8 +75,8 @@ CREATE TABLE stock_quote
 
 CREATE TABLE latest_stock_quote
 (
-    stock_symbol         VARCHAR(50)      PRIMARY KEY,
-    quote_id              BIGINT UNIQUE,
+    stock_symbol VARCHAR(50) PRIMARY KEY,
+    quote_id     BIGINT UNIQUE,
     FOREIGN KEY (stock_symbol) REFERENCES stock (symbol) ON DELETE CASCADE,
     FOREIGN KEY (quote_id) REFERENCES stock_quote (id) ON DELETE CASCADE
 );
@@ -86,10 +86,10 @@ CREATE TABLE latest_stock_quote
 
 CREATE TABLE crypto_quote
 (
-    id                    SERIAL PRIMARY KEY,
-    current_price         DECIMAL(18, 4) NOT NULL,
-    time_stamp            TIMESTAMP      NOT NULL,
-    crypto_symbol         VARCHAR(50)    NOT NULL,
+    id            SERIAL PRIMARY KEY,
+    current_price DECIMAL(18, 4) NOT NULL,
+    time_stamp    TIMESTAMP      NOT NULL,
+    crypto_symbol VARCHAR(50)    NOT NULL,
     FOREIGN KEY (crypto_symbol) REFERENCES crypto (symbol) ON DELETE CASCADE
 );
 
@@ -97,8 +97,8 @@ CREATE TABLE crypto_quote
 
 CREATE TABLE latest_crypto_quote
 (
-    crypto_symbol         VARCHAR(50)      PRIMARY KEY,
-    quote_id              BIGINT UNIQUE,
+    crypto_symbol VARCHAR(50) PRIMARY KEY,
+    quote_id      BIGINT UNIQUE,
     FOREIGN KEY (crypto_symbol) REFERENCES crypto (symbol) ON DELETE CASCADE,
     FOREIGN KEY (quote_id) REFERENCES crypto_quote (id) ON DELETE CASCADE
 );
@@ -107,10 +107,10 @@ CREATE TABLE latest_crypto_quote
 
 CREATE TABLE metal_quote
 (
-    id                    SERIAL PRIMARY KEY,
-    current_price         DECIMAL(18, 4) NOT NULL,
-    time_stamp            TIMESTAMP      NOT NULL,
-    metal_symbol          VARCHAR(50)    NOT NULL,
+    id            SERIAL PRIMARY KEY,
+    current_price DECIMAL(18, 4) NOT NULL,
+    time_stamp    TIMESTAMP      NOT NULL,
+    metal_symbol  VARCHAR(50)    NOT NULL,
     FOREIGN KEY (metal_symbol) REFERENCES metal (symbol) ON DELETE CASCADE
 );
 
@@ -118,8 +118,8 @@ CREATE TABLE metal_quote
 
 CREATE TABLE latest_metal_quote
 (
-    metal_symbol            VARCHAR(50)      PRIMARY KEY,
-    quote_id                BIGINT UNIQUE,
+    metal_symbol VARCHAR(50) PRIMARY KEY,
+    quote_id     BIGINT UNIQUE,
     FOREIGN KEY (metal_symbol) REFERENCES metal (symbol) ON DELETE CASCADE,
     FOREIGN KEY (quote_id) REFERENCES metal_quote (id) ON DELETE CASCADE
 );
@@ -146,24 +146,24 @@ CREATE TABLE investmentaccount
 
 CREATE TABLE portfolio_entry
 (
-    id           SERIAL PRIMARY KEY,
+    id                    SERIAL PRIMARY KEY,
     investment_account_id BIGINT,
-    stock_symbol VARCHAR(50) NOT NULL,
-    quantity     FLOAT       NOT NULL,
+    stock_symbol          VARCHAR(50) NOT NULL,
+    quantity              FLOAT       NOT NULL,
     FOREIGN KEY (investment_account_id) REFERENCES investmentaccount (id) ON DELETE CASCADE,
     FOREIGN KEY (stock_symbol) REFERENCES stock (symbol) ON DELETE CASCADE
 );
 
 -------------------------------------Order---------------------------------------------------------
 
--- Tabelle erstellen
 CREATE TABLE stock_order
 (
-    id                 SERIAL PRIMARY KEY,
-    volume             FLOAT       NOT NULL,
-    type               VARCHAR(4)  NOT NULL CHECK (type IN ('BUY', 'SELL')),
+    id                    SERIAL PRIMARY KEY,
+    purchase_amount       FLOAT       NOT NULL,
+    type                  VARCHAR(4)  NOT NULL CHECK (type IN ('BUY', 'SELL')),
+    execution_timestamp   TIMESTAMP   NOT NULL,
     investment_account_id BIGINT      NOT NULL,
-    stock_symbol       VARCHAR(50) NOT NULL,
+    stock_symbol          VARCHAR(50) NOT NULL,
     FOREIGN KEY (investment_account_id) REFERENCES investmentaccount (id) ON DELETE CASCADE,
     FOREIGN KEY (stock_symbol) REFERENCES stock (symbol) ON DELETE CASCADE
 );
