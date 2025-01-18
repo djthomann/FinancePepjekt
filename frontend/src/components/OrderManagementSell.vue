@@ -37,12 +37,11 @@ onBeforeMount(async () => {
   const symbol = route.params.symbol;
 
   try {
-    const response = await fetch(`/api/stock-details/symbol?symbol=${symbol}`)
+    const response = await fetch(`/api/stock/by/symbol?symbol=${symbol}`)
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
     stock.value = await response.json() as Stock
-    console.log(stock.value)
   } catch (e) {
     console.error(e)
   }
