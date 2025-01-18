@@ -39,21 +39,22 @@ class OrderService(
      * @return a [Mono] emitting the created [Order], or an error if the operation fails
      */
     override fun placeBuyOrder(
-        investmentAccountId: String,
+        investmentAccountId: Long,
         stockSymbol: String,
-        volume: BigDecimal,
+        purchaseAmount: BigDecimal,
         executionTime: LocalDateTime
     ): Mono<Order> {
         return Mono.zip(
-            investmentAccountRepository.findById(investmentAccountId.toLong()),
+            investmentAccountRepository.findById(investmentAccountId),
             stockRepository.findBySymbol(stockSymbol)
         ).flatMap { tuple ->
             val (account, stock) = tuple
             val order = Order(
-                volume = volume.toFloat(),
+                purchaseAmount = purchaseAmount,
                 type = OrderType.BUY,
                 investmentAccountId = account.id!!,
-                stockSymbol = stock.symbol
+                stockSymbol = stock.symbol,
+                executionTimestamp = executionTime
             )
             orderRepository.save(order).`as`(operator::transactional)
         }
@@ -80,10 +81,12 @@ class OrderService(
         ).flatMap { tuple ->
             val (account, stock) = tuple
             val order = Order(
-                volume = volume.toFloat(),
                 type = OrderType.SELL,
                 investmentAccountId = account.id!!,
-                stockSymbol = stock.symbol
+                stockSymbol = stock.symbol,
+                id = TODO(),
+                purchaseAmount = TODO(),
+                executionTimestamp = TODO()
             )
             orderRepository.save(order).`as`(operator::transactional)
         }

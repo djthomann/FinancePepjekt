@@ -3,6 +3,7 @@ package de.hsrm.mi.stacs.pepjekt.handler
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.OrderDTO
 import de.hsrm.mi.stacs.pepjekt.services.IOrderService
 import de.hsrm.mi.stacs.pepjekt.services.IStockService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -20,35 +21,41 @@ import java.time.LocalDateTime
  */
 @Component
 class OrderHandler(private val orderService: IOrderService, private val stockService: IStockService) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     /**
-     * Handles a request to place a buy order for stock in an investment account.
+     * Handles a request to buy stock in an investment account.
      *
-     * If any required parameter is missing, an error response will be returned. If the order
-     * cannot be placed, a 404 Not Found response will be returned.
+     * If any required parameter is missing or invalid, an error response will be returned.
      *
      * @param request The incoming server request containing query parameters.
-     * @return A Mono containing the server response with the created order or an error response if invalid.
-     * @throws IllegalArgumentException If any required parameter (investmentAccountId, stockSymbol,
-     *                                  volume, executionTime) is missing.
+     * @return A Mono containing the server response with the updated investment account or an error response if invalid.
+     * @throws IllegalArgumentException If any required parameter (investmentAccountId, stockSymbol, volume) is missing.
      */
-    fun postBuyStock(request: ServerRequest): Mono<ServerResponse> {
+    fun placeBuyOrder(request: ServerRequest): Mono<ServerResponse> {
         val investmentAccountId = request.queryParam("investmentAccountId")
+            .map { it.toLong() }
             .orElseThrow { IllegalArgumentException("investmentAccountId is required") }
-        val stockSymbol =
-            request.queryParam("stockSymbol").orElseThrow { IllegalArgumentException("stockSymbol is required") }
-        val volume =
-            BigDecimal(request.queryParam("volume").orElseThrow { IllegalArgumentException("volume is required") })
-        val executionDate = LocalDate.parse(
-            request.queryParam("executionTime").orElseThrow { IllegalArgumentException("executionTime is required") })
 
-        val executionTime = executionDate.atStartOfDay();
+        val stockSymbol = request.queryParam("stockSymbol")
+            .orElseThrow { IllegalArgumentException("stockSymbol is required") }
 
-        return orderService.placeBuyOrder(investmentAccountId, stockSymbol, volume, executionTime)
-            .flatMap { order ->
-                ServerResponse.ok().bodyValue(order)
+        val purchaseAmount = request.queryParam("purchaseAmount")
+            .map { BigDecimal(it) }
+            .orElseThrow { IllegalArgumentException("purchaseAmount is required") }
+
+        val executionTime = request.queryParam("executionTime")
+            .map { LocalDateTime.parse(it) }
+            .orElseThrow { IllegalArgumentException("executionTime is required") }
+
+        logger.info(
+            "Create Order to time $executionTime for $purchaseAmount $ of $stockSymbol for investmentAccount"
+                    + "$investmentAccountId"
+        )
+        return orderService.placeBuyOrder(investmentAccountId, stockSymbol, purchaseAmount, executionTime)
+            .flatMap { createdOrder ->
+                ServerResponse.ok().bodyValue(createdOrder)
             }
-            .switchIfEmpty(ServerResponse.notFound().build())
     }
 
     /**
@@ -107,7 +114,7 @@ class OrderHandler(private val orderService: IOrderService, private val stockSer
                             .map { stock ->
                                 OrderDTO(
                                     id = order.id,
-                                    volume = order.volume,
+                                    purchaseAmount = order.purchaseAmount,
                                     type = order.type,
                                     stock = stock,
                                     investmentAccountId = investmentAccountId.toLong(),

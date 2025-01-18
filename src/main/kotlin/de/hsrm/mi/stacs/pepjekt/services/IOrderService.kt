@@ -15,7 +15,7 @@ import java.time.LocalDateTime
 interface IOrderService {
 
     fun placeBuyOrder(
-        investmentAccountId: String, stockSymbol: String, volume: BigDecimal, executionTime:
+        investmentAccountId: Long, stockSymbol: String, purchaseAmount: BigDecimal, executionTime:
         LocalDateTime
     ): Mono<Order>
 
