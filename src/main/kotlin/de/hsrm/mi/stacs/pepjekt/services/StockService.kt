@@ -140,7 +140,7 @@ class StockService(
      * @param to the end of the time range
      * @return a [Flux] emitting the [StockQuote] instances within the specified time range
      */
-    override fun getStockHistoryBySymbol(symbol: String, from: LocalDateTime, to: LocalDateTime): Flux<Quote> {
+    override fun getStockHistoryBySymbol(symbol: String, from: LocalDateTime, to: LocalDateTime): Flux<StockQuote> {
         return stockQuoteRepository.findByStockSymbol(symbol)
             .filter { quote -> quote.timeStamp.isAfter(to) && quote.timeStamp.isBefore(from) }
 
