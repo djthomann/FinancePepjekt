@@ -7,7 +7,7 @@
         <p v-if="investmentAccount && investmentAccount.owner">{{ investmentAccount.owner.mail }}</p>
       </div>
       <div class="total-value" v-if="investmentAccount && investmentAccount.owner">
-        <p>Depotwert: <strong>{{ investmentAccount.totalValue }} €</strong></p>
+        <p>Depotwert: <strong>{{ totalValue }} €</strong></p>
       </div>
     </div>
 
@@ -48,6 +48,7 @@ import {onBeforeMount, onUnmounted, ref} from 'vue';
 const router = useRouter()
 const route = useRoute()
 const investmentAccount = ref<InvestmentAccount>()
+const totalValue = ref<number>()
 let pollingIntervalID: number
 const investmentAccountId = route.params.investmentAccountId as string
 
@@ -57,7 +58,10 @@ onBeforeMount(async () => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
-    investmentAccount.value = await response.json() as InvestmentAccount
+    const result = await response.json() as InvestmentAccount
+
+    investmentAccount.value = result
+    totalValue.value = result.totalValue
   } catch (e) {
     console.error(e)
   }
@@ -74,6 +78,7 @@ async function poll() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const investmentAccountData = (await response.json()) as InvestmentAccount;
+    totalValue.value = investmentAccountData.totalValue
 
     for (const portfolioEntry of investmentAccount.value!.portfolio) {
       const matchingEntry = investmentAccountData.portfolio.find(

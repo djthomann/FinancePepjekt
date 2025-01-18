@@ -48,7 +48,7 @@ export interface InvestmentAccount {
   id: number,
   bankAccountId: number,
   portfolio: PortfolioEntry[],
-  totalue: number,
+  totalValue: number,
   bankAccount: BankAccount,
   owner: Owner
 }
