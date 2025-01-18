@@ -162,7 +162,7 @@ class StockService(
 
         return stockQuoteLatestRepository.findById(stockQuote.stockSymbol)
             .flatMap { existingQuote ->
-                existingQuote.quote_id = stockQuote.id!!
+                existingQuote.quoteId = stockQuote.id!!
                 stockQuoteLatestRepository.save(existingQuote)
             }
             .switchIfEmpty(
@@ -179,7 +179,7 @@ class StockService(
     override fun getLatestQuoteBySymbol(symbol: String): Mono<StockQuote> {
         return stockQuoteLatestRepository.findById(symbol)
             .flatMap { entry ->
-                stockQuoteRepository.findById(entry.quote_id)
+                stockQuoteRepository.findById(entry.quoteId)
             }
     }
 

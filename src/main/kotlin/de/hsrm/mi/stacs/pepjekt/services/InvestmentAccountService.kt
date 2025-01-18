@@ -30,7 +30,9 @@ class InvestmentAccountService(
     val ownerRepository: IOwnerRepository,
     val stockRepository: IStockRepository,
     val finnhubHandler: FinnhubHandler,
-    val stockService: StockService
+    val stockService: StockService,
+    val latestIStockQuoteRepository: IStockQuoteLatestRepository,
+    val quoteRepository: IStockQuoteRepository
 ) : IInvestmentAccountService {
 
     /**
@@ -41,49 +43,60 @@ class InvestmentAccountService(
      * @param volume the volume of the stock to purchase
      * @return a [Mono] emitting the updated [InvestmentAccount] or an error if any operation fails
      */
-    override fun buyStock(investmentAccountId: Long, stockSymbol: String, volume: BigDecimal): Mono<InvestmentAccount> {
+    override fun buyStock(
+        investmentAccountId: Long,
+        stockSymbol: String,
+        purchaseAmount: BigDecimal
+    ): Mono<InvestmentAccount> {
         return investmentAccountRepository.findById(investmentAccountId)
             .flatMap { investmentAccount ->
                 if (investmentAccount.bankAccountId == null) {
                     return@flatMap Mono.error<InvestmentAccount>(IllegalArgumentException("No bank account linked to the investment account"))
                 }
 
-                portfolioEntryRepository.findByInvestmentAccountIdAndStockSymbol(investmentAccountId, stockSymbol)
-                    .flatMap { existingEntry ->
-                        // Update the existing entry
-                        val updatedQuantity = existingEntry.quantity + volume.toDouble()
-                        val updatedEntry = existingEntry.copy(quantity = updatedQuantity)
-                        portfolioEntryRepository.save(updatedEntry).`as`(operator::transactional)
-                    }
-                    .switchIfEmpty(
-                        // Create a new entry if none exists
-                        portfolioEntryRepository.save(
-                            PortfolioEntry(
-                                investmentAccountId = investmentAccountId,
-                                stockSymbol = stockSymbol,
-                                quantity = volume.toDouble(),
-                            )
-                        ).`as`(operator::transactional)
-                    )
-                    .flatMap {
-                        // Update the balance in the linked bank account
-                        bankAccountRepository.findById(investmentAccount.bankAccountId)
-                    }
-                    .flatMap { bankAccount ->
-                        val updatedBalance = bankAccount.balance.minus(volume)
-                        if (updatedBalance < BigDecimal.ZERO) {
-                            return@flatMap Mono.error<InvestmentAccount>(
-                                IllegalArgumentException(
-                                    "Insufficient balance " +
-                                            "in the bank account"
-                                )
-                            )
-                        }
+                latestIStockQuoteRepository.findById(stockSymbol)
+                    .flatMap { latestStockQuote ->
+                        quoteRepository.findById(latestStockQuote.quoteId)
+                    }.flatMap { quote ->
+                        val calculatedVolume = purchaseAmount / quote.currentPrice
 
-                        val updatedBankAccount = bankAccount.copy(balance = updatedBalance)
-                        bankAccountRepository.save(updatedBankAccount).`as`(operator::transactional)
+                        portfolioEntryRepository.findByInvestmentAccountIdAndStockSymbol(
+                            investmentAccountId,
+                            stockSymbol
+                        )
+                            .flatMap { existingEntry ->
+                                // Update the existing entry
+                                val updatedQuantity = existingEntry.quantity + calculatedVolume.toDouble()
+                                val updatedEntry = existingEntry.copy(quantity = updatedQuantity)
+                                portfolioEntryRepository.save(updatedEntry).`as`(operator::transactional)
+                            }
+                            .switchIfEmpty(
+                                // Create a new entry if none exists
+                                portfolioEntryRepository.save(
+                                    PortfolioEntry(
+                                        investmentAccountId = investmentAccountId,
+                                        stockSymbol = stockSymbol,
+                                        quantity = calculatedVolume.toDouble(),
+                                    )
+                                ).`as`(operator::transactional)
+                            )
+                            .flatMap {
+                                // Update the balance in the linked bank account
+                                bankAccountRepository.findById(investmentAccount.bankAccountId)
+                            }
+                            .flatMap { bankAccount ->
+                                val updatedBalance = bankAccount.balance.minus(purchaseAmount)
+                                if (updatedBalance < BigDecimal.ZERO) {
+                                    return@flatMap Mono.error<InvestmentAccount>(
+                                        IllegalArgumentException("Insufficient balance in the bank account")
+                                    )
+                                }
+
+                                val updatedBankAccount = bankAccount.copy(balance = updatedBalance)
+                                bankAccountRepository.save(updatedBankAccount).`as`(operator::transactional)
+                            }
+                            .thenReturn(investmentAccount)
                     }
-                    .thenReturn(investmentAccount)
             }
     }
 
