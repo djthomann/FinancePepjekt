@@ -3,6 +3,7 @@ package de.hsrm.mi.stacs.pepjekt.services
 import de.hsrm.mi.stacs.pepjekt.entities.CryptoQuoteLatest
 import de.hsrm.mi.stacs.pepjekt.entities.StockQuote
 import de.hsrm.mi.stacs.pepjekt.entities.Stock
+import de.hsrm.mi.stacs.pepjekt.entities.dtos.QuoteDTO
 import de.hsrm.mi.stacs.pepjekt.entities.StockQuoteLatest
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDetailsDTO
 import de.hsrm.mi.stacs.pepjekt.repositories.*
@@ -10,6 +11,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.server.ServerResponse
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
@@ -92,8 +94,20 @@ class StockService(
      * @return a [Mono] emitting the average price as a [BigDecimal], or zero if no quotes are found
      */
     override fun calculateAveragePrice(symbol: String, from: LocalDateTime, to: LocalDateTime): Mono<BigDecimal> {
-        return stockQuoteRepository.findByStockSymbol(symbol)
-            .filter { quote -> quote.timeStamp.isAfter(from) && quote.timeStamp.isBefore(to) }
+        return getStockHistoryBySymbol(symbol, from, to)
+                .collectList()
+                .map { quotes ->
+                    if (quotes.isEmpty()) {
+                        BigDecimal.ZERO
+                    } else {
+                        val sum = quotes.fold(BigDecimal.ZERO) { acc, quote -> acc.add(quote.currentPrice) }
+                        sum.divide(BigDecimal(quotes.size), 2, RoundingMode.HALF_UP)
+                    }
+                }
+        }
+
+    override fun calculateAveragePrice(symbol: String): Mono<BigDecimal> {
+        return getStockHistoryBySymbol(symbol)
             .collectList()
             .map { quotes ->
                 if (quotes.isEmpty()) {
@@ -103,7 +117,6 @@ class StockService(
                     sum.divide(BigDecimal(quotes.size), 2, RoundingMode.HALF_UP)
                 }
             }
-
     }
 
     /**
@@ -127,9 +140,9 @@ class StockService(
      * @param to the end of the time range
      * @return a [Flux] emitting the [StockQuote] instances within the specified time range
      */
-    override fun getStockHistoryBySymbol(symbol: String, from: LocalDateTime, to: LocalDateTime): Flux<StockQuote> {
+    override fun getStockHistoryBySymbol(symbol: String, from: LocalDateTime, to: LocalDateTime): Flux<Quote> {
         return stockQuoteRepository.findByStockSymbol(symbol)
-            .filter { quote -> quote.timeStamp.isAfter(from) && quote.timeStamp.isBefore(to) }
+            .filter { quote -> quote.timeStamp.isAfter(to) && quote.timeStamp.isBefore(from) }
 
     }
 

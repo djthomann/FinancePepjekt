@@ -245,15 +245,25 @@ class StockHandler(private val stockService: IStockService) {
      */
     fun getStockAveragePrice(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
-        val from =
-            LocalDateTime.parse(request.queryParam("from").orElseThrow { IllegalArgumentException("from is required") })
-        val to =
-            LocalDateTime.parse(request.queryParam("to").orElseThrow { IllegalArgumentException("to is required") })
+        val fromParam = request.queryParam("from")
+        val toParam = request.queryParam("to")
 
-        return stockService.calculateAveragePrice(symbol, from, to)
-            .flatMap { history ->
-                ServerResponse.ok().bodyValue(history)
-            }
-            .switchIfEmpty(ServerResponse.notFound().build())
+        return if (fromParam.isPresent && toParam.isPresent) {
+            val from = LocalDateTime.parse(fromParam.get())
+            val to = LocalDateTime.parse(toParam.get())
+
+            stockService.calculateAveragePrice(symbol, from, to)
+                .flatMap { averagePrice ->
+                    ServerResponse.ok().bodyValue(averagePrice)
+                }
+                .switchIfEmpty(ServerResponse.notFound().build())
+        } else {
+            stockService.calculateAveragePrice(symbol)
+                .flatMap { averagePrice ->
+                    ServerResponse.ok().bodyValue(averagePrice)
+                }
+                .switchIfEmpty(ServerResponse.notFound().build())
+        }
     }
+
 }
