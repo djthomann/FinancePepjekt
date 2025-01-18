@@ -116,9 +116,10 @@ class OrderHandler(private val orderService: IOrderService, private val stockSer
                                     id = order.id,
                                     purchaseAmount = order.purchaseAmount,
                                     type = order.type,
+                                    executionTimestamp = order.executionTimestamp,
                                     stock = stock,
                                     investmentAccountId = investmentAccountId.toLong(),
-                                    stockSymbol = stock.symbol
+                                    stockSymbol = stock.symbol,
                                 )
                             }
                     }

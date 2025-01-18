@@ -1,8 +1,9 @@
 export interface Order {
   id?: number,
-  volume: number,
+  purchaseAmount: number,
   type: OrderType,
   investmentAccountId: number,
+  executionTimestamp: string,
   stock: Stock,
   stockSymbol: string
 }
