@@ -1,8 +1,9 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
-import de.hsrm.mi.stacs.pepjekt.entities.Currency
-import de.hsrm.mi.stacs.pepjekt.entities.StockQuote
-import de.hsrm.mi.stacs.pepjekt.entities.Stock
+import de.hsrm.mi.stacs.pepjekt.entities.*
+import de.hsrm.mi.stacs.pepjekt.entities.dtos.PortfolioEntryDTO
+import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDTO
+import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDetailsDTO
 import de.hsrm.mi.stacs.pepjekt.handler.FinnhubHandler
 import de.hsrm.mi.stacs.pepjekt.repositories.*
 import org.junit.jupiter.api.BeforeEach
@@ -32,6 +33,11 @@ class StockServiceTest {
     private val databaseClient: DatabaseClient = mock(DatabaseClient::class.java)
 
     private lateinit var stockService: StockService
+    private lateinit var stock: Stock
+    private lateinit var stockQuotes: List<StockQuote>
+    private lateinit var portfolioEntry: PortfolioEntry
+    private lateinit var investmentAccount: InvestmentAccount
+    private lateinit var stockQuoteLatest: StockQuoteLatest
 
     /**
      * Sets up test environment by initializing mocked repositories, defining their behaviors,
@@ -39,8 +45,13 @@ class StockServiceTest {
      */
     @BeforeEach
     fun setUp() {
-        val stock = Stock(symbol = "AAPL", description = "Apple Inc.", figi = "BBG000B9XRY4", currency = Currency.USD, name = "Apple")
-        val stockQuotes = listOf(
+        stock = Stock(symbol = "AAPL", description = "Apple Inc.", figi = "BBG000B9XRY4", currency = Currency.USD, name = "Apple")
+        investmentAccount = InvestmentAccount(
+            bankAccountId = 1L,
+            ownerId = 1L,
+            id = 1L
+        )
+        stockQuotes = listOf(
             StockQuote(
                 currentPrice = BigDecimal(100),
                 timeStamp = LocalDateTime.now().minusDays(1),
@@ -102,11 +113,69 @@ class StockServiceTest {
                 previousClosePrice = BigDecimal(110)
             )
         )
+        stockQuoteLatest = StockQuoteLatest(stockSymbol = stock.symbol, quote_id = 1L)
+        portfolioEntry = PortfolioEntry(investmentAccountId = investmentAccount.id!!, stockSymbol = stock.symbol, id = 1L, quantity = 10.0)
 
         stockService = StockService(stockRepository, stockQuoteRepository, stockQuoteLatestRepository, databaseClient, investmentAccountRepository, portfolioEntryRepository)
         `when`(stockRepository.findBySymbol(stock.symbol)).thenReturn(Mono.just(stock))
         `when`(stockQuoteRepository.findByStockSymbol(stock.symbol)).thenReturn(Flux.fromIterable(stockQuotes))
     }
+
+    @Test
+    fun `test getStockDetails`() {
+        `when`(stockQuoteLatestRepository.findById(stock.symbol)).thenReturn(Mono.just(stockQuoteLatest))
+        `when`(stockQuoteRepository.findById(stockQuoteLatest.quote_id)).thenReturn(Mono.just(stockQuotes[0]))
+        `when`(stockService.getLatestQuoteBySymbol(stock.symbol)).thenReturn(Mono.just(stockQuotes[0]))
+        `when`(stockService.getStockBySymbol(stock.symbol)).thenReturn(Mono.just(stock))
+        `when`(investmentAccountRepository.findById(investmentAccount.id!!)).thenReturn(Mono.just(investmentAccount))
+
+        val stockDTO = StockDTO.mapToDto(stock, stockQuotes[0])
+        stockService.getStockDetails(stock.symbol, investmentAccount.id!!)
+            .doOnNext { result ->
+                assert(result.stock == stockDTO)
+                assert(result.portfolioEntry == PortfolioEntryDTO.mapToDto(portfolioEntry, stockDTO))
+            }
+            .subscribe()
+    }
+
+    @Test
+    fun `test getStockByDescription`() {
+        val description = "Apple Inc."
+        val stock = Stock(symbol = "AAPL", description = "Apple Inc.", figi = "BBG000B9XRY4", currency = Currency.USD, name = "Apple")
+
+        // Mocken der Rückgabe von `findByDescription`
+        `when`(stockRepository.findByDescription(description)).thenReturn(Mono.just(stock))
+
+        // Testaufruf und Überprüfung
+        stockService.getStockByDescription(description)
+            .doOnNext { result ->
+                assert(result.symbol == "AAPL")
+                assert(result.description == description)
+            }
+            .subscribe()
+    }
+
+
+    @Test
+    fun `test getStocks`() {
+        val stock1 = Stock(symbol = "AAPL", description = "Apple Inc.", figi = "BBG000B9XRY4", currency = Currency.USD, name = "Apple")
+        val stock2 = Stock(symbol = "GOOG", description = "Alphabet Inc.", figi = "BBG000B9XRY4", currency = Currency.USD, name = "Google")
+        val stocks = listOf(stock1, stock2)
+
+        // Mocken der Rückgabe von `findAll`
+        `when`(stockRepository.findAll()).thenReturn(Flux.fromIterable(stocks))
+
+        // Testaufruf und Überprüfung
+        stockService.getStocks()
+            .collectList()
+            .doOnNext { result ->
+                assert(result.size == 2)
+                assert(result[0].symbol == "AAPL")
+                assert(result[1].symbol == "GOOG")
+            }
+            .subscribe()
+    }
+
 
     /**
      * Tests the [StockService.getStockBySymbol] method to ensure it retrieves the correct Stock entity by its symbol.
@@ -136,11 +205,21 @@ class StockServiceTest {
             .subscribe()
     }
 
+    @Test
+    fun `test calculateAveragePrice without time limit`() {
+
+        stockService.calculateAveragePrice("AAPL")
+            .doOnNext { averagePrice ->
+                assert(averagePrice.compareTo(BigDecimal("200.00")) == 0)
+            }
+            .subscribe()
+    }
+
     /**
      * Tests the [StockService.getStockHistoryBySymbol] method to ensure all quotes for a stock are retrieved correctly.
      */
     @Test
-    fun `test getStockHistory`() {
+    fun `test getStockHistoryBySymbol without time limits`() {
         stockService.getStockHistoryBySymbol("AAPL")
             .collectList()
             .doOnNext { stockQuotes ->
@@ -167,4 +246,19 @@ class StockServiceTest {
             }
             .subscribe()
     }
+
+    @Test
+    fun `get the latest quote of a corresponding stock`() {
+        `when`(stockQuoteLatestRepository.findById(stock.symbol)).thenReturn(Mono.just(stockQuoteLatest))
+        `when`(stockQuoteRepository.findById(stockQuoteLatest.quote_id)).thenReturn(Mono.just(stockQuotes[0]))
+        `when`(stockService.getLatestQuoteBySymbol(stock.symbol)).thenReturn(Mono.just(stockQuotes[0]))
+
+        stockService.getLatestQuoteBySymbol(stock.symbol)
+            .doOnNext { result ->
+                assert(result.currentPrice == BigDecimal(100))
+                assert(result.stockSymbol == stock.symbol)
+            }
+            .subscribe()
+    }
+
 }
