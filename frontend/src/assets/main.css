@@ -18,6 +18,7 @@ body {
   --error-body-background-color: #fbc9c4;
   --background-color: #ffffff;
   --border-color: #ddd;
+  --dark-gray: #474747;
   --font-color: #ffffff;
 }
 
@@ -118,16 +119,20 @@ tr {
 }
 
 .details-button {
-  background-color: var(--main-color);
+  position: relative;
+  font-weight: bolder;
+  background-color: var(--border-color);
   border-radius: 5px;
   border-style: none;
   padding: 5px 10px;
-  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .details-button:hover {
-  font-weight: bold;
-  padding: 5px 8.5px;
+  font-weight: bolder;
+  background-color: var(--main-color);
 }
 
 #suchfeld {
