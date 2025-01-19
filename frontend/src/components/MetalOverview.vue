@@ -138,41 +138,6 @@ const navigateToMetalDetail = (symbol: string) => {
 
 </script>
 
-<style scoped lang="scss">
-.just-changed {
-  background-color: var(--main-color-light);
-}
-
-.table-row {
-  transition: background-color 200ms;
-}
-
-.sorting-button {
-  display: flex;
-  align-items: center;
-  background: 0;
-  border: none;
-  font-weight: bold;
-  font-size: 15px;
-  color: #333;
-}
-
-.sorting-button:hover {
-  cursor: pointer;
-}
-
-.sorting-button::before {
-  margin-right: 10px;
-  width: 10px;
-  height: 10px;
-  content: '';
-  background: url('@/assets/arrow_down.svg') no-repeat center center;
-  background-size: contain;
-  transition: transform 200ms;
-  transform: rotate(180deg);
-}
-
-.sorting-button-down::before {
-  transform: rotate(0deg);
-}
+<style lang="scss">
+@use "./style.scss";
 </style>
