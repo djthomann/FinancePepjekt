@@ -3,9 +3,8 @@
     <div>
       <h1>Edelmetalle</h1>
       <div id="searchField">
-        <input  placeholder="Symbol/Name" />
+        <input v-model="search" placeholder="Symbol/Name" />
         <button class="details-button" @click="resetSearch">Reset</button>
-        <button class="details-button" @click="searchContent">Search</button>
       </div>
     </div>
 
@@ -21,7 +20,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr class="table-row" v-for="metal in metals" :key="metal.symbol" :class="{ 'just-changed': metal.justChanged}" @click="navigateToMetalDetail(metal.symbol)">
+        <tr class="table-row" v-for="metal in filteredMetals" :key="metal.symbol" :class="{ 'just-changed': metal.justChanged}" @click="navigateToMetalDetail(metal.symbol)">
           <td>{{ metal.name }}</td>
           <td>{{ metal.symbol }}</td>
           <td>USD</td>
@@ -37,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref} from "vue";
+import {onMounted, onUnmounted, ref, computed} from "vue";
 import {type Metal} from "@/types/types.ts";
 import {useRouter} from "vue-router";
 
@@ -47,7 +46,17 @@ let pollingIntervalID: number
 const priceDescending = ref<boolean>(false)
 const nameDescending = ref<boolean>(false)
 
+const search = ref<string>('')
 const metals = ref<Metal[]>([])
+const  filteredMetals = computed(() =>
+  metals.value.filter(metal => {
+    return metal.symbol.toLowerCase().includes(search.value.toLowerCase()) || metal.name.toLowerCase().includes(search.value.toLowerCase())
+  })
+);
+
+function resetSearch() {
+  search.value = ''
+}
 
 async function poll() {
 
@@ -60,7 +69,6 @@ async function poll() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const metalData = await response.json() as Metal;
-      console.log(metalData)
       if (metal.currentPrice !== metalData.currentPrice) {
         metal.currentPrice = metalData.currentPrice
         metal.justChanged = true
@@ -72,6 +80,8 @@ async function poll() {
     } catch (e) {
       console.error(e);
     }
+
+    console.log(filteredMetals.value)
 
   }
 }
