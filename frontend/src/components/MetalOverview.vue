@@ -80,9 +80,6 @@ async function poll() {
     } catch (e) {
       console.error(e);
     }
-
-    console.log(filteredMetals.value)
-
   }
 }
 
