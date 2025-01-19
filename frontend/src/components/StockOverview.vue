@@ -3,9 +3,8 @@
     <div>
       <h1>Wertpapiere</h1>
       <div id="searchField">
-        <input v-model="searchField" placeholder="Symbol/Name"/>
+        <input v-model="search" placeholder="Symbol/Name"/>
         <button class="details-button" @click="resetSearch">Reset</button>
-        <button class="details-button" @click="searchContent">Search</button>
       </div>
     </div>
 
@@ -22,7 +21,7 @@
         </thead>
         <tbody>
 
-        <tr class="table-row" v-for="stock in stocks" :key="stock.figi" :class="{ 'just-changed':
+        <tr class="table-row" v-for="stock in filteredStocks" :key="stock.figi" :class="{ 'just-changed':
                        stock.justChanged}" @click="navigateToStockDetail(stock.symbol, investmentAccountId)">
           <td>{{ stock.name }}</td>
           <td>{{ stock.symbol }}</td>
@@ -39,20 +38,25 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, onUnmounted, ref} from 'vue';
+import {computed, onMounted, onUnmounted, ref} from 'vue';
 import {useRoute, useRouter} from "vue-router";
 import type {InvestmentAccount, Stock} from "@/types/types.ts";
 
 const router = useRouter()
 const route = useRoute()
 let pollingIntervalID: number
-const searchField = ref('')
 const investmentAccountId = route.params.investmentAccountId as string
 
 const priceDescending = ref<boolean>(false)
 const nameDescending = ref<boolean>(false)
 
+const search = ref('')
 const stocks = ref<Stock[]>([])
+const filteredStocks = computed(() =>
+  stocks.value.filter(stock => {
+    return stock.symbol.toLowerCase().includes(search.value.toLowerCase()) || stock.name.toLowerCase().includes(search.value.toLowerCase())
+  })
+);
 
 async function poll() {
 
@@ -128,11 +132,7 @@ onUnmounted(() => {
 })
 
 function resetSearch() {
-  searchField.value = ''
-}
-
-function searchContent() {
-  console.log('searching for:', searchField.value)
+  search.value = ''
 }
 
 const navigateToStockDetail = (symbol: string, investmentAccountId: string) => {

@@ -3,9 +3,8 @@
     <div>
       <h1>Kryptowährungen</h1>
       <div id="searchField">
-        <input  placeholder="Symbol/Name" />
+        <input v-model="search" placeholder="Symbol/Name" />
         <button class="details-button" @click="resetSearch">Reset</button>
-        <button class="details-button" @click="searchContent">Search</button>
       </div>
     </div>
 
@@ -21,7 +20,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr class="table-row" v-for="coin in coins" :key="coin.symbol" :class="{ 'just-changed': coin.justChanged}" @click="navigateToCryptoDetail(coin.symbol)">
+        <tr class="table-row" v-for="coin in filteredCoins" :key="coin.symbol" :class="{ 'just-changed': coin.justChanged}" @click="navigateToCryptoDetail(coin.symbol)">
           <td>{{ coin.name }}</td>
           <td>{{ coin.symbol }}</td>
           <td>USD</td>
@@ -37,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref } from "vue";
+import {computed, onMounted, onUnmounted, ref} from "vue";
 import {Coin} from "@/types/types.ts";
 import {useRouter} from "vue-router";
 
@@ -47,7 +46,17 @@ let pollingIntervalID: number
 const priceDescending = ref<boolean>(false)
 const nameDescending = ref<boolean>(false)
 
+const search = ref<string>('')
 const coins = ref<Coin[]>([])
+const filteredCoins = computed(() =>
+  coins.value.filter(coin => {
+    return coin.symbol.toLowerCase().includes(search.value.toLowerCase()) || coin.name.toLowerCase().includes(search.value.toLowerCase())
+  })
+);
+
+function resetSearch() {
+  search.value = ''
+}
 
 async function poll() {
 
