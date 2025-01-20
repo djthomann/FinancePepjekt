@@ -25,6 +25,10 @@ class FinnhubHandler(
 
     @Value("\${token}")
     private var token: String? = null
+
+    @Value("\${takeFinnhubDummyClient}")
+    private var finnhubDummyIsTaken: Boolean = false
+
     private final val exchange = "US"
 
     private final val finnhub_webClient = webClientBuilder.baseUrl("https://finnhub.io/api/v1").build()
@@ -44,7 +48,7 @@ class FinnhubHandler(
         } else {
             dummy_finnhub_webClient
         }
-        webClient= dummy_finnhub_webClient
+        webClient = dummy_finnhub_webClient
 
         logger.info(
             "Fetching Stock: {} from {}",
@@ -104,12 +108,21 @@ class FinnhubHandler(
     }
 
     /**
-     * On Application start there is a marketOpen check
+     * On Application start there is a marketOpen check.
+     * If variable takeFinnhubDummyClient is set to true then it will alwqys take the dummy cient.
+     * If not it depends if the market is open or not.
      * */
     @PostConstruct
     fun init() {
-        fetchMarketStatus(exchange).doOnNext { marketStatus ->
-            isMarketOpen = marketStatus.isOpen
-        }.subscribe()
+
+        //Check if marketStatus is open and then choose between finnhub or the dummy one
+        if (!finnhubDummyIsTaken) {
+            fetchMarketStatus(exchange).doOnNext { marketStatus ->
+                isMarketOpen = marketStatus.isOpen
+            }.subscribe()
+        } else {
+            isMarketOpen = false;
+        }
+
     }
 }
