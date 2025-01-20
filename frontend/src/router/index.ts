@@ -49,7 +49,7 @@ const router = createRouter({
       component: MetalDetail,
     },
     {
-      path: '/order-management-sell/:symbol',
+      path: '/order-management-sell/:symbol/:investmentAccountId',
       name: 'order-management-sell',
       component: OrderManagementSell,
     },
