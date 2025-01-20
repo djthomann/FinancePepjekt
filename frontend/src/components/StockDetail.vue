@@ -10,8 +10,9 @@
         <p><strong>Beschreibung:</strong> {{ stockDetails.stock.description }}</p>
 
         <div class="purchase-buttons">
-          <button class="purchase-button" @click="purchase(stockDetails.stock.symbol)">Kaufen</button>
-          <button class="purchase-button" @click="sell(stockDetails.stock.symbol)">Verkaufen</button>
+          <button class="purchase-button" @click="purchase(stockDetails.stock.symbol, stockDetails.portfolioEntry.investmentAccountId)">
+            Kaufen</button>
+          <button class="purchase-button" @click="sell(stockDetails.stock.symbol, stockDetails.portfolioEntry.investmentAccountId)">Verkaufen</button>
         </div>
       </div>
       <div class="stock-detail-header-chart">
@@ -180,7 +181,7 @@ onBeforeMount(async () => {
   if (pollingIntervalID) {
     clearInterval(pollingIntervalID);
   }
-  pollingIntervalID = setInterval(poll, 1000)
+  pollingIntervalID = setInterval(poll, 3000)
 })
 
 onUnmounted(() => {
@@ -190,14 +191,14 @@ onUnmounted(() => {
 
 const router = useRouter()
 
-function sell(symbol: string) {
+function sell(symbol: string, investmentAccountId: number) {
   console.log('Verkaufen')
-  router.push({name: 'order-management-sell', params: {symbol}});
+  router.push({name: 'order-management-sell', params: {symbol, investmentAccountId}});
 }
 
-function purchase(symbol: string) {
+function purchase(symbol: string, investmentAccountId: number) {
   console.log('Kaufen')
-  router.push({name: 'order-management-buy', params: {symbol}});
+  router.push({name: 'order-management-buy', params: {symbol, investmentAccountId}});
 }
 
 </script>

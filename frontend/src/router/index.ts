@@ -54,7 +54,7 @@ const router = createRouter({
       component: OrderManagementSell,
     },
     {
-      path: '/order-management-buy/:symbol',
+      path: '/order-management-buy/:symbol/:investmentAccountId',
       name: 'order-management-buy',
       component: OrderManagementBuy,
     },
