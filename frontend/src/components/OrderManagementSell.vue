@@ -33,8 +33,10 @@
         <form @submit.prevent="sell">
           <label for="amount">Anzahl</label>
           <input v-model.number="amount" type="number" id="amount"/>
-          <label for="timestamp">Zeitpunkt</label>
-          <input v-model="date" type="date" id="timestamp"/>
+          <label for="timestamp-date">Datum</label>
+          <input v-model="date" type="date" id="timestamp-date"/>
+          <label for="timestamp-time">Uhrzeit</label>
+          <input v-model="time" type="time" id="timestamp-time"/>
 
           <button type="submit" class="purchase-button">Verkaufen</button>
           <p>{{ serverResponse }}</p>
@@ -53,6 +55,9 @@ const stockDetail = ref<StockDetails>({})
 
 const amount = ref(0);
 const serverResponse = ref<string>()
+
+const date = ref(getTodayDate());
+const time = ref("12:00");
 
 const url = "/api/sell/stock"
 
@@ -100,15 +105,13 @@ async function sell() {
   }
 }
 
-const getTodayDate = () => {
+function getTodayDate() {
   const today = new Date();
   const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0'); // Monat von 0-11, daher +1
+  const month = String(today.getMonth() + 1).padStart(2, '0');
   const day = String(today.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
-};
-
-const date = ref(getTodayDate());
+}
 
 </script>
 
