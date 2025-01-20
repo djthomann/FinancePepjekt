@@ -23,6 +23,8 @@ class ScheduledOrderExecutor(val orderService: IOrderService) {
                 orderService.processOrders()
                     .doOnTerminate { log.info("Finished processing orders.") }
                     .doOnError { error -> log.error("Error in processOrders: ${error.message}", error) }
+            }.onErrorContinue { error, _ ->
+                log.error("Error in scheduler: ${error.message}", error)
             }
             .subscribe(
                 {

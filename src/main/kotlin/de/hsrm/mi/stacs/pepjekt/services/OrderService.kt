@@ -139,10 +139,11 @@ class OrderService(
                 // Mark the order as processed, or delete it if completed
                 log.info("Deleting order ${order.stockSymbol} after processing.")
                 orderRepository.delete(order)
+            } .onErrorContinue { error, _ ->
+                log.error("Error during order processing: ${error.message}", error)
             }
             .then()
             .doOnTerminate { log.info("Finished processing all orders.") }
-            .doOnError { error -> log.error("Error during order processing: ${error.message}", error) }
     }
 
 

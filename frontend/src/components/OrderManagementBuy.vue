@@ -71,14 +71,14 @@ async function purchase() {
     const response = await fetch(requestUrl, {method: "POST"});
 
     if (!response.ok) {
-      serverResponse.value = "Fehler: Bestellung ungültig";
-      throw new Error("Netzwerkantwort war nicht in Ordnung");
+      serverResponse.value = "Error: Order invalid";
+      throw new Error("Network response was not ok");
     }
 
-    serverResponse.value = "Erfolg: Kaufauftrag erteilt";
+    serverResponse.value = "Success: Buy order placed";
   } catch (error) {
-    serverResponse.value = "Serverfehler: Bestellung nicht durchgeführt";
-    console.error("Fehler: Bestellung nicht durchgeführt", error);
+    serverResponse.value = "Server Error: Order not placed";
+    console.error("Error: Order not placed", error);
   }
 }
 
