@@ -9,6 +9,10 @@ import reactor.core.publisher.Flux
 import java.time.Duration
 import java.time.LocalDateTime
 
+/**
+ * The ScheduledOrderExecutor is responsible for periodically
+ * triggering the execution of order processing tasks.
+ */
 @Component
 class ScheduledOrderExecutor(val orderService: IOrderService) {
 
