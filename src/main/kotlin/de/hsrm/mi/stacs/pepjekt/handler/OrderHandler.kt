@@ -49,8 +49,8 @@ class OrderHandler(private val orderService: IOrderService, private val stockSer
             .orElseThrow { IllegalArgumentException("executionTime is required") }
 
         logger.info(
-            "Create Order to time $executionTime for $purchaseAmount $ of $stockSymbol for investmentAccount"
-                    + "$investmentAccountId"
+            "Place BUY Order to time $executionTime for $purchaseAmount $ of $stockSymbol for investmentAccount"
+                    + " $investmentAccountId"
         )
         return orderService.placeBuyOrder(investmentAccountId, stockSymbol, purchaseAmount, executionTime)
             .flatMap { createdOrder ->

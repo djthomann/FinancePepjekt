@@ -2,9 +2,7 @@ package de.hsrm.mi.stacs.pepjekt.services
 
 import de.hsrm.mi.stacs.pepjekt.entities.Order
 import de.hsrm.mi.stacs.pepjekt.entities.OrderType
-import de.hsrm.mi.stacs.pepjekt.repositories.IInvestmentAccountRepository
-import de.hsrm.mi.stacs.pepjekt.repositories.IOrderRepository
-import de.hsrm.mi.stacs.pepjekt.repositories.IStockRepository
+import de.hsrm.mi.stacs.pepjekt.repositories.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -13,7 +11,9 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.util.function.component1
 import reactor.kotlin.core.util.function.component2
+import reactor.kotlin.core.util.function.component3
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDateTime
 
 /**
@@ -30,6 +30,8 @@ class OrderService(
     val investmentAccountRepository: IInvestmentAccountRepository,
     val stockRepository: IStockRepository,
     val investmentAccountService: IInvestmentAccountService,
+    val latestIStockQuoteRepository: IStockQuoteLatestRepository,
+    val quoteRepository: IStockQuoteRepository
 ) : IOrderService {
 
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -51,16 +53,28 @@ class OrderService(
     ): Mono<Order> {
         return Mono.zip(
             investmentAccountRepository.findById(investmentAccountId),
-            stockRepository.findBySymbol(stockSymbol)
+            stockRepository.findBySymbol(stockSymbol),
+            latestIStockQuoteRepository.findById(stockSymbol)
+                .flatMap { latestStockQuote ->
+                    quoteRepository.findById(latestStockQuote.quoteId)
+                }
         ).flatMap { tuple ->
-            val (account, stock) = tuple
+            val (account, stock, quote) = tuple
+            val calculatedVolume = if (quote.currentPrice != BigDecimal.ZERO) {
+                purchaseAmount.divide(quote.currentPrice, 10, RoundingMode.UP)
+            } else {
+                return@flatMap Mono.error(IllegalArgumentException("Current price cannot be null or zero"))
+            }
+
             val order = Order(
                 purchaseAmount = purchaseAmount,
+                purchaseVolume = calculatedVolume.toDouble(),
                 type = OrderType.BUY,
                 investmentAccountId = account.id!!,
                 stockSymbol = stock.symbol,
                 executionTimestamp = executionTime
             )
+
             orderRepository.save(order).`as`(operator::transactional)
         }
     }

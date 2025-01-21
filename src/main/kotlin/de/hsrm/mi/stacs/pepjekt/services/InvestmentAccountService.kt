@@ -88,7 +88,11 @@ class InvestmentAccountService(
                                 val updatedBalance = bankAccount.balance.minus(purchaseAmount)
                                 if (updatedBalance < BigDecimal.ZERO) {
                                     return@flatMap Mono.error<InvestmentAccount>(
-                                        IllegalArgumentException("Insufficient balance in the bank account")
+                                        IllegalArgumentException(
+                                            "Investmentaccount " + investmentAccountId +
+                                                    ": Insufficient balance in the bank account buying " +
+                                                    stockSymbol + " for amount " + purchaseAmount
+                                        )
                                     )
                                 }
 

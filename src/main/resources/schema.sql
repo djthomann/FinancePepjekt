@@ -19,27 +19,27 @@ DROP TABLE IF EXISTS finance_owner;
 
 CREATE TABLE stock
 (
-    symbol        VARCHAR(50) PRIMARY KEY,
-    name          VARCHAR(50),
-    description   VARCHAR(255) NOT NULL,
-    figi          VARCHAR(50)  NOT NULL,
-    currency      VARCHAR(3)   NOT NULL -- ISO 4217
+    symbol      VARCHAR(50) PRIMARY KEY,
+    name        VARCHAR(50),
+    description VARCHAR(255) NOT NULL,
+    figi        VARCHAR(50)  NOT NULL,
+    currency    VARCHAR(3)   NOT NULL -- ISO 4217
 );
 
 ---------------------------------------Crypto-------------------------------------------------------
 
 CREATE TABLE crypto
 (
-    symbol        VARCHAR(50) PRIMARY KEY,
-    name          VARCHAR(50)
+    symbol VARCHAR(50) PRIMARY KEY,
+    name   VARCHAR(50)
 );
 
 ---------------------------------------Metals-------------------------------------------------------
 
 CREATE TABLE metal
 (
-    symbol        VARCHAR(50) PRIMARY KEY,
-    name          VARCHAR(50)
+    symbol VARCHAR(50) PRIMARY KEY,
+    name   VARCHAR(50)
 );
 
 ---------------------------------------Owner-------------------------------------------------------
@@ -156,11 +156,12 @@ CREATE TABLE portfolio_entry
 CREATE TABLE stock_order
 (
     id                    SERIAL PRIMARY KEY,
-    purchase_amount       FLOAT       NOT NULL,
-    type                  VARCHAR(4)  NOT NULL CHECK (type IN ('BUY', 'SELL')),
-    execution_timestamp   TIMESTAMP   NOT NULL,
-    investment_account_id BIGINT      NOT NULL,
-    stock_symbol          VARCHAR(50) NOT NULL,
+    purchase_amount       DECIMAL(18, 4) NOT NULL,
+    purchase_volume       FLOAT          NOT NULL,
+    type                  VARCHAR(4)     NOT NULL CHECK (type IN ('BUY', 'SELL')),
+    execution_timestamp   TIMESTAMP      NOT NULL,
+    investment_account_id BIGINT         NOT NULL,
+    stock_symbol          VARCHAR(50)    NOT NULL,
     FOREIGN KEY (investment_account_id) REFERENCES investmentaccount (id) ON DELETE CASCADE,
     FOREIGN KEY (stock_symbol) REFERENCES stock (symbol) ON DELETE CASCADE
 );

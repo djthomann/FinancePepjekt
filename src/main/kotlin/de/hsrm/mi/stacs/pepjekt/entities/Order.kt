@@ -10,6 +10,7 @@ data class Order(
     @Id
     var id: Long? = null,
     val purchaseAmount: BigDecimal,
+    val purchaseVolume: Double,
     val type: OrderType,
     val executionTimestamp: LocalDateTime,
     val investmentAccountId: Long,

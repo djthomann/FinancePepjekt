@@ -36,7 +36,7 @@ const purchaseAmount = ref<number>();
 const serverResponse = ref<string>();
 
 const date = ref(getTodayDate());
-const time = ref("12:00");
+const time = ref("00:00");
 
 const route = useRoute();
 
@@ -55,14 +55,23 @@ onBeforeMount(async () => {
 });
 
 async function purchase() {
-  const route = useRoute()
-  const stockSymbol = route.params.symbol
-  const investmentAccountId = route.params.investmentAccountId
+  const route = useRoute();
+  const stockSymbol = Array.isArray(route.params.symbol) ? route.params.symbol[0] : route.params.symbol;
+  const investmentAccountId = Array.isArray(route.params.investmentAccountId)
+    ? route.params.investmentAccountId[0]
+    : route.params.investmentAccountId;
 
   const executionTime = `${date.value}T${time.value}`;
 
   const baseUrl = "/api/placeBuyOrder";
-  const requestUrl = `${baseUrl}?investmentAccountId=${investmentAccountId}&stockSymbol=${stockSymbol}&purchaseAmount=${purchaseAmount.value}&executionTime=${executionTime}`;
+  const queryParams = new URLSearchParams({
+    investmentAccountId: investmentAccountId,
+    stockSymbol: stockSymbol,
+    purchaseAmount: purchaseAmount.value!.toString(),
+    executionTime,
+  }).toString();
+
+  const requestUrl = `${baseUrl}?${queryParams}`;
 
   try {
     const response = await fetch(requestUrl, {method: "POST"});
