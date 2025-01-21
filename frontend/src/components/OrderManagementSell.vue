@@ -1,59 +1,96 @@
 <template>
-      <div class="stock-order">
-            <h2>{{ stock.name }} - Detailansicht</h2>
-            <p><strong>FIGI:</strong> {{ stock.figi }}</p>
-            <p><strong>Aktueller Wert:</strong> {{ stock.latestQuote.currentPrice }} €</p>
+  <div class="stock-detail">
+    <h2>{{ stockDetail.stock.name }} - Detailansicht</h2>
+    <p><strong>FIGI:</strong> {{ stockDetail.stock.figi }}</p>
+    <p><strong>Aktueller Wert:</strong> {{ stockDetail.stock.latestQuote.currentPrice }} €</p>
 
-            <div>
-                  <form @submit.prevent="sell">
-                        <label for="amount">Anzahl</label>
-                        <input v-model.number="amount" type="number" id="amount" />
-                        <label for="timestamp">Zeitpunkt</label>
-                        <input v-model="date" type="date" id="timestamp" />
+    <div class="stock-info-section">
+      <h2>Im Besitz</h2>
+      <table>
+        <tbody>
+        <tr>
+          <td>Stück</td>
+          <td>{{ stockDetail.portfolioEntry.quantity }}</td>
+        </tr>
+        <tr>
+          <td>Seit Kauf</td>
+          <td :class="{ 'positive': stockDetail.stock.latestQuote.change >= 0, 'negative':
+          stockDetail.stock.latestQuote.change
+           < 0 }">
+            {{ stockDetail.stock.latestQuote.change }} € ({{ stockDetail.stock.latestQuote.percentChange }}%)
+          </td>
+        </tr>
+        <tr>
+          <td>Kaufpreis gesamt</td>
+          <td>{{ stockDetail.portfolioEntry.totalValue }} {{ stockDetail.stock.currency }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
 
-                        <button type="submit" class="purchase-button">Verkaufen</button>
-                        <p>{{serverResponse}}</p>
-                  </form>
-            </div>
+    <div class="stock-order">
+      <div>
+        <form @submit.prevent="sell">
+          <label for="volume">Anteile</label>
+          <input v-model.number="volume" type="number" id="volume" step="0.01" />
+          <label for="timestamp-date">Datum</label>
+          <input v-model="date" type="date" id="timestamp-date"/>
+          <label for="timestamp-time">Uhrzeit</label>
+          <input v-model="time" type="time" id="timestamp-time"/>
+
+          <button type="submit" class="purchase-button">Verkaufen</button>
+          <p>{{ serverResponse }}</p>
+        </form>
       </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import {onBeforeMount, ref} from 'vue';
 import {useRoute} from "vue-router";
-import type {Stock} from "@/types/types.ts";
+import type {Stock, StockDetails} from "@/types/types.ts";
 
-const stock = ref<Stock>({})
+const stockDetail = ref<StockDetails>({})
 
-const amount = ref(0);
+const volume = ref(0);
 const serverResponse = ref<string>()
+
+const date = ref(getTodayDate());
+const time = ref("00:00");
 
 const url = "/api/sell/stock"
 
 onBeforeMount(async () => {
-
-  const route = useRoute();
-
-  const symbol = route.params.symbol;
+  const route = useRoute()
+  const stockSymbol = route.params.symbol
+  const investmentAccountId = route.params.investmentAccountId
 
   try {
-    const response = await fetch(`/api/stock-details/symbol?symbol=${symbol}`)
+    const response = await
+      fetch(`/api/stock-details/symbol?symbol=${stockSymbol}&investmentAccountId=${investmentAccountId}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
-    stock.value = await response.json() as Stock
-    console.log(stock.value)
+    stockDetail.value = await response.json() as StockDetails
   } catch (e) {
     console.error(e)
   }
 })
 
 async function sell() {
-  console.log(amount.value + ' Stück verkaufen zum Zeitpunkt: ' + date.value)
-  const curl = url + `?investmentAccountId=1&stockSymbol=${stock.value.symbol}&volume=${amount.value}&executionTime=${date.value}`
-  console.log(curl)
+  const route = useRoute()
+  const stockSymbol = route.params.symbol
+  const investmentAccountId = route.params.investmentAccountId
+
+  const executionTime = `${date.value}T${time.value}`;
+
+  console.log(volume.value + ' Stück verkaufen zum Zeitpunkt: ' + executionTime)
+  const baseUrl = "/api/placeSellOrder";
+  const requestUrl =
+    `${baseUrl}?investmentAccountId=${investmentAccountId}&stockSymbol=${stockSymbol}&volume=${volume.value}&executionTime=${executionTime}`;
   try {
-    const response = await fetch(curl, {
+    const response = await fetch(requestUrl, {
       method: "POST"
     });
 
@@ -68,18 +105,18 @@ async function sell() {
   }
 }
 
-const getTodayDate = () => {
+function getTodayDate() {
   const today = new Date();
   const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0'); // Monat von 0-11, daher +1
+  const month = String(today.getMonth() + 1).padStart(2, '0');
   const day = String(today.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
-};
-
-const date = ref(getTodayDate());
+}
 
 </script>
 
 <style lang="scss">
 @use "./style.scss";
+
 </style>
+

@@ -10,6 +10,5 @@ import reactor.core.publisher.Flux
 @Repository
 interface IOrderRepository : R2dbcRepository<Order, Long> {
 
-    @Query("SELECT * FROM stock_order o WHERE o.investment_account_id = :investmentAccountId")
     fun findByInvestmentAccountId(investmentAccountId: Long): Flux<Order>
 }

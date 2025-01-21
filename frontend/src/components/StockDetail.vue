@@ -10,8 +10,9 @@
         <p><strong>Beschreibung:</strong> {{ stockDetails.stock.description }}</p>
 
         <div class="purchase-buttons">
-          <button class="purchase-button" @click="purchase(stockDetails.stock.symbol)">Kaufen</button>
-          <button class="purchase-button" @click="sell(stockDetails.stock.symbol)">Verkaufen</button>
+          <button class="purchase-button" @click="purchase(stockDetails.stock.symbol, stockDetails.portfolioEntry.investmentAccountId)">
+            Kaufen</button>
+          <button class="purchase-button" @click="sell(stockDetails.stock.symbol, stockDetails.portfolioEntry.investmentAccountId)">Verkaufen</button>
         </div>
       </div>
       <div class="stock-detail-header-chart">
@@ -24,8 +25,8 @@
       <table>
         <tbody>
         <tr>
-          <td>Stück</td>
-          <td>{{ stockDetails.portfolioEntry.quantity }}</td>
+          <td v-if="stockDetails.portfolioEntry != null">Stück</td>
+          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.quantity }}</td>
         </tr>
         <tr>
           <td>Seit Kauf</td>
@@ -36,12 +37,16 @@
           </td>
         </tr>
         <tr>
-          <td>Kaufpreis gesamt</td>
-          <td>{{ stockDetails.portfolioEntry.totalValue }} {{ stockDetails.stock.currency }}</td>
+          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.quantity }}</td>
+          <td v-if="stockDetails.portfolioEntry != null">Kaufpreis gesamt</td>
+          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.quantity }}</td>
+          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.totalValue }} {{ stockDetails.stock.currency }}</td>
         </tr>
         <tr>
-          <td>Kaufpreis Stück</td>
-          <td>{{ stockDetails.stock.latestQuote.currentPrice }} {{ stockDetails.stock.currency }}</td>
+          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.quantity }}</td>
+          <td v-if="stockDetails.portfolioEntry != null">Kaufpreis Stück</td>
+          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.quantity }}</td>
+          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.stock.latestQuote.currentPrice }} {{ stockDetails.stock.currency }}</td>
         </tr>
         </tbody>
       </table>
@@ -134,7 +139,7 @@ async function poll() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const stockData = await response.json() as StockDetails;
-
+    console.log(stockData)
     if (stockDetails.value.stock.latestQuote.currentPrice !== stockData.stock.latestQuote.currentPrice) {
       stockDetails.value.stock.latestQuote.currentPrice = stockData.stock.latestQuote.currentPrice
       stockDetails.value.stock.justChanged = true
@@ -180,7 +185,7 @@ onBeforeMount(async () => {
   if (pollingIntervalID) {
     clearInterval(pollingIntervalID);
   }
-  pollingIntervalID = setInterval(poll, 1000)
+  pollingIntervalID = setInterval(poll, 3000)
 })
 
 onUnmounted(() => {
@@ -190,14 +195,14 @@ onUnmounted(() => {
 
 const router = useRouter()
 
-function sell(symbol: string) {
+function sell(symbol: string, investmentAccountId: number) {
   console.log('Verkaufen')
-  router.push({name: 'order-management-sell', params: {symbol}});
+  router.push({name: 'order-management-sell', params: {symbol, investmentAccountId}});
 }
 
-function purchase(symbol: string) {
+function purchase(symbol: string, investmentAccountId: number) {
   console.log('Kaufen')
-  router.push({name: 'order-management-buy', params: {symbol}});
+  router.push({name: 'order-management-buy', params: {symbol, investmentAccountId}});
 }
 
 </script>

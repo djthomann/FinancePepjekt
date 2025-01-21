@@ -7,5 +7,5 @@ import org.springframework.data.relational.core.mapping.Table
 class StockQuoteLatest (
     @Id
     var stockSymbol: String,
-    var quote_id: Long,
+    var quoteId: Long,
 )

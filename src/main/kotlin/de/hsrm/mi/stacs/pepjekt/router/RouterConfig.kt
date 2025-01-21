@@ -65,8 +65,6 @@ class RouterConfig {
         "/api".nest {
             GET("/portfolio", investmentAccountHandler::getPortfolio)
             GET("/portfolio/totalValue", investmentAccountHandler::getPortfolioTotalValue)
-            POST("/stock/buy", investmentAccountHandler::buyStock)
-            POST("/stock/sell", investmentAccountHandler::sellStock)
         }
     }
 
@@ -136,8 +134,8 @@ class RouterConfig {
     @Bean
     fun orderRouter(orderHandler: OrderHandler) = router {
         "/api".nest {
-            POST("/buy/stock", orderHandler::postBuyStock)
-            POST("/sell/stock", orderHandler::postSellStock)
+            POST("/placeBuyOrder", orderHandler::placeBuyOrder)
+            POST("/placeSellOrder", orderHandler::placeSellOrder)
             GET("/orders", orderHandler::getOrders)
         }
     }
