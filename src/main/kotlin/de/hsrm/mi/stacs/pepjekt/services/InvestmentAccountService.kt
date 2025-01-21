@@ -116,7 +116,7 @@ class InvestmentAccountService(
     override fun sellStock(
         investmentAccountId: Long,
         stockSymbol: String,
-        volume: BigDecimal
+        volume: Double
     ): Mono<InvestmentAccount> {
         return investmentAccountRepository.findById(investmentAccountId)
             .flatMap { investmentAccount ->
@@ -151,7 +151,7 @@ class InvestmentAccountService(
                         bankAccountRepository.findById(investmentAccount.bankAccountId)
                     }
                     .flatMap { bankAccount ->
-                        val updatedBalance = bankAccount.balance.plus(volume)
+                        val updatedBalance = bankAccount.balance.plus(volume.toBigDecimal())
                         val updatedBankAccount = bankAccount.copy(balance = updatedBalance)
                         bankAccountRepository.save(updatedBankAccount).`as`(operator::transactional)
                     }

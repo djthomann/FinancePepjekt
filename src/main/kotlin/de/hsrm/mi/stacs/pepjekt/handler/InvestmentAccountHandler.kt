@@ -90,32 +90,4 @@ class InvestmentAccountHandler(
                     }
             }
     }
-
-    /**
-     * Handles a request to sell stock from an investment account.
-     *
-     * If any required parameter is missing or invalid, an error response will be returned.
-     *
-     * @param request The incoming server request containing query parameters.
-     * @return A Mono containing the server response with the updated investment account or an error response if invalid.
-     * @throws IllegalArgumentException If any required parameter (investmentAccountId, stockSymbol, volume) is missing.
-     */
-    fun sellStock(request: ServerRequest): Mono<ServerResponse> {
-        val investmentAccountId = request.queryParam("investmentAccountId")
-            .map { it.toLong() }
-            .orElseThrow { IllegalArgumentException("investmentAccountId is required") }
-
-        val stockSymbol = request.queryParam("stockSymbol")
-            .orElseThrow { IllegalArgumentException("stockSymbol is required") }
-
-        val volume = request.queryParam("volume")
-            .map { BigDecimal(it) }
-            .orElseThrow { IllegalArgumentException("volume is required") }
-
-        return investmentAccountService.sellStock(investmentAccountId, stockSymbol, volume)
-            .flatMap { updatedAccount ->
-                ServerResponse.ok().bodyValue(updatedAccount)
-            }
-    }
-
 }

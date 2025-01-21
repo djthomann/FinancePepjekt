@@ -65,7 +65,6 @@ class RouterConfig {
         "/api".nest {
             GET("/portfolio", investmentAccountHandler::getPortfolio)
             GET("/portfolio/totalValue", investmentAccountHandler::getPortfolioTotalValue)
-            POST("/stock/sell", investmentAccountHandler::sellStock)
         }
     }
 
@@ -136,7 +135,7 @@ class RouterConfig {
     fun orderRouter(orderHandler: OrderHandler) = router {
         "/api".nest {
             POST("/placeBuyOrder", orderHandler::placeBuyOrder)
-            POST("/placeSellOrder", orderHandler::postSellStock)
+            POST("/placeSellOrder", orderHandler::placeSellOrder)
             GET("/orders", orderHandler::getOrders)
         }
     }

@@ -69,17 +69,21 @@ class OrderHandler(private val orderService: IOrderService, private val stockSer
      * @throws IllegalArgumentException If any required parameter (investmentAccountId, stockSymbol,
      *                                  volume, executionTime) is missing.
      */
-    fun postSellStock(request: ServerRequest): Mono<ServerResponse> {
+    fun placeSellOrder(request: ServerRequest): Mono<ServerResponse> {
         val investmentAccountId = request.queryParam("investmentAccountId")
+            .map { it.toLong() }
             .orElseThrow { IllegalArgumentException("investmentAccountId is required") }
         val stockSymbol =
             request.queryParam("stockSymbol").orElseThrow { IllegalArgumentException("stockSymbol is required") }
         val volume =
-            BigDecimal(request.queryParam("volume").orElseThrow { IllegalArgumentException("volume is required") })
-        val executionDate = LocalDate.parse(
+            request.queryParam("volume").orElseThrow { IllegalArgumentException("volume is required") }.toDouble()
+        val executionTime = LocalDateTime.parse(
             request.queryParam("executionTime").orElseThrow { IllegalArgumentException("executionTime is required") })
 
-        val executionTime = executionDate.atStartOfDay();
+        logger.info(
+            "Place SELL Order to time $executionTime for $volume $ of $stockSymbol for investmentAccount"
+                    + "$investmentAccountId"
+        )
 
         return orderService.placeSellOrder(investmentAccountId, stockSymbol, volume, executionTime)
             .flatMap { order ->

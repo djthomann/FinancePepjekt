@@ -79,6 +79,7 @@ class OrderService(
         }
     }
 
+
     /**
      * Places a sell order for a specific stock and associates it with an investment account.
      *
@@ -89,23 +90,29 @@ class OrderService(
      * @return a [Mono] emitting the created [Order], or an error if the operation fails
      */
     override fun placeSellOrder(
-        investmentAccountId: String,
+        investmentAccountId: Long,
         stockSymbol: String,
-        volume: BigDecimal,
+        volume: Double,
         executionTime: LocalDateTime
     ): Mono<Order> {
         return Mono.zip(
-            investmentAccountRepository.findById(investmentAccountId.toLong()),
-            stockRepository.findBySymbol(stockSymbol)
+            investmentAccountRepository.findById(investmentAccountId),
+            stockRepository.findBySymbol(stockSymbol),
+            latestIStockQuoteRepository.findById(stockSymbol)
+                .flatMap { latestStockQuote ->
+                    quoteRepository.findById(latestStockQuote.quoteId)
+                }
         ).flatMap { tuple ->
-            val (account, stock) = tuple
+            val (account, stock, quote) = tuple
+            val calculatedAmount = quote.currentPrice.multiply(volume.toBigDecimal())
+
             val order = Order(
                 type = OrderType.SELL,
+                purchaseAmount = calculatedAmount,
+                purchaseVolume = volume,
+                executionTimestamp = executionTime,
                 investmentAccountId = account.id!!,
                 stockSymbol = stock.symbol,
-                id = TODO(),
-                purchaseAmount = TODO(),
-                executionTimestamp = TODO()
             )
             orderRepository.save(order).`as`(operator::transactional)
         }
@@ -137,15 +144,25 @@ class OrderService(
             .flatMap { order ->
                 when (order.type) {
                     OrderType.BUY -> {
-                        log.info("Order ${order.stockSymbol} processed")
-                        investmentAccountService.buyStock(order.investmentAccountId, order.stockSymbol, order.purchaseAmount)
+                        log.info("BUY Order ${order.stockSymbol} processed")
+                        investmentAccountService.buyStock(
+                            order.investmentAccountId,
+                            order.stockSymbol,
+                            order.purchaseAmount
+                        )
                             .then(Mono.just(order))
                             .doOnTerminate { log.info("Completed BUY order processing for ${order.stockSymbol}") }
                     }
+
                     OrderType.SELL -> {
-                        // TODO handle SELL orders if necessary
-                        log.warn("SELL order processing not implemented.")
-                        Mono.empty<Order>()
+                        log.info("SELL Order ${order.stockSymbol} processed")
+                        investmentAccountService.sellStock(
+                            order.investmentAccountId,
+                            order.stockSymbol,
+                            order.purchaseVolume
+                        )
+                            .then(Mono.just(order))
+                            .doOnTerminate { log.info("Completed SELL order processing for ${order.stockSymbol}") }
                     }
                 }
             }
@@ -153,7 +170,7 @@ class OrderService(
                 // Mark the order as processed, or delete it if completed
                 log.info("Deleting order ${order.stockSymbol} after processing.")
                 orderRepository.delete(order)
-            } .onErrorContinue { error, _ ->
+            }.onErrorContinue { error, _ ->
                 log.error("Error during order processing: ${error.message}", error)
             }
             .then()

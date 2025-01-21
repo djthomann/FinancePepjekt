@@ -20,7 +20,7 @@ interface IOrderService {
     ): Mono<Order>
 
     fun placeSellOrder(
-        investmentAccountId: String, stockSymbol: String, volume: BigDecimal, executionTime:
+        investmentAccountId: Long, stockSymbol: String, volume: Double, executionTime:
         LocalDateTime
     ): Mono<Order>
 

@@ -31,8 +31,8 @@
     <div class="stock-order">
       <div>
         <form @submit.prevent="sell">
-          <label for="amount">Anzahl</label>
-          <input v-model.number="amount" type="number" id="amount"/>
+          <label for="volume">Anteile</label>
+          <input v-model.number="volume" type="number" id="volume"/>
           <label for="timestamp-date">Datum</label>
           <input v-model="date" type="date" id="timestamp-date"/>
           <label for="timestamp-time">Uhrzeit</label>
@@ -53,11 +53,11 @@ import type {Stock, StockDetails} from "@/types/types.ts";
 
 const stockDetail = ref<StockDetails>({})
 
-const amount = ref(0);
+const volume = ref(0);
 const serverResponse = ref<string>()
 
 const date = ref(getTodayDate());
-const time = ref("12:00");
+const time = ref("00:00");
 
 const url = "/api/sell/stock"
 
@@ -83,12 +83,12 @@ async function sell() {
   const stockSymbol = route.params.symbol
   const investmentAccountId = route.params.investmentAccountId
 
-  // const executionTime = `${date.value}T${time.value}`;
+  const executionTime = `${date.value}T${time.value}`;
 
-  console.log(amount.value + ' Stück verkaufen zum Zeitpunkt: ' + date.value)
-  //todo anpassen!!!
-  const baseUrl = "/api/placeBuyOrder";
-  const requestUrl = `${baseUrl}?investmentAccountId=${investmentAccountId}&stockSymbol=${stockSymbol}&purchaseAmount=${purchaseAmount.value}&executionTime=${executionTime}`;
+  console.log(volume.value + ' Stück verkaufen zum Zeitpunkt: ' + executionTime)
+  const baseUrl = "/api/placeSellOrder";
+  const requestUrl =
+    `${baseUrl}?investmentAccountId=${investmentAccountId}&stockSymbol=${stockSymbol}&volume=${volume.value}&executionTime=${executionTime}`;
   try {
     const response = await fetch(requestUrl, {
       method: "POST"
