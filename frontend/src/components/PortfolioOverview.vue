@@ -91,6 +91,7 @@ async function poll() {
       if (matchingEntry && portfolioEntry.stock.latestQuote.currentPrice !== matchingEntry.stock.latestQuote.currentPrice) {
         portfolioEntry.stock.latestQuote.currentPrice = matchingEntry.stock.latestQuote.currentPrice;
         portfolioEntry.totalValue = matchingEntry.totalValue
+        portfolioEntry.quantity = matchingEntry.quantity
         portfolioEntry.stock.justChanged = true;
 
         setTimeout(() => {
