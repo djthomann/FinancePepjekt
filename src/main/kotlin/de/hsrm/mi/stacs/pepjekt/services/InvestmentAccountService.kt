@@ -66,7 +66,10 @@ class InvestmentAccountService(
                             .flatMap { existingEntry ->
                                 // Update the existing entry
                                 val updatedQuantity = existingEntry.quantity + calculatedVolume.toDouble()
-                                val updatedEntry = existingEntry.copy(quantity = updatedQuantity)
+                                val updatedEntry = existingEntry.copy(
+                                    quantity = updatedQuantity, totalInvestAmount =
+                                    existingEntry.totalInvestAmount.plus(purchaseAmount)
+                                )
                                 portfolioEntryRepository.save(updatedEntry).`as`(operator::transactional)
                             }
                             .switchIfEmpty(
@@ -76,6 +79,7 @@ class InvestmentAccountService(
                                         investmentAccountId = investmentAccountId,
                                         stockSymbol = stockSymbol,
                                         quantity = calculatedVolume.toDouble(),
+                                        totalInvestAmount = purchaseAmount,
                                     )
                                 ).`as`(operator::transactional)
                             )
