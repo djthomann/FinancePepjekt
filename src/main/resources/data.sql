@@ -95,7 +95,7 @@ VALUES
     ( 'XPT', 3 );
 
 INSERT INTO bankaccount (currency, balance)
-VALUES ('USD', 10000.50),
+VALUES ('USD', 1000000.50),
        ('EUR', 250.00),
        ('JPY', 500000.00),
        ('GBP', 123.45);
