@@ -19,4 +19,6 @@ interface IInvestmentAccountService {
 
     fun getInvestmentAccountPortfolio(investmentAccountId: Long): Mono<InvestmentAccountDTO>
 
+    fun getInvestmentAccount(investmentAccountId: Long): Mono<InvestmentAccount>
+
 }

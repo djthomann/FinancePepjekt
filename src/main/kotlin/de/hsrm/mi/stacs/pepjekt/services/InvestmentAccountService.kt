@@ -221,6 +221,13 @@ class InvestmentAccountService(
             }
     }
 
+    /**
+     * Returns an investment account by its id
+     */
+    override fun getInvestmentAccount(investmentAccountId: Long): Mono<InvestmentAccount> {
+        return investmentAccountRepository.findById(investmentAccountId)
+    }
+
     // Asynchrone Methode, die den Gesamtwert des Depots berechnet
     private fun calculateInvestmentAccountTotalValueAsync(portfolioMono: Mono<List<PortfolioEntryDTO>>): Mono<BigDecimal> {
         return portfolioMono.flatMap { portfolioEntries ->
