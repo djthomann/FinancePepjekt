@@ -66,15 +66,15 @@
           <td :class="{ 'positive': stock.change >= 0, 'negative': stock.change < 0 }">
             {{ stock.change }} € ({{ stock.changePercentage }}%)
           </td>
-          <td v-if="stock.isFavorite">
-            <button @click.stop="toggleFavorite(stock)" class="favorite-button">
-              remove as favorite
-            </button>
-          </td>
-          <td v-if="!stock.isFavorite">
-            <button @click.stop="toggleFavorite(stock)" class="favorite-button">
-              add to favorite
-            </button>
+          <td>
+            <img
+              @mouseover="hoverFavorite(stock)"
+              @mouseleave="leaveFavorite(stock)"
+              @click.stop="toggleFavorite(stock)"
+              :src="stock.tempFavoriteIcon || (stock.isFavorite ? '/noFavorite.png' : '/favorite.png')"
+              :alt="stock.isFavorite ? 'Favorit entfernen' : 'Zu Favoriten hinzufügen'"
+              class="favorite-icon"
+            >
           </td>
         </tr>
         </tbody>
@@ -86,7 +86,7 @@
 <script lang="ts" setup>
 import {computed, onMounted, onUnmounted, ref} from 'vue';
 import {useRoute, useRouter} from "vue-router";
-import type {InvestmentAccount, Stock} from "@/types/types.ts";
+import type {Stock} from "@/types/types.ts";
 
 const router = useRouter()
 const route = useRoute()
@@ -104,6 +104,14 @@ const filteredStocks = computed(() =>
   })
 )
 const favoriteStocks = ref<Stock[]>([])
+
+function hoverFavorite(stock: Stock) {
+  stock.tempFavoriteIcon = stock.isFavorite ? '/favorite.png' : '/noFavorite.png';
+}
+
+function leaveFavorite(stock: Stock) {
+  stock.tempFavoriteIcon = "";
+}
 
 async function poll() {
   // stocks
@@ -296,15 +304,15 @@ async function toggleFavorite(stock: Stock) {
   transform: rotate(0deg);
 }
 
-.favorite-button {
+.favorite-icon {
+  width: 24px;
+  height: 24px;
   cursor: pointer;
-  font-size: 1.2em;
-  background-color: white;
-  border: solid 2px black;
 }
 
-.favorite-button:hover {
+.favorite-icon:hover {
   opacity: 0.8;
+  transform: scale(1.3);
 }
 
 </style>

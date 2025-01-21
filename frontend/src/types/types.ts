@@ -25,6 +25,7 @@ export interface Stock {
 
   justChanged: boolean // Just for frontend
   isFavorite: boolean // Just for frontend
+  tempFavoriteIcon?: string
 }
 
 export interface StockDetails {
