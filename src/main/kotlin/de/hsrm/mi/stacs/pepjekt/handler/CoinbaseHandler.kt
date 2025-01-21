@@ -26,8 +26,7 @@ class CoinbaseHandler(
      * Fetches the current exchange rate for a given Crypto symbol
      */
     fun fetchCoinRate(symbol: String): Mono<CryptoQuote> {
-
-        logger.info("Fetching Crypto: $symbol")
+        logger.debug("Fetching Crypto: $symbol")
 
         return coinbase_client.get()
             .uri { uriBuilder: UriBuilder ->
