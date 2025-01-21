@@ -25,8 +25,8 @@
       <table>
         <tbody>
         <tr>
-          <td>Stück</td>
-          <td>{{ stockDetails.portfolioEntry.quantity }}</td>
+          <td v-if="stockDetails.portfolioEntry != null">Stück</td>
+          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.quantity }}</td>
         </tr>
         <tr>
           <td>Seit Kauf</td>
@@ -37,12 +37,16 @@
           </td>
         </tr>
         <tr>
-          <td>Kaufpreis gesamt</td>
-          <td>{{ stockDetails.portfolioEntry.totalValue }} {{ stockDetails.stock.currency }}</td>
+          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.quantity }}</td>
+          <td v-if="stockDetails.portfolioEntry != null">Kaufpreis gesamt</td>
+          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.quantity }}</td>
+          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.totalValue }} {{ stockDetails.stock.currency }}</td>
         </tr>
         <tr>
-          <td>Kaufpreis Stück</td>
-          <td>{{ stockDetails.stock.latestQuote.currentPrice }} {{ stockDetails.stock.currency }}</td>
+          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.quantity }}</td>
+          <td v-if="stockDetails.portfolioEntry != null">Kaufpreis Stück</td>
+          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.quantity }}</td>
+          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.stock.latestQuote.currentPrice }} {{ stockDetails.stock.currency }}</td>
         </tr>
         </tbody>
       </table>
@@ -135,7 +139,7 @@ async function poll() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const stockData = await response.json() as StockDetails;
-
+    console.log(stockData)
     if (stockDetails.value.stock.latestQuote.currentPrice !== stockData.stock.latestQuote.currentPrice) {
       stockDetails.value.stock.latestQuote.currentPrice = stockData.stock.latestQuote.currentPrice
       stockDetails.value.stock.justChanged = true
