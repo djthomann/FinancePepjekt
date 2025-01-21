@@ -35,12 +35,13 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref} from 'vue';
+import {onMounted, onUnmounted, ref} from 'vue';
 import {useRouter, useRoute} from "vue-router";
-import type {Order} from '@/types/types.ts'
+import type {Order, Stock} from '@/types/types.ts'
 
 const router = useRouter()
 const route = useRoute()
+let pollingIntervalID: number
 const investmentAccountId = route.params.investmentAccountId
 const orders = ref<Order[]>([])
 
@@ -54,11 +55,28 @@ onMounted(async () => {
   } catch (e) {
     console.error(e)
   }
+
+  pollingIntervalID = setInterval(poll, 3000)
 })
 
 const navigateToStockDetail = (symbol: string) => {
   router.push({name: 'wertpapier-detail', params: {symbol}})
 }
+
+async function poll() {
+  console.log("polling")
+
+  const response = await fetch(`/api/orders?investmentAccountId=${investmentAccountId}`)
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+  orders.value = await response.json() as Order[]
+}
+
+onUnmounted(() => {
+  console.log("Clearing interval for polling")
+  clearInterval(pollingIntervalID)
+})
 
 </script>
 
