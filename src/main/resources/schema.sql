@@ -177,4 +177,15 @@ CREATE TABLE exchange
     description VARCHAR(255) NOT NULL
 );
 
+---------------------------------Favoritenspeicherung Stocks------------------------------------------
+
+CREATE TABLE favorite
+(
+    id                    SERIAL PRIMARY KEY,
+    investment_account_id BIGINT      NOT NULL,
+    stock_symbol          VARCHAR(50)    NOT NULL,
+    FOREIGN KEY (investment_account_id) REFERENCES investmentaccount (id) ON DELETE CASCADE,
+    FOREIGN KEY (stock_symbol) REFERENCES stock (symbol) ON DELETE CASCADE
+);
+
 ----------------------------------------------------------------------------------------------
