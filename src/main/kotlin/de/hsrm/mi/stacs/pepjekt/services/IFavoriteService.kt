@@ -12,4 +12,6 @@ interface IFavoriteService {
 
     fun removeFavoriteFromInvestmentAccount(investmentAccountId: Long, stockSymbol: String): Mono<Void>
 
+    fun isFavorite(investmentAccountId: Long, stockSymbol: String): Mono<Boolean>
+
 }

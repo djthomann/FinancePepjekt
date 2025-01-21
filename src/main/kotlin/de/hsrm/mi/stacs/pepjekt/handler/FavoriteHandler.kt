@@ -1,8 +1,8 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDTO
-import de.hsrm.mi.stacs.pepjekt.services.FavoriteService
-import de.hsrm.mi.stacs.pepjekt.services.StockService
+import de.hsrm.mi.stacs.pepjekt.services.IFavoriteService
+import de.hsrm.mi.stacs.pepjekt.services.IStockService
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -11,8 +11,8 @@ import reactor.core.publisher.Mono
 
 @Component
 class FavoriteHandler(
-    private val favoriteService: FavoriteService,
-    private val stockService: StockService
+    private val favoriteService: IFavoriteService,
+    private val stockService: IStockService
 ) {
 
     fun getFavorites(request: ServerRequest): Mono<ServerResponse> {
@@ -29,7 +29,7 @@ class FavoriteHandler(
                     Flux.fromIterable(stocks)
                         .flatMap { stock ->
                             stockService.getLatestQuoteBySymbol(stock.symbol)
-                                .map { quote -> StockDTO.mapToDto(stock, quote) }
+                                .map { quote -> StockDTO.mapToDto(stock, quote, true) }
                         }
                         .collectList()
                         .flatMap { stockDtos ->

@@ -12,10 +12,11 @@ class StockDetailsDTO(
         fun mapToDto(
             stock: Stock,
             stockQuote: StockQuote,
-            portfolioEntryToMap: PortfolioEntry?
+            portfolioEntryToMap: PortfolioEntry?,
+            isFavorite: Boolean? = null
         ): StockDetailsDTO {
             return StockDetailsDTO(
-                stock = StockDTO.mapToDto(stock, stockQuote),
+                stock = StockDTO.mapToDto(stock, stockQuote, isFavorite),
                 portfolioEntry = portfolioEntryToMap?.let {
                     PortfolioEntryDTO.mapToDtoWithoutStock(it, stockQuote)
                 }

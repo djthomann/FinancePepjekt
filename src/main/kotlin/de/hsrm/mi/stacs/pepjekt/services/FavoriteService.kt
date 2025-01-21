@@ -49,5 +49,12 @@ class FavoriteService(
             .then()
     }
 
+    override fun isFavorite(investmentAccountId: Long, stockSymbol: String): Mono<Boolean> {
+        return favoriteRepository.findByInvestmentAccountIdAndStockSymbol(investmentAccountId, stockSymbol)
+            .map { true }
+            .defaultIfEmpty(false)
+    }
+
+
 
 }

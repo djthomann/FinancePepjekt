@@ -3,6 +3,7 @@ package de.hsrm.mi.stacs.pepjekt.handler
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.QuoteDTO
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDTO
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDetailsDTO
+import de.hsrm.mi.stacs.pepjekt.services.IFavoriteService
 import de.hsrm.mi.stacs.pepjekt.services.IStockService
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
@@ -21,7 +22,7 @@ import java.time.LocalDateTime
  * @param orderService The service for interacting with stock orders (this is injected but currently not used).
  */
 @Component
-class StockHandler(private val stockService: IStockService) {
+class StockHandler(private val stockService: IStockService, private val favoriteService: IFavoriteService) {
 
     /**
      * Handles a request to retrieve all stocks from the database.
@@ -32,10 +33,17 @@ class StockHandler(private val stockService: IStockService) {
      * TODO return StockDT0
      */
     fun getStocks(request: ServerRequest): Mono<ServerResponse> {
+        val investmentAccountId = request.queryParam("investmentAccountId")
+            .orElseThrow { IllegalArgumentException("investmentAccountId is required") }
+
         return stockService.getAllStocks()
             .flatMap { stock ->
-                stockService.getLatestQuoteBySymbol(stock.symbol)
-                    .map { quote -> StockDTO.mapToDto(stock, quote) }
+                Mono.zip(
+                    stockService.getLatestQuoteBySymbol(stock.symbol),
+                    favoriteService.isFavorite(investmentAccountId.toLong(), stock.symbol)
+                ).map { tuple ->
+                    StockDTO.mapToDto(stock, tuple.t1, tuple.t2)
+                }
             }
             .collectList()
             .flatMap { stockDtos ->
@@ -46,7 +54,6 @@ class StockHandler(private val stockService: IStockService) {
                 }
             }
     }
-
 
     /**
      * Handles a request to retrieve stock data by its symbol.

@@ -31,7 +31,7 @@ class StockService(
     val stockQuoteLatestRepository: IStockQuoteLatestRepository,
     val databaseClient: DatabaseClient,
     val investmentAccountRepository: IInvestmentAccountRepository,
-    val portfolioEntryRepository: IPortfolioEntryRepository
+    val portfolioEntryRepository: IPortfolioEntryRepository,
 ) : IStockService {
 
     val log: Logger = LoggerFactory.getLogger(StockService::class.java)
