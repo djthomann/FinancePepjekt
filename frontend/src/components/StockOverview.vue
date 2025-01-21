@@ -66,7 +66,12 @@
           <td :class="{ 'positive': stock.change >= 0, 'negative': stock.change < 0 }">
             {{ stock.change }} € ({{ stock.changePercentage }}%)
           </td>
-          <td>
+          <td v-if="stock.isFavorite">
+            <button @click.stop="toggleFavorite(stock)" class="favorite-button">
+              remove as favorite
+            </button>
+          </td>
+          <td v-if="!stock.isFavorite">
             <button @click.stop="toggleFavorite(stock)" class="favorite-button">
               add to favorite
             </button>
@@ -104,7 +109,7 @@ async function poll() {
   // stocks
   for (const stock of stocks.value) {
     try {
-      const response = await fetch(`/api/stock/by/symbol?symbol=${stock.symbol}`);
+      const response = await fetch(`/api/stock/by/symbol?symbol=${stock.symbol}&investmentAccountId=${investmentAccountId}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -124,30 +129,6 @@ async function poll() {
   }
 }
 
-async function pollFavoriteStocksOld() {
-  // favs
-  for (const favoriteStock of favoriteStocks.value) {
-    try {
-      const response = await fetch(`/api/stock/by/symbol?symbol=${favoriteStock.symbol}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const stockData = await response.json() as Stock;
-
-      if (favoriteStock.latestQuote.currentPrice !== stockData.latestQuote.currentPrice) {
-        favoriteStock.latestQuote.currentPrice = stockData.latestQuote.currentPrice
-        favoriteStock.justChanged = true
-
-        setTimeout(() => {
-          favoriteStock.justChanged = false;
-        }, 200);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }
-}
-
 async function pollFavoriteStocks() {
   if (investmentAccountId) {
     try {
@@ -159,7 +140,7 @@ async function pollFavoriteStocks() {
       // Update stocks
       for (const stock of newFavorites) {
         const existingStock = favoriteStocks.value.find(oldFavoriteStock => oldFavoriteStock.symbol === stock.symbol);
-        const stockResponse = await fetch(`/api/stock/by/symbol?symbol=${stock.symbol}`);
+        const stockResponse = await fetch(`/api/stock/by/symbol?symbol=${stock.symbol}&investmentAccountId=${investmentAccountId}`);
         const stockData = await stockResponse.json() as Stock;
 
         if (existingStock) {
@@ -205,7 +186,7 @@ function sortByName() {
 onMounted(async () => {
   // stocks
   try {
-    const response = await fetch("/api/stocks")
+    const response = await fetch(`/api/stocks?investmentAccountId=${investmentAccountId}`)
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
@@ -247,11 +228,9 @@ async function toggleFavorite(stock: Stock) {
   try {
     let url = ""
     if(stock.isFavorite){
-      // unfavor
-      url = `/api/add-favorites?investmentAccountId=${investmentAccountId}&stockSymbol=${stock.symbol}`
-    } else {
-      // favor
       url = `/api/delete-favorites?investmentAccountId=${investmentAccountId}&stockSymbol=${stock.symbol}`
+    } else {
+      url = `/api/add-favorites?investmentAccountId=${investmentAccountId}&stockSymbol=${stock.symbol}`
     }
     const response = await fetch(url, {
       method: 'POST',
@@ -320,7 +299,8 @@ async function toggleFavorite(stock: Stock) {
 .favorite-button {
   cursor: pointer;
   font-size: 1.2em;
-  color: gold;
+  background-color: white;
+  border: solid 2px black;
 }
 
 .favorite-button:hover {
