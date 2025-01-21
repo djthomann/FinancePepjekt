@@ -107,33 +107,31 @@ class OrderHandler(private val orderService: IOrderService, private val stockSer
             .map { it }
             .orElseThrow { IllegalArgumentException("investmentAccountId is required") }
 
+        logger.info("Fetch orders for investmentaccount $investmentAccountId")
+
         return orderService.getOrdersByInvestmentAccountId(investmentAccountId)
             .collectList()
             .flatMap { orders ->
-                if (orders.isEmpty()) {
-                    ServerResponse.notFound().build()
-                } else {
-                    val stockMonos = orders.map { order ->
-                        stockService.getStockBySymbol(order.stockSymbol)
-                            .map { stock ->
-                                OrderDTO(
-                                    id = order.id,
-                                    purchaseAmount = order.purchaseAmount,
-                                    type = order.type,
-                                    executionTimestamp = order.executionTimestamp,
-                                    stock = stock,
-                                    investmentAccountId = investmentAccountId.toLong(),
-                                    stockSymbol = stock.symbol,
-                                )
-                            }
-                    }
-
-                    Flux.merge(stockMonos)
-                        .collectList()
-                        .flatMap { orderDTOs ->
-                            ServerResponse.ok().bodyValue(orderDTOs)
+                val stockMonos = orders.map { order ->
+                    stockService.getStockBySymbol(order.stockSymbol)
+                        .map { stock ->
+                            OrderDTO(
+                                id = order.id,
+                                purchaseAmount = order.purchaseAmount,
+                                type = order.type,
+                                executionTimestamp = order.executionTimestamp,
+                                stock = stock,
+                                investmentAccountId = investmentAccountId.toLong(),
+                                stockSymbol = stock.symbol,
+                            )
                         }
                 }
+
+                Flux.merge(stockMonos)
+                    .collectList()
+                    .flatMap { orderDTOs ->
+                        ServerResponse.ok().bodyValue(orderDTOs)
+                    }
             }
     }
 }
