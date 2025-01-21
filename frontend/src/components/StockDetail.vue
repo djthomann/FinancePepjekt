@@ -20,33 +20,28 @@
       </div>
     </div>
 
-    <div class="stock-info-section">
+    <div class="stock-info-section" v-if="stockDetails.portfolioEntry != null">
       <h2>Im Besitz</h2>
       <table>
         <tbody>
         <tr>
-          <td v-if="stockDetails.portfolioEntry != null">Stück</td>
-          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.quantity }}</td>
+          <td>Stück</td>
+          <td>{{ stockDetails.portfolioEntry.quantity }}</td>
+        </tr>
+        <tr>
+          <td>Gesamtwert</td>
+          <td>{{ stockDetails.portfolioEntry.totalValue}} {{ stockDetails.stock.currency }}</td>
         </tr>
         <tr>
           <td>Seit Kauf</td>
-          <td :class="{ 'positive': stockDetails.stock.latestQuote.change >= 0, 'negative':
-          stockDetails.stock.latestQuote.change
-           < 0 }">
-            {{ stockDetails.stock.latestQuote.change }} € ({{ stockDetails.stock.latestQuote.percentChange }}%)
+          <td :class="{ 'positive': stockDetails.portfolioEntry.profitAndLossPercent >= 0, 'negative':
+          stockDetails.portfolioEntry.profitAndLossPercent < 0 }">
+            {{ stockDetails.portfolioEntry.profitAndLoss }} {{ stockDetails.stock.currency }} ({{ stockDetails.portfolioEntry.profitAndLossPercent }}%)
           </td>
         </tr>
         <tr>
-          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.quantity }}</td>
-          <td v-if="stockDetails.portfolioEntry != null">Kaufpreis gesamt</td>
-          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.quantity }}</td>
-          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.totalValue }} {{ stockDetails.stock.currency }}</td>
-        </tr>
-        <tr>
-          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.quantity }}</td>
-          <td v-if="stockDetails.portfolioEntry != null">Kaufpreis Stück</td>
-          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.portfolioEntry.quantity }}</td>
-          <td v-if="stockDetails.portfolioEntry != null">{{ stockDetails.stock.latestQuote.currentPrice }} {{ stockDetails.stock.currency }}</td>
+          <td>Kaufpreis gesamt</td>
+          <td>{{ stockDetails.portfolioEntry.totalInvestAmount }} {{ stockDetails.stock.currency }}</td>
         </tr>
         </tbody>
       </table>
@@ -58,11 +53,11 @@
         <tbody>
         <tr>
           <td>Tagestief</td>
-          <td>{{ stockDetails.stock.latestQuote.lowPriceOfTheDay }} €</td>
+          <td>{{ stockDetails.stock.latestQuote.lowPriceOfTheDay }} {{stockDetails.stock.currency}}</td>
         </tr>
         <tr>
           <td>Tageshoch</td>
-          <td>{{ stockDetails.stock.latestQuote.highPriceOfTheDay }} €</td>
+          <td>{{ stockDetails.stock.latestQuote.highPriceOfTheDay }} {{stockDetails.stock.currency}}</td>
         </tr>
         </tbody>
       </table>
@@ -142,6 +137,12 @@ async function poll() {
     console.log(stockData)
     if (stockDetails.value.stock.latestQuote.currentPrice !== stockData.stock.latestQuote.currentPrice) {
       stockDetails.value.stock.latestQuote.currentPrice = stockData.stock.latestQuote.currentPrice
+      stockDetails.value.portfolioEntry.totalValue = stockData.portfolioEntry.totalValue
+      stockDetails.value.portfolioEntry.profitAndLoss = stockData.portfolioEntry.profitAndLoss
+      stockDetails.value.portfolioEntry.profitAndLossPercent = stockData.portfolioEntry.profitAndLossPercent
+      stockDetails.value.stock.latestQuote.highPriceOfTheDay = stockData.stock.latestQuote.highPriceOfTheDay
+      stockDetails.value.stock.latestQuote.lowPriceOfTheDay = stockData.stock.latestQuote.lowPriceOfTheDay
+
       stockDetails.value.stock.justChanged = true
 
       setTimeout(() => {

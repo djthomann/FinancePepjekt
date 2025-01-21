@@ -16,7 +16,7 @@
           <th>Symbol</th>
           <th>Währung</th>
           <th><button :class="{ 'sorting-button-down': priceDescending}" class="sorting-button" @click="sortByPrice">Aktueller Wert</button></th>
-          <th>Gewinn/Verlust</th>
+          <th>Heutige Bilanz</th>
         </tr>
         </thead>
         <tbody>
@@ -27,8 +27,8 @@
           <td>{{ stock.symbol }}</td>
           <td>{{ stock.currency }}</td>
           <td>{{ stock.latestQuote.currentPrice }}</td>
-          <td :class="{ 'positive': stock.change >= 0, 'negative': stock.change < 0 }">
-            {{ stock.change }} € ({{ stock.changePercentage }}%)
+          <td :class="{ 'positive': stock.latestQuote.change >= 0, 'negative': stock.latestQuote.change < 0 }">
+            {{ stock.latestQuote.change }} ({{ stock.latestQuote.percentChange }}%)
           </td>
         </tr>
         </tbody>
@@ -69,9 +69,12 @@ async function poll() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const stockData = await response.json() as Stock;
+      console.log(stockData)
 
       if (stock.latestQuote.currentPrice !== stockData.latestQuote.currentPrice) {
         stock.latestQuote.currentPrice = stockData.latestQuote.currentPrice
+        stock.latestQuote.percentChange = stockData.latestQuote.percentChange
+        stock.latestQuote.change = stockData.latestQuote.change
         stock.justChanged = true
 
         setTimeout(() => {

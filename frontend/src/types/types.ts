@@ -20,8 +20,6 @@ export interface Stock {
   description: string,
   figi: string,
   currency: Currency,
-  change: number,
-  changePercentage: number,
   latestQuote: Quote,
 
   justChanged: boolean // Just for frontend
@@ -83,6 +81,7 @@ export interface PortfolioEntry {
   quantity: number,
   stock: Stock,
   totalValue: number,
+  totalInvestAmount: number,
   profitAndLoss: number,
   profitAndLossPercent: number
 }

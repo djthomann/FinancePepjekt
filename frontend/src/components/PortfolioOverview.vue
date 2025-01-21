@@ -7,7 +7,7 @@
         <p v-if="investmentAccount && investmentAccount.owner">{{ investmentAccount.owner.mail }}</p>
       </div>
       <div class="total-value" v-if="investmentAccount && investmentAccount.owner">
-        <p>Depotwert: <strong>{{ totalValue }} €</strong></p>
+        <p>Depotwert: <strong>{{ totalValue }} USD</strong></p>
       </div>
     </div>
 
@@ -20,7 +20,7 @@
         <th>Anteile</th>
         <th>Aktueller Wert</th>
         <th>Gesamtwert</th>
-        <th>Gewinn/Verlust</th>
+        <th>Bilanz</th>
       </tr>
       </thead>
       <tbody>
@@ -34,10 +34,8 @@
         <td>{{ portfolioEntry.stock.latestQuote.currentPrice }}</td>
         <td>{{ portfolioEntry.totalValue }}</td>
         <td :class="{ 'positive': portfolioEntry.profitAndLossPercent >= 0, 'negative': portfolioEntry.profitAndLossPercent < 0 }">
-          {{ portfolioEntry.profitAndLoss }} {{portfolioEntry.stock.currency}} ({{ portfolioEntry.profitAndLossPercent }}%)
+          {{ portfolioEntry.profitAndLoss }}  ({{ portfolioEntry.profitAndLossPercent }}%)
         </td>
-
-
       </tr>
       </tbody>
     </table>
