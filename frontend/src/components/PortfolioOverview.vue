@@ -31,9 +31,12 @@
         <td>{{ portfolioEntry.stock.symbol }}</td>
         <td>{{ portfolioEntry.quantity }}</td>
         <td>{{ portfolioEntry.stock.latestQuote.currentPrice }}</td>
-        <td :class="{ 'positive': portfolioEntry.stock.change >= 0, 'negative': portfolioEntry.stock.change < 0 }">
+     <!-- <td :class="{ 'positive': portfolioEntry.stock.change >= 0, 'negative': portfolioEntry.stock.change < 0 }">
           {{ portfolioEntry.totalValue }} € ({{ portfolioEntry.changePercentage }}%)
         </td>
+
+        -->
+        <td>{{portfolioEntry.totalValue}}</td>
       </tr>
       </tbody>
     </table>
@@ -87,6 +90,7 @@ async function poll() {
 
       if (matchingEntry && portfolioEntry.stock.latestQuote.currentPrice !== matchingEntry.stock.latestQuote.currentPrice) {
         portfolioEntry.stock.latestQuote.currentPrice = matchingEntry.stock.latestQuote.currentPrice;
+        portfolioEntry.totalValue = matchingEntry.totalValue
         portfolioEntry.stock.justChanged = true;
 
         setTimeout(() => {

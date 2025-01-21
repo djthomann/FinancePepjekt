@@ -30,7 +30,6 @@ class InvestmentAccountService(
     val ownerRepository: IOwnerRepository,
     val stockRepository: IStockRepository,
     val finnhubHandler: FinnhubHandler,
-    val stockService: StockService,
     val latestIStockQuoteRepository: IStockQuoteLatestRepository,
     val quoteRepository: IStockQuoteRepository
 ) : IInvestmentAccountService {
@@ -195,23 +194,21 @@ class InvestmentAccountService(
                 }
         }
 
-        // Load Portfolio and create PortfolioDTO
         val portfolioMono = accountMono.flatMap { account ->
             portfolioEntryRepository.findByInvestmentAccountId(account.id!!)
                 .flatMap { portfolioEntry ->
-                    // Lade Stock-Daten für jedes PortfolioEntry
                     stockRepository.findBySymbol(portfolioEntry.stockSymbol).flatMap { stock ->
-                        stockService.getLatestQuoteBySymbol(stock.symbol)
-                            .map { quote ->
-                                PortfolioEntryDTO(
-                                    id = portfolioEntry.id,
-                                    stockSymbol = portfolioEntry.stockSymbol,
-                                    quantity = portfolioEntry.quantity,
-                                    stock = StockDTO.mapToDto(stock, quote)
+                        latestIStockQuoteRepository.findById(portfolioEntry.stockSymbol).flatMap { latestStockQuote ->
+                            quoteRepository.findById(latestStockQuote.quoteId).map { quote ->
+                                PortfolioEntryDTO.mapToDto(
+                                    portfolioEntry,
+                                    StockDTO.mapToDto(stock, quote)
                                 )
                             }
+                        }
                     }
-                }.collectList()
+                }
+                .collectList()
         }
 
         val totalValue = calculateInvestmentAccountTotalValueAsync(portfolioMono)
@@ -238,19 +235,16 @@ class InvestmentAccountService(
             }
     }
 
-    // Asynchrone Methode, die den Gesamtwert des Depots berechnet
     private fun calculateInvestmentAccountTotalValueAsync(portfolioMono: Mono<List<PortfolioEntryDTO>>): Mono<BigDecimal> {
         return portfolioMono.flatMap { portfolioEntries ->
             Flux.fromIterable(portfolioEntries)
                 .flatMap { entry ->
-                    // Hole aktuelle Quote für das Stock-Symbol
                     finnhubHandler.fetchStockQuote(entry.stockSymbol)
                         .map { quote ->
-                            // Berechne den Wert der Position
                             quote.currentPrice.multiply(BigDecimal(entry.quantity))
                         }
                 }
-                .reduce(BigDecimal.ZERO) { acc, value -> acc.add(value) } // Summiere alle Werte
+                .reduce(BigDecimal.ZERO) { acc, value -> acc.add(value) }
         }
     }
 
