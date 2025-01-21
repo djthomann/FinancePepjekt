@@ -7,13 +7,13 @@ import de.hsrm.mi.stacs.pepjekt.repositories.ICryptoQuoteLatestRepository
 import de.hsrm.mi.stacs.pepjekt.repositories.ICryptoQuoteRepository
 import de.hsrm.mi.stacs.pepjekt.repositories.ICryptoRepository
 import org.junit.jupiter.api.BeforeEach
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import org.junit.jupiter.api.Assertions.*
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.*
 import kotlin.test.Test
 
 /**
@@ -89,6 +89,7 @@ class CryptoServiceTest {
         assertEquals(result?.id, cryptoQuote.id)
         assertEquals(result?.cryptoSymbol, cryptoQuote.cryptoSymbol)
         assertEquals(result?.currentPrice, cryptoQuote.currentPrice)
+        verify(cryptoQuoteRepository.save(any()))
     }
 
     /**
@@ -101,6 +102,7 @@ class CryptoServiceTest {
 
         assertEquals(result?.cryptoSymbol, crypto.symbol)
         assertEquals(result?.quote_id, cryptoQuote.id)
+        verify(cryptoQuoteLatestRepository).save(any())
     }
 
     /**
