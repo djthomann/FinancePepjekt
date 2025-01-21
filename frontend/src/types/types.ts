@@ -24,6 +24,7 @@ export interface Stock {
   latestQuote: Quote,
 
   justChanged: boolean // Just for frontend
+  isFavorite: boolean // Just for frontend
 }
 
 export interface StockDetails {
