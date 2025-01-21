@@ -13,6 +13,6 @@ interface IFavoriteRepository : R2dbcRepository<Favorite, Long> {
 
     fun removeByInvestmentAccountIdAndStockSymbol(investmentAccountId: Long, stockSymbol: String): Mono<Boolean>
 
-    fun findByInvestmentAccountIdAndStockSymbol(investmentAccountId: Long, stockSymbol: String): Mono<Boolean>
+    fun findByInvestmentAccountIdAndStockSymbol(investmentAccountId: Long, stockSymbol: String): Mono<Favorite>
 
 }

@@ -25,10 +25,21 @@ class FavoriteService(
             .flatMap { investmentAccountService.getInvestmentAccount(investmentAccountId) }
             .switchIfEmpty(Mono.error(NoSuchElementException("Investment account not found by investmentAccountId $investmentAccountId")))
             .flatMap {
-                favoriteRepository.save(Favorite(investmentAccountId = investmentAccountId, stockSymbol = stockSymbol))
-                    .`as`(operator::transactional)
+                favoriteRepository.findByInvestmentAccountIdAndStockSymbol(investmentAccountId, stockSymbol)
+                    .flatMap {
+                        Mono.error<Void>(IllegalStateException("Favorite already exists for this investment account and stock"))
+                    }
+                    .switchIfEmpty(
+                        favoriteRepository.save(
+                            Favorite(
+                                investmentAccountId = investmentAccountId,
+                                stockSymbol = stockSymbol
+                            )
+                        )
+                            .`as`(operator::transactional)
+                            .then()
+                    )
             }
-            .then()
     }
 
     override fun removeFavoriteFromInvestmentAccount(investmentAccountId: Long, stockSymbol: String): Mono<Void> {
