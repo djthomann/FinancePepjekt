@@ -134,7 +134,6 @@ async function poll() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const stockData = await response.json() as StockDetails;
-    console.log(stockData)
     if (stockDetails.value.stock.latestQuote.currentPrice !== stockData.stock.latestQuote.currentPrice) {
       stockDetails.value.stock.latestQuote.currentPrice = stockData.stock.latestQuote.currentPrice
       stockDetails.value.portfolioEntry.totalValue = stockData.portfolioEntry.totalValue
