@@ -7,3 +7,6 @@
 ### Helpful SQLs
 Show all existing tables:
 SELECT table_name FROM information_schema WHERE table_name = 'public'
+
+### ENV-Datei nutzen
+siehe Repo: https://github.com/cdimascio/dotenv-kotlin
