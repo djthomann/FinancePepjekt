@@ -1,7 +1,7 @@
 ### How to connect to DB:
 
 1. Go into Docker container
-2. execute "psql mydb my_user"
+2. execute "psql DB_NAME DB_USERNAME"
 3. You are ready to execute SQLs
 
 ### Helpful SQLs
