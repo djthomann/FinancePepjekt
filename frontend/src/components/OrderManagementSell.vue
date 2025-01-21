@@ -32,7 +32,7 @@
       <div>
         <form @submit.prevent="sell">
           <label for="volume">Anteile</label>
-          <input v-model.number="volume" type="number" id="volume"/>
+          <input v-model.number="volume" type="number" id="volume" step="0.01" />
           <label for="timestamp-date">Datum</label>
           <input v-model="date" type="date" id="timestamp-date"/>
           <label for="timestamp-time">Uhrzeit</label>

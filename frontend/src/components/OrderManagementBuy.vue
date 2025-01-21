@@ -11,7 +11,7 @@
          oder
          -->
         <label for="purchaseAmount">Kaufsumme</label>
-        <input v-model.number="purchaseAmount" type="number" id="sum"/>
+        <input v-model.number="purchaseAmount" type="number" id="sum" step="0.01" />
         <br>
         <label for="timestamp-date">Datum</label>
         <input v-model="date" type="date" id="timestamp-date"/>
