@@ -83,8 +83,8 @@ export interface PortfolioEntry {
   quantity: number,
   stock: Stock,
   totalValue: number,
-  change: number,
-  changePercentage: number
+  profitAndLoss: number,
+  profitAndLossPercent: number
 }
 
 export interface BankAccount {

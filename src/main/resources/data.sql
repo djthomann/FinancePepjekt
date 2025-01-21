@@ -110,19 +110,18 @@ VALUES (1, 1), -- Verknüpft mit Bankkonto ID 1 und Benutzer ID 1
 
 -- Portfolio
 INSERT INTO portfolio_entry (investment_account_id, stock_symbol, quantity, total_invest_amount)
-VALUES (1, 'AAPL', 50.5, 1000.0),
-       (1, 'TSLA', 10.0, 16000.0),
-       (1, 'NVDA', 5.0, 15660.0),
-       (2, 'SAP', 15.0, 1555.0),
-       (3, 'AAPL', 25.0, 1500.0);
+VALUES (1, 'AAPL', 50.5, 13600.0),
+       (1, 'TSLA', 10.0, 4500.0),
+       (1, 'NVDA', 5.0, 600.0);
 
 -- Order
-INSERT INTO stock_order (purchase_amount, purchase_volume, type, execution_timestamp, investment_account_id, stock_symbol)
-VALUES
-    (1000.0, 100.0, 'BUY', '2025-01-18 09:00:00', 1, 'AAPL'),
-    (500.0, 5.0, 'SELL', '2025-01-18 09:30:00', 1, 'TSLA'),
-    (2550.0, 25.5, 'BUY', '2025-01-18 10:00:00', 2, 'SAP'),
-    (1000.0, 10.0, 'SELL', '2025-01-18 10:30:00', 3, 'AAPL');
+--INSERT INTO stock_order (purchase_amount, purchase_volume, type, execution_timestamp, investment_account_id,
+--stock_symbol)
+--VALUES
+--    (1000.0, 100.0, 'BUY', '2025-01-18 09:00:00', 1, 'AAPL'),
+--    (500.0, 5.0, 'SELL', '2025-01-18 09:30:00', 1, 'TSLA'),
+--    (2550.0, 25.5, 'BUY', '2025-01-18 10:00:00', 2, 'SAP'),
+--    (1000.0, 10.0, 'SELL', '2025-01-18 10:30:00', 3, 'AAPL');
 
 
 -- Order for 10 SAP from Investmentkonto 3
