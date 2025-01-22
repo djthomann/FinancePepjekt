@@ -30,8 +30,8 @@ class InvestmentAccountDTO(
                 bankAccount = bankAccount,
                 owner = owner,
                 portfolio = portfolioEntryDTOs,
-                totalValue = totalValue,
-                totalProfitAndLoss = totalProfitAndLoss,
+                totalValue = totalValue.setScale(ROUNDING_NUMBER_TO_DECIMAL_PLACE, RoundingMode.HALF_UP),
+                totalProfitAndLoss = totalProfitAndLoss.setScale(ROUNDING_NUMBER_TO_DECIMAL_PLACE, RoundingMode.HALF_UP),
                 totalProfitAndLossPercent = totalProfitAndLossPercent
             )
         }

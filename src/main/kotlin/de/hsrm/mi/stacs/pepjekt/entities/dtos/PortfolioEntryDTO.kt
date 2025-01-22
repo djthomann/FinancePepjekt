@@ -30,9 +30,9 @@ class PortfolioEntryDTO(
                 stockSymbol = portfolioEntry.stockSymbol,
                 quantity = portfolioEntry.quantity,
                 stock = stock,
-                totalInvestAmount = portfolioEntry.totalInvestAmount,
-                totalValue = totalValue,
-                profitAndLoss = profitAndLoss,
+                totalInvestAmount = portfolioEntry.totalInvestAmount.setScale(ROUNDING_NUMBER_TO_DECIMAL_PLACE, RoundingMode.HALF_UP),
+                totalValue = totalValue.setScale(ROUNDING_NUMBER_TO_DECIMAL_PLACE, RoundingMode.HALF_UP),
+                profitAndLoss = profitAndLoss.setScale(ROUNDING_NUMBER_TO_DECIMAL_PLACE, RoundingMode.HALF_UP),
                 profitAndLossPercent = profitAndLossPercent
             )
         }
@@ -46,9 +46,9 @@ class PortfolioEntryDTO(
                 id = portfolioEntry.id,
                 stockSymbol = portfolioEntry.stockSymbol,
                 quantity = portfolioEntry.quantity,
-                totalInvestAmount = portfolioEntry.totalInvestAmount,
-                totalValue = totalValue,
-                profitAndLoss = profitAndLoss,
+                totalInvestAmount = portfolioEntry.totalInvestAmount.setScale(ROUNDING_NUMBER_TO_DECIMAL_PLACE, RoundingMode.HALF_UP),
+                totalValue = totalValue.setScale(ROUNDING_NUMBER_TO_DECIMAL_PLACE, RoundingMode.HALF_UP),
+                profitAndLoss = profitAndLoss.setScale(ROUNDING_NUMBER_TO_DECIMAL_PLACE, RoundingMode.HALF_UP),
                 profitAndLossPercent = profitAndLossPercent
             )
         }
