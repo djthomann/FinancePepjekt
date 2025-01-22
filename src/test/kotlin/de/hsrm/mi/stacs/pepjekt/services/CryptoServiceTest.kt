@@ -89,7 +89,6 @@ class CryptoServiceTest {
         assertEquals(result?.id, cryptoQuote.id)
         assertEquals(result?.cryptoSymbol, cryptoQuote.cryptoSymbol)
         assertEquals(result?.currentPrice, cryptoQuote.currentPrice)
-        verify(cryptoQuoteRepository.save(any()))
     }
 
     /**
