@@ -1,9 +1,7 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
 import de.hsrm.mi.stacs.pepjekt.entities.*
-import de.hsrm.mi.stacs.pepjekt.repositories.IInvestmentAccountRepository
-import de.hsrm.mi.stacs.pepjekt.repositories.IOrderRepository
-import de.hsrm.mi.stacs.pepjekt.repositories.IStockRepository
+import de.hsrm.mi.stacs.pepjekt.repositories.*
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
@@ -27,6 +25,9 @@ class OrderServiceTest {
         mock(IInvestmentAccountRepository::class.java)
     private val stockRepository: IStockRepository = mock(IStockRepository::class.java)
     private val operator: TransactionalOperator = mock(TransactionalOperator::class.java)
+    private val investmentAccountService: IInvestmentAccountService = mock(IInvestmentAccountService::class.java)
+    private val latestIStockQuoteRepository: IStockQuoteLatestRepository = mock(IStockQuoteLatestRepository::class.java)
+    private val quoteRepository: IStockQuoteRepository = mock(IStockQuoteRepository::class.java)
 
     private lateinit var orderService: OrderService
 
@@ -38,11 +39,23 @@ class OrderServiceTest {
         val investmentAccountId = "1"
         val stockSymbol = "AAPL"
         val volume = BigDecimal(10)
-        val stock = Stock(symbol = stockSymbol, description = "Apple Inc.", figi = "BBG000B9XRY4", currency = Currency.USD, name = "Apple")
+        val stock = Stock(
+            symbol = stockSymbol,
+            description = "Apple Inc.",
+            figi = "BBG000B9XRY4",
+            currency = Currency.USD,
+            name = "Apple"
+        )
 
         val ordersList = listOf(
-            Order(volume = 10f, type = OrderType.BUY, investmentAccountId = 1L, stockSymbol = stock.symbol),
-            Order(volume = 5f, type = OrderType.SELL, investmentAccountId = 1L, stockSymbol = stock.symbol)
+            Order(
+                purchaseAmount = BigDecimal(10), type = OrderType.BUY, investmentAccountId = 1L, stockSymbol =
+                stock.symbol, executionTimestamp = LocalDateTime.now(), purchaseVolume = 10.0
+            ),
+            Order(
+                purchaseAmount = BigDecimal(5), type = OrderType.SELL, investmentAccountId = 1L, stockSymbol =
+                stock.symbol, executionTimestamp = LocalDateTime.now(), purchaseVolume = 10.0
+            ),
         )
 
         val investmentAccount = InvestmentAccount(id = 1L, bankAccountId = 1L, ownerId = 1L)
@@ -56,10 +69,12 @@ class OrderServiceTest {
         `when`(orderRepository.save(any())).thenReturn(
             Mono.just(
                 Order(
-                    volume = volume.toFloat(),
                     type = OrderType.BUY,
                     investmentAccountId = investmentAccount.id!!,
-                    stockSymbol = stock.symbol
+                    stockSymbol = stock.symbol,
+                    purchaseAmount = BigDecimal(10),
+                    purchaseVolume = 10.0,
+                    executionTimestamp = LocalDateTime.now()
                 )
             )
         )
@@ -71,15 +86,18 @@ class OrderServiceTest {
         `when`(orderRepository.save(any())).thenReturn(
             Mono.just(
                 Order(
-                    volume = volume.toFloat(),
                     type = OrderType.SELL,
                     investmentAccountId = investmentAccount.id!!,
-                    stockSymbol = stock.symbol
+                    stockSymbol = stock.symbol,
+                    purchaseAmount = BigDecimal(10),
+                    purchaseVolume = 10.0,
+                    executionTimestamp = LocalDateTime.now()
                 )
             )
         )
 
-        orderService = OrderService(operator, orderRepository, investmentAccountRepository, stockRepository)
+        orderService = OrderService(operator, orderRepository, investmentAccountRepository, stockRepository,
+            investmentAccountService, latestIStockQuoteRepository, quoteRepository)
     }
 
     /**
@@ -87,7 +105,7 @@ class OrderServiceTest {
      */
     @Test
     fun `test placeBuyOrder`() {
-        val investmentAccountId = "1"
+        val investmentAccountId = 1L
         val stockSymbol = "AAPL"
         val volume = BigDecimal(10)
         val executionTime = LocalDateTime.now()
@@ -103,9 +121,9 @@ class OrderServiceTest {
      */
     @Test
     fun `test placeSellOrder`() {
-        val investmentAccountId = "1"
+        val investmentAccountId = 1L
         val stockSymbol = "AAPL"
-        val volume = BigDecimal(10)
+        val volume = 10.0
         val executionTime = LocalDateTime.now()
 
         val subscribe = orderService.placeSellOrder(investmentAccountId, stockSymbol, volume, executionTime)
