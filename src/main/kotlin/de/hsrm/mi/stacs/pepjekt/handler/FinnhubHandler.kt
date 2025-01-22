@@ -48,9 +48,8 @@ class FinnhubHandler(
         } else {
             dummy_finnhub_webClient
         }
-        webClient = dummy_finnhub_webClient
 
-        logger.debug(
+        logger.info(
             "Fetching Stock: {} from {}",
             symbol,
             if (isMarketOpen) "finnhub_webclient" else "dummy_finnhub_webClient"
