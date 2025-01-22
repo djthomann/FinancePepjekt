@@ -13,7 +13,7 @@ interface IBankAccountService {
 
     fun getBalance(bankAccountId: Long): Mono<BigDecimal>
 
-    fun deposit(bankAccountId: Long, amount: BigDecimal)
+    fun deposit(bankAccountId: Long, amount: BigDecimal): Mono<Void>
 
-    fun withdraw(bankAccountId: Long, amount: BigDecimal)
+    fun withdraw(bankAccountId: Long, amount: BigDecimal): Mono<Void>
 }

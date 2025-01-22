@@ -38,15 +38,14 @@ class OrderServiceTest {
         val investmentAccountId = "1"
         val stockSymbol = "AAPL"
         val volume = BigDecimal(10)
-        val stock =
-            Stock(symbol = stockSymbol, description = "Apple Inc.", figi = "BBG000B9XRY4", currency = Currency.USD)
+        val stock = Stock(symbol = stockSymbol, description = "Apple Inc.", figi = "BBG000B9XRY4", currency = Currency.USD, name = "Apple")
 
         val ordersList = listOf(
-            Order(volume = 10f, type = OrderType.BUY, investmentAccount = InvestmentAccount(id = 1L), stock = stock),
-            Order(volume = 5f, type = OrderType.SELL, investmentAccount = InvestmentAccount(id = 1L), stock = stock)
+            Order(volume = 10f, type = OrderType.BUY, investmentAccountId = 1L, stockSymbol = stock.symbol),
+            Order(volume = 5f, type = OrderType.SELL, investmentAccountId = 1L, stockSymbol = stock.symbol)
         )
 
-        val investmentAccount = InvestmentAccount(id = 1L)
+        val investmentAccount = InvestmentAccount(id = 1L, bankAccountId = 1L, ownerId = 1L)
 
         `when`(investmentAccountRepository.findById(investmentAccountId.toLong())).thenReturn(
             Mono.just(
@@ -59,8 +58,8 @@ class OrderServiceTest {
                 Order(
                     volume = volume.toFloat(),
                     type = OrderType.BUY,
-                    investmentAccount = investmentAccount,
-                    stock = stock
+                    investmentAccountId = investmentAccount.id!!,
+                    stockSymbol = stock.symbol
                 )
             )
         )
@@ -74,8 +73,8 @@ class OrderServiceTest {
                 Order(
                     volume = volume.toFloat(),
                     type = OrderType.SELL,
-                    investmentAccount = investmentAccount,
-                    stock = stock
+                    investmentAccountId = investmentAccount.id!!,
+                    stockSymbol = stock.symbol
                 )
             )
         )
@@ -123,7 +122,7 @@ class OrderServiceTest {
     fun `test getOrdersByInvestmentAccount`() {
         val investmentAccountId = "1"
 
-        orderService.getOrdersByInvestmentAccount(investmentAccountId)
+        orderService.getOrdersByInvestmentAccountId(investmentAccountId)
             .collectList()
             .doOnNext { result ->
                 assert(result.size == 2)

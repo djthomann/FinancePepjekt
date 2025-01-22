@@ -3,6 +3,7 @@ package de.hsrm.mi.stacs.pepjekt.services
 import de.hsrm.mi.stacs.pepjekt.entities.BankAccount
 import de.hsrm.mi.stacs.pepjekt.entities.Currency
 import de.hsrm.mi.stacs.pepjekt.entities.InvestmentAccount
+import de.hsrm.mi.stacs.pepjekt.repositories.IBankAccountRepository
 import de.hsrm.mi.stacs.pepjekt.repositories.IInvestmentAccountRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -20,8 +21,8 @@ import kotlin.test.Test
  * for the repository and transaction operator.
  */
 class BankAccountServiceTest {
-    private val investmentAccountRepository: IInvestmentAccountRepository =
-        mock(IInvestmentAccountRepository::class.java)
+    private val investmentAccountRepository: IInvestmentAccountRepository = mock(IInvestmentAccountRepository::class.java)
+    private val bankAccountRepository: IBankAccountRepository = mock(IBankAccountRepository::class.java)
     private val operator: TransactionalOperator = mock(TransactionalOperator::class.java)
 
     private lateinit var bankAccountService: BankAccountService
@@ -38,12 +39,19 @@ class BankAccountServiceTest {
             balance = BigDecimal(150),
             currency = Currency.USD
         )
-        investmentAccount = InvestmentAccount(bankAccount = bankAccount, id = 2L)
+        investmentAccount = InvestmentAccount(bankAccountId = bankAccount.id, id = 2L, ownerId = 1L)
 
-        `when`(investmentAccountRepository.findByBankAccountId(1L)).thenReturn(Mono.just(investmentAccount))
+        `when`(investmentAccountRepository.findByBankAccountId(bankAccount.id!!)).thenReturn(Mono.just(investmentAccount))
         `when`(investmentAccountRepository.save(any())).thenReturn(Mono.just(investmentAccount))
 
-        bankAccountService = BankAccountService(operator, investmentAccountRepository)
+        bankAccountService = BankAccountService(operator, bankAccountRepository, investmentAccountRepository)
+
+        `when`(bankAccountRepository.findById(bankAccount.id!!)).thenReturn(Mono.just(bankAccount))
+        `when`(bankAccountRepository.save(any())).thenAnswer { invocation ->
+            val argument = invocation.arguments[0] as BankAccount
+            Mono.just(argument)
+        }
+
     }
 
     /**
@@ -60,11 +68,9 @@ class BankAccountServiceTest {
      */
     @Test
     fun `test deposit method`() {
-        bankAccountService.deposit(1L, BigDecimal(50))
+        bankAccountService.deposit(1L, BigDecimal(50)).block()
 
-        verify(investmentAccountRepository).save(argThat {
-            bankAccount.balance == BigDecimal(200)
-        })
+        verify(bankAccountRepository).save(argThat { it.balance == BigDecimal(200) })
     }
 
     /**
@@ -72,10 +78,9 @@ class BankAccountServiceTest {
      */
     @Test
     fun `test withdraw method`() {
-        bankAccountService.withdraw(1L, BigDecimal(50))
+        bankAccountService.withdraw(1L, BigDecimal(50)).block()
 
-        verify(investmentAccountRepository).save(argThat {
-            bankAccount.balance == BigDecimal(100)
-        })
+        verify(bankAccountRepository).save(argThat { it.balance == BigDecimal(100) })
     }
+
 }
