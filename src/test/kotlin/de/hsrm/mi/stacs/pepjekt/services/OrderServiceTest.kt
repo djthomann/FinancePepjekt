@@ -2,6 +2,7 @@ package de.hsrm.mi.stacs.pepjekt.services
 
 import de.hsrm.mi.stacs.pepjekt.entities.*
 import de.hsrm.mi.stacs.pepjekt.repositories.*
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
@@ -9,6 +10,7 @@ import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDateTime
 import kotlin.test.Test
 
@@ -96,24 +98,113 @@ class OrderServiceTest {
             )
         )
 
-        orderService = OrderService(operator, orderRepository, investmentAccountRepository, stockRepository,
-            investmentAccountService, latestIStockQuoteRepository, quoteRepository)
+        orderService = OrderService(
+            operator, orderRepository, investmentAccountRepository, stockRepository,
+            investmentAccountService, latestIStockQuoteRepository, quoteRepository
+        )
     }
 
     /**
      * Tests the [OrderService.placeBuyOrder] method to ensure buy orders are saved correctly.
      */
     @Test
-    fun `test placeBuyOrder`() {
+    fun `test placeBuyOrder successfully saves order`() {
         val investmentAccountId = 1L
         val stockSymbol = "AAPL"
-        val volume = BigDecimal(10)
+        val purchaseAmount = BigDecimal(10)
         val executionTime = LocalDateTime.now()
 
-        orderService.placeBuyOrder(investmentAccountId, stockSymbol, volume, executionTime)
-            .subscribe {
+        val account = InvestmentAccount(id = investmentAccountId)
+        val stock = Stock(
+            symbol = stockSymbol,
+            name = "Apple Inc.",
+            description = "Apple Stock",
+            figi = "BBG000B9XRY4",
+            currency = Currency.USD
+        )
+        val quote = StockQuote(
+            id = 1L, currentPrice = BigDecimal(100), change = 0f, percentChange = 0f,
+            highPriceOfTheDay = BigDecimal(110), lowPriceOfTheDay = BigDecimal(90),
+            openPriceOfTheDay = BigDecimal(100), previousClosePrice = BigDecimal(99),
+            timeStamp = executionTime, stockSymbol = stockSymbol
+        )
+
+        `when`(investmentAccountRepository.findById(investmentAccountId)).thenReturn(Mono.just(account))
+        `when`(stockRepository.findBySymbol(stockSymbol)).thenReturn(Mono.just(stock))
+        `when`(latestIStockQuoteRepository.findById(stockSymbol)).thenReturn(
+            Mono.just(
+                StockQuoteLatest(
+                    stockSymbol,
+                    1L
+                )
+            )
+        )
+        `when`(quoteRepository.findById(1L)).thenReturn(Mono.just(quote))
+        `when`(orderRepository.save(any())).thenReturn(
+            Mono.just(
+                Order(
+                    id = 1L, purchaseAmount = purchaseAmount,
+                    purchaseVolume = 0.1, type = OrderType.BUY, investmentAccountId = investmentAccountId,
+                    stockSymbol = stockSymbol, executionTimestamp = executionTime
+                )
+            )
+        )
+
+        orderService.placeBuyOrder(investmentAccountId, stockSymbol, purchaseAmount, executionTime)
+            .subscribe { savedOrder ->
                 verify(orderRepository).save(any())
+                assertEquals(
+                    purchaseAmount.divide(quote.currentPrice, 10, RoundingMode.UP),
+                    BigDecimal(savedOrder.purchaseVolume)
+                )
             }
+    }
+
+    /**
+     * Tests the [OrderService.placeBuyOrder] method to ensure buy orders are saved correctly.
+     */
+    @Test
+    fun `test placeBuyOrder with zero currentPrice should throw error`() {
+        // Given
+        val investmentAccountId = 1L
+        val stockSymbol = "AAPL"
+        val purchaseAmount = BigDecimal(10)
+        val executionTime = LocalDateTime.now()
+
+        val account = InvestmentAccount(id = investmentAccountId)
+        val stock = Stock(
+            symbol = stockSymbol,
+            name = "Apple Inc.",
+            description = "Apple Stock",
+            figi = "BBG000B9XRY4",
+            currency = Currency.USD
+        )
+        val quote = StockQuote(
+            id = 1L, currentPrice = BigDecimal.ZERO, change = 0f, percentChange = 0f,
+            highPriceOfTheDay = BigDecimal(110), lowPriceOfTheDay = BigDecimal(90),
+            openPriceOfTheDay = BigDecimal(100), previousClosePrice = BigDecimal(99),
+            timeStamp = executionTime, stockSymbol = stockSymbol
+        )
+
+        // Mocking the repositories to return values
+        `when`(investmentAccountRepository.findById(investmentAccountId)).thenReturn(Mono.just(account))
+        `when`(stockRepository.findBySymbol(stockSymbol)).thenReturn(Mono.just(stock))
+        `when`(latestIStockQuoteRepository.findById(stockSymbol)).thenReturn(
+            Mono.just(
+                StockQuoteLatest(
+                    stockSymbol,
+                    1L
+                )
+            )
+        )
+        `when`(quoteRepository.findById(1L)).thenReturn(Mono.just(quote))
+
+        orderService.placeBuyOrder(investmentAccountId, stockSymbol, purchaseAmount, executionTime)
+            .doOnError { error ->
+                assert(error is IllegalArgumentException)
+                assertEquals("Current price cannot be null or zero", error.message)
+            }
+            .subscribe()
     }
 
     /**
