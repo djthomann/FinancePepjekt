@@ -10,9 +10,11 @@
         <p><strong>Beschreibung:</strong> {{ stockDetails.stock.description }}</p>
 
         <div class="purchase-buttons">
-          <button class="purchase-button" @click="purchase(stockDetails.stock.symbol, stockDetails.portfolioEntry.investmentAccountId)">
+          <button class="purchase-button" @click="purchase(stockDetails.stock.symbol)">
             Kaufen</button>
-          <button class="purchase-button" @click="sell(stockDetails.stock.symbol, stockDetails.portfolioEntry.investmentAccountId)">Verkaufen</button>
+          <button v-if="stockDetails.portfolioEntry != null" class="purchase-button"
+                  @click="sell(stockDetails.stock.symbol)">Verkaufen
+          </button>
         </div>
       </div>
       <div class="stock-detail-header-chart">
@@ -195,13 +197,16 @@ onUnmounted(() => {
 
 const router = useRouter()
 
-function sell(symbol: string, investmentAccountId: number) {
-  console.log('Verkaufen')
+function sell(symbol: string) {
+  const route = useRoute()
+  const investmentAccountId = route.params.investmentAccountId
+
   router.push({name: 'order-management-sell', params: {symbol, investmentAccountId}});
 }
 
-function purchase(symbol: string, investmentAccountId: number) {
-  console.log('Kaufen')
+function purchase(symbol: string) {
+  const route = useRoute()
+  const investmentAccountId = route.params.investmentAccountId
   router.push({name: 'order-management-buy', params: {symbol, investmentAccountId}});
 }
 
