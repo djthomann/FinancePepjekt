@@ -1,12 +1,56 @@
-### How to connect to DB:
+# STACS Project - Finance-Pepjekt
 
-1. Go into Docker container
-2. execute "psql DB_NAME DB_USERNAME"
-3. You are ready to execute SQLs
+The Finance Project focuses on creating a platform for managing financial assets with the following key functionalities:
 
-### Helpful SQLs
-Show all existing tables:
-SELECT table_name FROM information_schema WHERE table_name = 'public'
+1. **Account Management**: Users can deposit stocks into their accounts by specifying the desired amount.
+2. **Portfolio Management**: Users can use deposited stocks to purchase them, which are stored in their portfolio.
+3. **Trading Capabilities**: Users can execute buy or sell orders for stocks, with options for immediate or scheduled 
+   execution based on real-time market prices.
+4. **Portfolio Overview**: A dashboard displays purchased stocks with details
+5. **Search for Socks**: Users can search for stocks
 
-### ENV-Datei nutzen
-siehe Repo: https://github.com/cdimascio/dotenv-kotlin
+# How to Execute
+
+## 1. Prepare Environment
+1. **Install Docker**
+    - Install Docker and start it on your local machine.
+
+2. **Download Finnhub-Recreate (Dummy Finnhub)**
+    - Repository URL: https://gitlab.cs.hs-rm.de/dthom001/finnhub-recreate
+
+3. **Start Finnhub-Recreate**
+    - Run the following command:
+      ```bash
+      ./gradlew bootRun
+      ```
+
+## 2. Install and Run Backend
+1. **Create .env file**
+    - Create in root an .env file
+    - Insert the given credentials
+
+2. **Start Backend**
+    - Use the following command:
+      ```bash
+      ./gradlew bootRun
+      ```
+
+
+## 3. Start Frontend
+1. **Navigate to the Frontend Directory**
+    - Change to the `frontend` directory:
+      ```bash
+      cd /frontend
+      ```
+
+2. **Install Packages**
+    - Install required packages using:
+      ```bash
+      npm i
+      ```
+
+3. **Run Frontend**
+    - Start the frontend with:
+      ```bash
+      npm run dev
+      ```
