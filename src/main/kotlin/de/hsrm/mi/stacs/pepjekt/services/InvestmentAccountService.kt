@@ -145,7 +145,8 @@ class InvestmentAccountService(
                             .flatMap {
                                 //investReduction = totalInvestAmount * (sold amount of volume / old amount of volume)
                                 val investReduction = existingEntry.totalInvestAmount.multiply(
-                                    volume.toBigDecimal().divide(existingEntry.quantity.toBigDecimal(), 4, RoundingMode.HALF_UP)
+                                    volume.toBigDecimal()
+                                        .divide(existingEntry.quantity.toBigDecimal(), 4, RoundingMode.HALF_UP)
                                 )
                                 val newTotalInvestAmount = existingEntry.totalInvestAmount.subtract(investReduction)
 
@@ -235,14 +236,7 @@ class InvestmentAccountService(
 
                 val roundedPortfolioTotalValue = portfolioTotalValue.setScale(2, RoundingMode.HALF_UP)
 
-                InvestmentAccountDTO(
-                    id = account.id,
-                    bankAccountId = account.bankAccountId,
-                    portfolio = portfolio,
-                    bankAccount = bankAccount,
-                    owner = owner,
-                    totalValue = roundedPortfolioTotalValue
-                )
+                InvestmentAccountDTO.mapToDto(account.id!!, bankAccount, owner, portfolio, roundedPortfolioTotalValue)
             }
     }
 
@@ -257,10 +251,6 @@ class InvestmentAccountService(
                 }
                 .reduce(BigDecimal.ZERO) { acc, value -> acc.add(value) }
         }
-    }
-
-    fun getInvestmentAccountOwner(userId: Long): Mono<Owner> {
-        return ownerRepository.findById(userId)
     }
 
 }

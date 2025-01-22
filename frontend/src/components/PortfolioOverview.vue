@@ -8,6 +8,9 @@
       </div>
       <div class="total-value" v-if="investmentAccount && investmentAccount.owner">
         <p>Depotwert: <strong>{{ totalValue }} USD</strong></p>
+        <p :class="{ 'positive':totalProfitAndLossPercent >= 0, 'negative': totalProfitAndLossPercent < 0 }">
+          {{ totalProfitAndLoss }} ({{ totalProfitAndLossPercent }}%)
+        </p>
       </div>
     </div>
 
@@ -33,8 +36,9 @@
         <td>{{ portfolioEntry.quantity }}</td>
         <td>{{ portfolioEntry.stock.latestQuote.currentPrice }}</td>
         <td>{{ portfolioEntry.totalValue }}</td>
-        <td :class="{ 'positive': portfolioEntry.profitAndLossPercent >= 0, 'negative': portfolioEntry.profitAndLossPercent < 0 }">
-          {{ portfolioEntry.profitAndLoss }}  ({{ portfolioEntry.profitAndLossPercent }}%)
+        <td
+          :class="{ 'positive': portfolioEntry.profitAndLossPercent >= 0, 'negative': portfolioEntry.profitAndLossPercent < 0 }">
+          {{ portfolioEntry.profitAndLoss }} ({{ portfolioEntry.profitAndLossPercent }}%)
         </td>
       </tr>
       </tbody>
@@ -51,6 +55,8 @@ const router = useRouter()
 const route = useRoute()
 const investmentAccount = ref<InvestmentAccount>()
 const totalValue = ref<number>()
+const totalProfitAndLoss = ref<number>(0)
+const totalProfitAndLossPercent = ref<number>(0)
 let pollingIntervalID: number
 const investmentAccountId = route.params.investmentAccountId as string
 
@@ -63,6 +69,9 @@ onBeforeMount(async () => {
     const result = await response.json() as InvestmentAccount
 
     investmentAccount.value = result
+
+    totalProfitAndLoss.value = result.totalProfitAndLoss
+    totalProfitAndLossPercent.value = result.totalProfitAndLossPercent
     totalValue.value = result.totalValue
   } catch (e) {
     console.error(e)
@@ -81,6 +90,8 @@ async function poll() {
     }
     const investmentAccountData = (await response.json()) as InvestmentAccount;
     totalValue.value = investmentAccountData.totalValue
+    totalProfitAndLoss.value = investmentAccountData.totalProfitAndLoss
+    totalProfitAndLossPercent.value = investmentAccountData.totalProfitAndLossPercent
 
     for (const portfolioEntry of investmentAccount.value!.portfolio) {
       const matchingEntry = investmentAccountData.portfolio.find(
@@ -117,11 +128,6 @@ const navigateToStockDetail = (symbol: string, investmentAccountId: string) => {
 
 
 </script>
-
-<style lang="scss">
-@use "./style.scss";
-</style>
-
 
 <style lang="scss">
 @use "./style.scss";
