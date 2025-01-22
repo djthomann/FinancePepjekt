@@ -122,46 +122,53 @@ class InvestmentAccountService(
         volume: Double
     ): Mono<InvestmentAccount> {
         return investmentAccountRepository.findById(investmentAccountId)
+            .switchIfEmpty(Mono.error(IllegalArgumentException("Investment account not found")))
             .flatMap { investmentAccount ->
                 if (investmentAccount.bankAccountId == null) {
                     return@flatMap Mono.error<InvestmentAccount>(IllegalArgumentException("No bank account linked to the investment account"))
                 }
 
                 portfolioEntryRepository.findByInvestmentAccountIdAndStockSymbol(investmentAccountId, stockSymbol)
+                    .switchIfEmpty(Mono.error(IllegalArgumentException("Stock not found in portfolio")))
                     .flatMap { existingEntry ->
-                        if (existingEntry == null) {
-                            return@flatMap Mono.error<InvestmentAccount>(IllegalArgumentException("Stock not found in portfolio"))
-                        }
-
-                        val newQuantity = existingEntry.quantity - volume.toDouble()
+                        val newQuantity = existingEntry.quantity - volume
                         if (newQuantity < 0) {
                             return@flatMap Mono.error<InvestmentAccount>(IllegalArgumentException("Insufficient stock quantity to sell"))
                         }
 
-                        // Update existing entry or create a new one with 0 quantity (effectively removing)
-                        val updatedEntry: PortfolioEntry
-                        if (newQuantity > 0) {
-                            updatedEntry = existingEntry.copy(quantity = newQuantity)
-                        } else {
-                            return@flatMap portfolioEntryRepository.delete(existingEntry).`as`(operator::transactional)
-                                .then(Mono.just(investmentAccount))
-                        }
+                        latestIStockQuoteRepository.findById(stockSymbol)
+                            .switchIfEmpty(Mono.error(IllegalArgumentException("Stock quote not found")))
+                            .flatMap { latestStockQuote ->
+                                quoteRepository.findById(latestStockQuote.quoteId)
+                            }
+                            .switchIfEmpty(Mono.error(IllegalArgumentException("Quote not found")))
+                            .flatMap {
+                                //investReduction = totalInvestAmount * (sold amount of volume / old amount of volume)
+                                val investReduction = existingEntry.totalInvestAmount.multiply(
+                                    volume.toBigDecimal().divide(existingEntry.quantity.toBigDecimal(), 4, RoundingMode.HALF_UP)
+                                )
+                                val newTotalInvestAmount = existingEntry.totalInvestAmount.subtract(investReduction)
 
-                        portfolioEntryRepository.save(updatedEntry).`as`(operator::transactional)
+                                if (newQuantity > 0) {
+                                    val updatedEntry = existingEntry.copy(
+                                        quantity = newQuantity,
+                                        totalInvestAmount = newTotalInvestAmount
+                                    )
+                                    portfolioEntryRepository.save(updatedEntry)
+                                } else {
+                                    portfolioEntryRepository.delete(existingEntry).then(Mono.empty())
+                                }
+                            }
+                            .then(bankAccountRepository.findById(investmentAccount.bankAccountId))
+                            .flatMap { bankAccount ->
+                                val updatedBalance = bankAccount.balance.add(volume.toBigDecimal())
+                                val updatedBankAccount = bankAccount.copy(balance = updatedBalance)
+                                bankAccountRepository.save(updatedBankAccount)
+                            }
+                            .thenReturn(investmentAccount)
                     }
-                    .flatMap {
-                        // Update the balance in the linked bank account
-                        bankAccountRepository.findById(investmentAccount.bankAccountId)
-                    }
-                    .flatMap { bankAccount ->
-                        val updatedBalance = bankAccount.balance.plus(volume.toBigDecimal())
-                        val updatedBankAccount = bankAccount.copy(balance = updatedBalance)
-                        bankAccountRepository.save(updatedBankAccount).`as`(operator::transactional)
-                    }
-                    .thenReturn(investmentAccount)
             }
     }
-
 
     /**
      * Retrieves the portfolio of an investment account by the investmentAccountId ID.
