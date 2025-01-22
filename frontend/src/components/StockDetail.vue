@@ -10,8 +10,11 @@
         <p><strong>Beschreibung:</strong> {{ stockDetails.stock.description }}</p>
 
         <div class="purchase-buttons">
-          <button class="purchase-button" @click="purchase(stockDetails.stock.symbol)">Kaufen</button>
-          <button class="purchase-button" @click="sell(stockDetails.stock.symbol)">Verkaufen</button>
+          <button class="purchase-button" @click="purchase(stockDetails.stock.symbol)">
+            Kaufen</button>
+          <button v-if="stockDetails.portfolioEntry != null" class="purchase-button"
+                  @click="sell(stockDetails.stock.symbol)">Verkaufen
+          </button>
         </div>
       </div>
       <div class="stock-detail-header-chart">
@@ -19,7 +22,7 @@
       </div>
     </div>
 
-    <div class="stock-info-section">
+    <div class="stock-info-section" v-if="stockDetails.portfolioEntry != null">
       <h2>Im Besitz</h2>
       <table>
         <tbody>
@@ -28,20 +31,19 @@
           <td>{{ stockDetails.portfolioEntry.quantity }}</td>
         </tr>
         <tr>
+          <td>Gesamtwert</td>
+          <td>{{ stockDetails.portfolioEntry.totalValue}} {{ stockDetails.stock.currency }}</td>
+        </tr>
+        <tr>
           <td>Seit Kauf</td>
-          <td :class="{ 'positive': stockDetails.stock.latestQuote.change >= 0, 'negative':
-          stockDetails.stock.latestQuote.change
-           < 0 }">
-            {{ stockDetails.stock.latestQuote.change }} € ({{ stockDetails.stock.latestQuote.percentChange }}%)
+          <td :class="{ 'positive': stockDetails.portfolioEntry.profitAndLossPercent >= 0, 'negative':
+          stockDetails.portfolioEntry.profitAndLossPercent < 0 }">
+            {{ stockDetails.portfolioEntry.profitAndLoss }} {{ stockDetails.stock.currency }} ({{ stockDetails.portfolioEntry.profitAndLossPercent }}%)
           </td>
         </tr>
         <tr>
           <td>Kaufpreis gesamt</td>
-          <td>{{ stockDetails.portfolioEntry.totalValue }} {{ stockDetails.stock.currency }}</td>
-        </tr>
-        <tr>
-          <td>Kaufpreis Stück</td>
-          <td>{{ stockDetails.stock.latestQuote.currentPrice }} {{ stockDetails.stock.currency }}</td>
+          <td>{{ stockDetails.portfolioEntry.totalInvestAmount }} {{ stockDetails.stock.currency }}</td>
         </tr>
         </tbody>
       </table>
@@ -53,11 +55,11 @@
         <tbody>
         <tr>
           <td>Tagestief</td>
-          <td>{{ stockDetails.stock.latestQuote.lowPriceOfTheDay }} €</td>
+          <td>{{ stockDetails.stock.latestQuote.lowPriceOfTheDay }} {{stockDetails.stock.currency}}</td>
         </tr>
         <tr>
           <td>Tageshoch</td>
-          <td>{{ stockDetails.stock.latestQuote.highPriceOfTheDay }} €</td>
+          <td>{{ stockDetails.stock.latestQuote.highPriceOfTheDay }} {{stockDetails.stock.currency}}</td>
         </tr>
         </tbody>
       </table>
@@ -134,9 +136,14 @@ async function poll() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const stockData = await response.json() as StockDetails;
-
     if (stockDetails.value.stock.latestQuote.currentPrice !== stockData.stock.latestQuote.currentPrice) {
       stockDetails.value.stock.latestQuote.currentPrice = stockData.stock.latestQuote.currentPrice
+      stockDetails.value.portfolioEntry.totalValue = stockData.portfolioEntry.totalValue
+      stockDetails.value.portfolioEntry.profitAndLoss = stockData.portfolioEntry.profitAndLoss
+      stockDetails.value.portfolioEntry.profitAndLossPercent = stockData.portfolioEntry.profitAndLossPercent
+      stockDetails.value.stock.latestQuote.highPriceOfTheDay = stockData.stock.latestQuote.highPriceOfTheDay
+      stockDetails.value.stock.latestQuote.lowPriceOfTheDay = stockData.stock.latestQuote.lowPriceOfTheDay
+
       stockDetails.value.stock.justChanged = true
 
       setTimeout(() => {
@@ -180,7 +187,7 @@ onBeforeMount(async () => {
   if (pollingIntervalID) {
     clearInterval(pollingIntervalID);
   }
-  pollingIntervalID = setInterval(poll, 1000)
+  pollingIntervalID = setInterval(poll, 3000)
 })
 
 onUnmounted(() => {
@@ -191,13 +198,16 @@ onUnmounted(() => {
 const router = useRouter()
 
 function sell(symbol: string) {
-  console.log('Verkaufen')
-  router.push({name: 'order-management-sell', params: {symbol}});
+  const route = useRoute()
+  const investmentAccountId = route.params.investmentAccountId
+
+  router.push({name: 'order-management-sell', params: {symbol, investmentAccountId}});
 }
 
 function purchase(symbol: string) {
-  console.log('Kaufen')
-  router.push({name: 'order-management-buy', params: {symbol}});
+  const route = useRoute()
+  const investmentAccountId = route.params.investmentAccountId
+  router.push({name: 'order-management-buy', params: {symbol, investmentAccountId}});
 }
 
 </script>

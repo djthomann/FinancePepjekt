@@ -1,8 +1,9 @@
 export interface Order {
   id?: number,
-  volume: number,
+  purchaseAmount: number,
   type: OrderType,
   investmentAccountId: number,
+  executionTimestamp: string,
   stock: Stock,
   stockSymbol: string
 }
@@ -19,8 +20,6 @@ export interface Stock {
   description: string,
   figi: string,
   currency: Currency,
-  change: number,
-  changePercentage: number,
   latestQuote: Quote,
 
   justChanged: boolean // Just for frontend
@@ -50,6 +49,8 @@ export interface InvestmentAccount {
   portfolio: PortfolioEntry[],
   totalValue: number,
   bankAccount: BankAccount,
+  totalProfitAndLoss: number,
+  totalProfitAndLossPercent: number,
   owner: Owner
 }
 
@@ -82,8 +83,9 @@ export interface PortfolioEntry {
   quantity: number,
   stock: Stock,
   totalValue: number,
-  change: number,
-  changePercentage: number
+  totalInvestAmount: number,
+  profitAndLoss: number,
+  profitAndLossPercent: number
 }
 
 export interface BankAccount {

@@ -1,7 +1,5 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
-import de.hsrm.mi.stacs.pepjekt.entities.PortfolioEntry
-import de.hsrm.mi.stacs.pepjekt.entities.Stock
 import de.hsrm.mi.stacs.pepjekt.services.IInvestmentAccountService
 import org.slf4j.LoggerFactory
 import de.hsrm.mi.stacs.pepjekt.services.IStockService
@@ -11,7 +9,7 @@ import org.springframework.web.reactive.function.server.ServerResponse
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
-import javax.sound.sampled.Port
+import java.time.LocalDateTime
 
 /**
  * Handler for managing investment account-related requests.
@@ -71,7 +69,7 @@ class InvestmentAccountHandler(
         return investmentAccountService.getInvestmentAccountPortfolio(investmentAccountId)
             .flatMap { portfolio ->
                 val stockSymbols = portfolio.portfolio.map { it.stockSymbol }
-                if(stockSymbols.isEmpty()){
+                if (stockSymbols.isEmpty()) {
                     ServerResponse.notFound().build()
                 }
 
@@ -92,60 +90,4 @@ class InvestmentAccountHandler(
                     }
             }
     }
-
-
-    /**
-     * Handles a request to buy stock in an investment account.
-     *
-     * If any required parameter is missing or invalid, an error response will be returned.
-     *
-     * @param request The incoming server request containing query parameters.
-     * @return A Mono containing the server response with the updated investment account or an error response if invalid.
-     * @throws IllegalArgumentException If any required parameter (investmentAccountId, stockSymbol, volume) is missing.
-     */
-    fun buyStock(request: ServerRequest): Mono<ServerResponse> {
-        val investmentAccountId = request.queryParam("investmentAccountId")
-            .map { it.toLong() }
-            .orElseThrow { IllegalArgumentException("investmentAccountId is required") }
-
-        val stockSymbol = request.queryParam("stockSymbol")
-            .orElseThrow { IllegalArgumentException("stockSymbol is required") }
-
-        val volume = request.queryParam("volume")
-            .map { BigDecimal(it) }
-            .orElseThrow { IllegalArgumentException("volume is required") }
-
-        return investmentAccountService.buyStock(investmentAccountId, stockSymbol, volume)
-            .flatMap { updatedAccount ->
-                ServerResponse.ok().bodyValue(updatedAccount)
-            }
-    }
-
-    /**
-     * Handles a request to sell stock from an investment account.
-     *
-     * If any required parameter is missing or invalid, an error response will be returned.
-     *
-     * @param request The incoming server request containing query parameters.
-     * @return A Mono containing the server response with the updated investment account or an error response if invalid.
-     * @throws IllegalArgumentException If any required parameter (investmentAccountId, stockSymbol, volume) is missing.
-     */
-    fun sellStock(request: ServerRequest): Mono<ServerResponse> {
-        val investmentAccountId = request.queryParam("investmentAccountId")
-            .map { it.toLong() }
-            .orElseThrow { IllegalArgumentException("investmentAccountId is required") }
-
-        val stockSymbol = request.queryParam("stockSymbol")
-            .orElseThrow { IllegalArgumentException("stockSymbol is required") }
-
-        val volume = request.queryParam("volume")
-            .map { BigDecimal(it) }
-            .orElseThrow { IllegalArgumentException("volume is required") }
-
-        return investmentAccountService.sellStock(investmentAccountId, stockSymbol, volume)
-            .flatMap { updatedAccount ->
-                ServerResponse.ok().bodyValue(updatedAccount)
-            }
-    }
-
 }

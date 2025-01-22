@@ -15,15 +15,16 @@ import java.time.LocalDateTime
 interface IOrderService {
 
     fun placeBuyOrder(
-        investmentAccountId: String, stockSymbol: String, volume: BigDecimal, executionTime:
+        investmentAccountId: Long, stockSymbol: String, purchaseAmount: BigDecimal, executionTime:
         LocalDateTime
     ): Mono<Order>
 
     fun placeSellOrder(
-        investmentAccountId: String, stockSymbol: String, volume: BigDecimal, executionTime:
+        investmentAccountId: Long, stockSymbol: String, volume: Double, executionTime:
         LocalDateTime
     ): Mono<Order>
 
     fun getOrdersByInvestmentAccountId(investmentAccountId: String): Flux<Order>
 
+    fun processOrders(): Mono<Void>
 }

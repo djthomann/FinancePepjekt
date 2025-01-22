@@ -16,7 +16,6 @@
           <th>Symbol</th>
           <th>Währung</th>
           <th><button :class="{ 'sorting-button-down': priceDescending}" class="sorting-button" @click="sortByPrice">Aktueller Wert</button></th>
-          <th>Gewinn/Verlust</th>
         </tr>
         </thead>
         <tbody>
@@ -25,9 +24,6 @@
           <td>{{ coin.symbol }}</td>
           <td>USD</td>
           <td>{{ coin.currentPrice }}</td>
-          <td :class="{ 'positive': coin.change >= 0, 'negative': coin.change < 0 }">
-            {{ coin.change }} € ({{ coin.changePercentage }}%)
-          </td>
         </tr>
         </tbody>
       </table>

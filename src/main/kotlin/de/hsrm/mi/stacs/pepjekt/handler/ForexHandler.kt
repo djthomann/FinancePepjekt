@@ -27,7 +27,7 @@ class ForexHandler(
      */
     fun fetchMetalPrice(symbol: String): Mono<MetalQuote> {
 
-        logger.info("Fetching Metal: $symbol")
+        logger.debug("Fetching Metal: $symbol")
 
         return forex_webclient.get()
             .uri { uriBuilder: UriBuilder ->
