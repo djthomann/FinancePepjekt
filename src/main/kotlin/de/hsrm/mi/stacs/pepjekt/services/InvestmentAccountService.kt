@@ -4,6 +4,7 @@ import de.hsrm.mi.stacs.pepjekt.ROUNDING_NUMBER_TO_DECIMAL_PLACE
 import de.hsrm.mi.stacs.pepjekt.entities.InvestmentAccount
 import de.hsrm.mi.stacs.pepjekt.entities.Owner
 import de.hsrm.mi.stacs.pepjekt.entities.PortfolioEntry
+import de.hsrm.mi.stacs.pepjekt.entities.StockQuote
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.*
 import de.hsrm.mi.stacs.pepjekt.handler.FinnhubHandler
 import de.hsrm.mi.stacs.pepjekt.repositories.*
@@ -61,54 +62,110 @@ class InvestmentAccountService(
     override fun buyStock(
         investmentAccountId: Long, stockSymbol: String, purchaseAmount: BigDecimal
     ): Mono<InvestmentAccount> {
-        return investmentAccountRepository.findById(investmentAccountId).flatMap { investmentAccount ->
-            if (investmentAccount.bankAccountId == null) {
-                return@flatMap Mono.error<InvestmentAccount>(IllegalArgumentException("No bank account linked to the investment account"))
-            }
-
-            latestIStockQuoteRepository.findById(stockSymbol).flatMap { latestStockQuote ->
-                quoteRepository.findById(latestStockQuote.quoteId)
-            }.flatMap { quote ->
-                val calculatedVolume = purchaseAmount / quote.currentPrice
-
-                portfolioEntryRepository.findByInvestmentAccountIdAndStockSymbol(
-                    investmentAccountId, stockSymbol
-                ).flatMap { existingEntry ->
-                    // Update the existing entry
-                    val updatedQuantity = existingEntry.quantity + calculatedVolume.toDouble()
-                    val updatedEntry = existingEntry.copy(
-                        quantity = updatedQuantity,
-                        totalInvestAmount = existingEntry.totalInvestAmount.plus(purchaseAmount)
-                    )
-                    portfolioEntryRepository.save(updatedEntry).`as`(operator::transactional)
-                }.switchIfEmpty(
-                    // Create a new entry if none exists
-                    portfolioEntryRepository.save(
-                        PortfolioEntry(
-                            investmentAccountId = investmentAccountId,
-                            stockSymbol = stockSymbol,
-                            quantity = calculatedVolume.toDouble(),
-                            totalInvestAmount = purchaseAmount,
-                        )
-                    ).`as`(operator::transactional)
-                ).flatMap {
-                    // Update the balance in the linked bank account
-                    bankAccountRepository.findById(investmentAccount.bankAccountId)
-                }.flatMap { bankAccount ->
-                    val updatedBalance = bankAccount.balance.minus(purchaseAmount)
-                    if (updatedBalance < BigDecimal.ZERO) {
-                        return@flatMap Mono.error<InvestmentAccount>(
-                            IllegalArgumentException(
-                                "Investmentaccount " + investmentAccountId + ": Insufficient balance in the bank account buying " + stockSymbol + " for amount " + purchaseAmount
-                            )
-                        )
+        return investmentAccountRepository.findById(investmentAccountId)
+            .switchIfEmpty(Mono.error(IllegalArgumentException("Investment account not found")))
+            .flatMap { investmentAccount ->
+                validateBankAccount(investmentAccount).flatMap {
+                    fetchStockQuote(stockSymbol).flatMap { quote ->
+                        handlePortfolioUpdate(investmentAccountId, stockSymbol, purchaseAmount, quote).flatMap {
+                            updateBankAccountForPurchase(investmentAccount, purchaseAmount)
+                        }
                     }
-
-                    val updatedBankAccount = bankAccount.copy(balance = updatedBalance)
-                    bankAccountRepository.save(updatedBankAccount).`as`(operator::transactional)
-                }.thenReturn(investmentAccount)
+                }
             }
-        }
+    }
+
+    /**
+     * Fetches the stock quote for the given stock symbol.
+     */
+    private fun fetchStockQuote(stockSymbol: String): Mono<StockQuote> {
+        return latestIStockQuoteRepository.findById(stockSymbol)
+            .switchIfEmpty(Mono.error(IllegalArgumentException("Stock quote not found")))
+            .flatMap { latestStockQuote ->
+                quoteRepository.findById(latestStockQuote.quoteId)
+                    .switchIfEmpty(Mono.error(IllegalArgumentException("Quote not found")))
+            }
+    }
+
+    /**
+     * Updates the portfolio by either creating a new entry or updating an existing one.
+     */
+    private fun handlePortfolioUpdate(
+        investmentAccountId: Long,
+        stockSymbol: String,
+        purchaseAmount: BigDecimal,
+        quote: StockQuote
+    ): Mono<PortfolioEntry> {
+        val calculatedVolume = calculateVolume(purchaseAmount, quote.currentPrice)
+        return portfolioEntryRepository.findByInvestmentAccountIdAndStockSymbol(investmentAccountId, stockSymbol)
+            .flatMap { existingEntry ->
+                updateExistingPortfolioEntry(existingEntry, calculatedVolume, purchaseAmount)
+            }
+            .switchIfEmpty(createNewPortfolioEntry(investmentAccountId, stockSymbol, calculatedVolume, purchaseAmount))
+    }
+
+    /**
+     * Calculates the volume of stock that can be purchased based on the purchase amount and stock price.
+     */
+    private fun calculateVolume(purchaseAmount: BigDecimal, stockPrice: BigDecimal): BigDecimal {
+        return purchaseAmount.divide(stockPrice, ROUNDING_NUMBER_TO_DECIMAL_PLACE, RoundingMode.HALF_UP)
+    }
+
+    /**
+     * Updates an existing portfolio entry with the new purchase details.
+     */
+    private fun updateExistingPortfolioEntry(
+        existingEntry: PortfolioEntry,
+        calculatedVolume: BigDecimal,
+        purchaseAmount: BigDecimal
+    ): Mono<PortfolioEntry> {
+        val updatedQuantity = existingEntry.quantity + calculatedVolume.toDouble()
+        val updatedEntry = existingEntry.copy(
+            quantity = updatedQuantity,
+            totalInvestAmount = existingEntry.totalInvestAmount.plus(purchaseAmount)
+        )
+        return portfolioEntryRepository.save(updatedEntry).`as`(operator::transactional)
+    }
+
+    /**
+     * Creates a new portfolio entry for the stock purchase.
+     */
+    private fun createNewPortfolioEntry(
+        investmentAccountId: Long,
+        stockSymbol: String,
+        calculatedVolume: BigDecimal,
+        purchaseAmount: BigDecimal
+    ): Mono<PortfolioEntry> {
+        val newEntry = PortfolioEntry(
+            investmentAccountId = investmentAccountId,
+            stockSymbol = stockSymbol,
+            quantity = calculatedVolume.toDouble(),
+            totalInvestAmount = purchaseAmount
+        )
+        return portfolioEntryRepository.save(newEntry).`as`(operator::transactional)
+    }
+
+    /**
+     * Updates the linked bank account by deducting the purchase amount.
+     */
+    private fun updateBankAccountForPurchase(
+        investmentAccount: InvestmentAccount,
+        purchaseAmount: BigDecimal
+    ): Mono<InvestmentAccount> {
+        return bankAccountRepository.findById(investmentAccount.bankAccountId!!)
+            .flatMap { bankAccount ->
+                val updatedBalance = bankAccount.balance.minus(purchaseAmount)
+                if (updatedBalance < BigDecimal.ZERO) {
+                    return@flatMap Mono.error<InvestmentAccount>(
+                        IllegalArgumentException(
+                            "Investment account ${investmentAccount.id}: Insufficient balance in the bank account to buy $purchaseAmount"
+                        )
+                    )
+                }
+                val updatedBankAccount = bankAccount.copy(balance = updatedBalance)
+                bankAccountRepository.save(updatedBankAccount).`as`(operator::transactional)
+            }
+            .thenReturn(investmentAccount)
     }
 
 
