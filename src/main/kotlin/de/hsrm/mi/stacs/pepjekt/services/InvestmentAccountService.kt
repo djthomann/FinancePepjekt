@@ -142,50 +142,99 @@ class InvestmentAccountService(
         return investmentAccountRepository.findById(investmentAccountId)
             .switchIfEmpty(Mono.error(IllegalArgumentException("Investment account not found")))
             .flatMap { investmentAccount ->
-                if (investmentAccount.bankAccountId == null) {
-                    return@flatMap Mono.error<InvestmentAccount>(IllegalArgumentException("No bank account linked to the investment account"))
+                validateBankAccount(investmentAccount).flatMap {
+                    processStockSale(investmentAccount, stockSymbol, volume)
                 }
-
-                portfolioEntryRepository.findByInvestmentAccountIdAndStockSymbol(investmentAccountId, stockSymbol)
-                    .switchIfEmpty(Mono.error(IllegalArgumentException("Stock not found in portfolio")))
-                    .flatMap { existingEntry ->
-                        val newQuantity = existingEntry.quantity - volume
-                        if (newQuantity < 0) {
-                            return@flatMap Mono.error<InvestmentAccount>(IllegalArgumentException("Insufficient stock quantity to sell"))
-                        }
-
-                        latestIStockQuoteRepository.findById(stockSymbol)
-                            .switchIfEmpty(Mono.error(IllegalArgumentException("Stock quote not found")))
-                            .flatMap { latestStockQuote ->
-                                quoteRepository.findById(latestStockQuote.quoteId)
-                            }.switchIfEmpty(Mono.error(IllegalArgumentException("Quote not found"))).flatMap {
-                                //investReduction = totalInvestAmount * (sold amount of volume / old amount of volume)
-                                val investReduction = existingEntry.totalInvestAmount.multiply(
-                                    volume.toBigDecimal().divide(
-                                        existingEntry.quantity.toBigDecimal(),
-                                        ROUNDING_NUMBER_TO_DECIMAL_PLACE,
-                                        RoundingMode.HALF_UP
-                                    )
-                                )
-                                val newTotalInvestAmount = existingEntry.totalInvestAmount.subtract(investReduction)
-
-                                if (newQuantity > 0) {
-                                    val updatedEntry = existingEntry.copy(
-                                        quantity = newQuantity, totalInvestAmount = newTotalInvestAmount
-                                    )
-                                    portfolioEntryRepository.save(updatedEntry)
-                                } else {
-                                    portfolioEntryRepository.delete(existingEntry).then(Mono.empty())
-                                }
-                            }.then(bankAccountRepository.findById(investmentAccount.bankAccountId))
-                            .flatMap { bankAccount ->
-                                val updatedBalance = bankAccount.balance.add(volume.toBigDecimal())
-                                val updatedBankAccount = bankAccount.copy(balance = updatedBalance)
-                                bankAccountRepository.save(updatedBankAccount)
-                            }.thenReturn(investmentAccount)
-                    }
             }
     }
+
+    /**
+     * Validates that the investment account has a linked bank account.
+     */
+    private fun validateBankAccount(investmentAccount: InvestmentAccount): Mono<Unit> {
+        return if (investmentAccount.bankAccountId == null) {
+            Mono.error(IllegalArgumentException("No bank account linked to the investment account"))
+        } else {
+            Mono.just(Unit)
+        }
+    }
+
+    /**
+     * Processes the stock sale, including validation, portfolio update, and bank account update.
+     */
+    private fun processStockSale(
+        investmentAccount: InvestmentAccount, stockSymbol: String, volume: Double
+    ): Mono<InvestmentAccount> {
+        return portfolioEntryRepository.findByInvestmentAccountIdAndStockSymbol(investmentAccount.id!!, stockSymbol)
+            .switchIfEmpty(Mono.error(IllegalArgumentException("Stock not found in portfolio")))
+            .flatMap { existingEntry ->
+                validateSufficientStock(existingEntry, volume).flatMap {
+                    performStockSale(existingEntry, investmentAccount, volume)
+                }
+            }
+    }
+
+    /**
+     * Validates that there is sufficient stock quantity to sell.
+     */
+    private fun validateSufficientStock(existingEntry: PortfolioEntry, volume: Double): Mono<Unit> {
+        return if (existingEntry.quantity < volume) {
+            Mono.error(IllegalArgumentException("Insufficient stock quantity to sell"))
+        } else {
+            Mono.just(Unit)
+        }
+    }
+
+    /**
+     * Performs the stock sale by updating the portfolio and linked bank account.
+     */
+    private fun performStockSale(
+        existingEntry: PortfolioEntry, investmentAccount: InvestmentAccount, volume: Double
+    ): Mono<InvestmentAccount> {
+        val newQuantity = existingEntry.quantity - volume
+        val investReduction = calculateInvestReduction(existingEntry, volume)
+        val newTotalInvestAmount = existingEntry.totalInvestAmount.subtract(investReduction)
+
+        val portfolioUpdate = if (newQuantity > 0) {
+            val updatedEntry = existingEntry.copy(
+                quantity = newQuantity,
+                totalInvestAmount = newTotalInvestAmount
+            )
+            portfolioEntryRepository.save(updatedEntry)
+        } else {
+            portfolioEntryRepository.delete(existingEntry).then(Mono.empty())
+        }
+
+        return portfolioUpdate
+            .then(updateBankAccount(investmentAccount, volume))
+    }
+
+    /**
+     * Calculates the amount to reduce from the total investment based on the volume sold.
+     */
+    private fun calculateInvestReduction(existingEntry: PortfolioEntry, volume: Double): BigDecimal {
+        return existingEntry.totalInvestAmount.multiply(
+            volume.toBigDecimal().divide(
+                existingEntry.quantity.toBigDecimal(),
+                ROUNDING_NUMBER_TO_DECIMAL_PLACE,
+                RoundingMode.HALF_UP
+            )
+        )
+    }
+
+    /**
+     * Updates the linked bank account by adding the sale proceeds.
+     */
+    private fun updateBankAccount(investmentAccount: InvestmentAccount, volume: Double): Mono<InvestmentAccount> {
+        return bankAccountRepository.findById(investmentAccount.bankAccountId!!)
+            .flatMap { bankAccount ->
+                val updatedBalance = bankAccount.balance.add(volume.toBigDecimal())
+                val updatedBankAccount = bankAccount.copy(balance = updatedBalance)
+                bankAccountRepository.save(updatedBankAccount)
+            }
+            .thenReturn(investmentAccount)
+    }
+
 
     /**
      * Retrieves the portfolio of an investment account by the investmentAccountId ID.
