@@ -4,10 +4,10 @@ The Finance Project focuses on creating a platform for managing financial assets
 
 1. **Account Management**: Users can deposit stocks into their accounts by specifying the desired amount.
 2. **Portfolio Management**: Users can use deposited stocks to purchase them, which are stored in their portfolio.
-3. **Trading Capabilities**: Users can execute buy or sell orders for stocks, with options for immediate or scheduled 
+3. **Trading Stocks**: Users can execute buy or sell orders for stocks, with options for immediate or scheduled 
    execution based on real-time market prices.
 4. **Portfolio Overview**: A dashboard displays purchased stocks with details
-5. **Search for Socks**: Users can search for stocks
+5. **Search for Stocks**: Users can search for stocks
 
 # How to Execute
 

@@ -145,8 +145,9 @@ CREATE TABLE portfolio_entry
 (
     id                    SERIAL PRIMARY KEY,
     investment_account_id BIGINT,
-    stock_symbol          VARCHAR(50) NOT NULL,
-    quantity              FLOAT       NOT NULL,
+    stock_symbol          VARCHAR(50)    NOT NULL,
+    quantity              FLOAT          NOT NULL,
+    total_invest_amount   DECIMAL(18, 4) NOT NULL,
     FOREIGN KEY (investment_account_id) REFERENCES investmentaccount (id) ON DELETE CASCADE,
     FOREIGN KEY (stock_symbol) REFERENCES stock (symbol) ON DELETE CASCADE
 );
