@@ -211,17 +211,103 @@ class OrderServiceTest {
      * Tests the [OrderService.placeSellOrder] method to ensure sell orders are saved correctly.
      */
     @Test
-    fun `test placeSellOrder`() {
+    fun `test placeSellOrder successfully saves order`() {
         val investmentAccountId = 1L
         val stockSymbol = "AAPL"
-        val volume = 10.0
+        val volume = 0.1
         val executionTime = LocalDateTime.now()
 
-        val subscribe = orderService.placeSellOrder(investmentAccountId, stockSymbol, volume, executionTime)
-            .subscribe {
+        val account = InvestmentAccount(id = investmentAccountId)
+        val stock = Stock(
+            symbol = stockSymbol,
+            name = "Apple Inc.",
+            description = "Apple Stock",
+            figi = "BBG000B9XRY4",
+            currency = Currency.USD
+        )
+        val quote = StockQuote(
+            id = 1L, currentPrice = BigDecimal(100), change = 0f, percentChange = 0f,
+            highPriceOfTheDay = BigDecimal(110), lowPriceOfTheDay = BigDecimal(90),
+            openPriceOfTheDay = BigDecimal(100), previousClosePrice = BigDecimal(99),
+            timeStamp = executionTime, stockSymbol = stockSymbol
+        )
+
+        `when`(investmentAccountRepository.findById(investmentAccountId)).thenReturn(Mono.just(account))
+        `when`(stockRepository.findBySymbol(stockSymbol)).thenReturn(Mono.just(stock))
+        `when`(latestIStockQuoteRepository.findById(stockSymbol)).thenReturn(
+            Mono.just(
+                StockQuoteLatest(
+                    stockSymbol,
+                    1L
+                )
+            )
+        )
+        `when`(quoteRepository.findById(1L)).thenReturn(Mono.just(quote))
+        `when`(orderRepository.save(any())).thenReturn(
+            Mono.just(
+                Order(
+                    id = 1L, purchaseAmount = volume.toBigDecimal().multiply(quote.currentPrice),
+                    purchaseVolume = volume, type = OrderType.SELL, investmentAccountId = investmentAccountId,
+                    stockSymbol = stockSymbol, executionTimestamp = executionTime
+                )
+            )
+        )
+
+        orderService.placeSellOrder(investmentAccountId, stockSymbol, volume, executionTime)
+            .subscribe { savedOrder ->
                 verify(orderRepository).save(any())
+                val expectedAmount = quote.currentPrice.multiply(volume.toBigDecimal())
+                assertEquals(expectedAmount, savedOrder.purchaseAmount)
+                assertEquals(volume, savedOrder.purchaseVolume)
             }
     }
+
+
+    /**
+     * Tests the [OrderService.placeSellOrder] method to ensure sell orders are saved correctly.
+     */
+    @Test
+    fun `test placeSellOrder with zero currentPrice should throw error`() {
+        val investmentAccountId = 1L
+        val stockSymbol = "AAPL"
+        val volume = 0.1
+        val executionTime = LocalDateTime.now()
+
+        val account = InvestmentAccount(id = investmentAccountId)
+        val stock = Stock(
+            symbol = stockSymbol,
+            name = "Apple Inc.",
+            description = "Apple Stock",
+            figi = "BBG000B9XRY4",
+            currency = Currency.USD
+        )
+        val quote = StockQuote(
+            id = 1L, currentPrice = BigDecimal.ZERO, change = 0f, percentChange = 0f,
+            highPriceOfTheDay = BigDecimal(110), lowPriceOfTheDay = BigDecimal(90),
+            openPriceOfTheDay = BigDecimal(100), previousClosePrice = BigDecimal(99),
+            timeStamp = executionTime, stockSymbol = stockSymbol
+        )
+
+        `when`(investmentAccountRepository.findById(investmentAccountId)).thenReturn(Mono.just(account))
+        `when`(stockRepository.findBySymbol(stockSymbol)).thenReturn(Mono.just(stock))
+        `when`(latestIStockQuoteRepository.findById(stockSymbol)).thenReturn(
+            Mono.just(
+                StockQuoteLatest(
+                    stockSymbol,
+                    1L
+                )
+            )
+        )
+        `when`(quoteRepository.findById(1L)).thenReturn(Mono.just(quote))
+
+        orderService.placeSellOrder(investmentAccountId, stockSymbol, volume, executionTime)
+            .doOnError { error ->
+                assert(error is IllegalArgumentException)
+                assertEquals("Current price cannot be null or zero", error.message)
+            }
+            .subscribe()
+    }
+
 
     /**
      * Tests the [OrderService.getOrdersByInvestmentAccount] method to ensure all orders for an investment account
