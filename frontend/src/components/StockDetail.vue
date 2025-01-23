@@ -17,8 +17,21 @@
           </button>
         </div>
       </div>
-      <div class="stock-detail-header-chart">
-        <Line ref="lineChart" :data="data" :options="options"/>
+      <div class="stock-detail-header-chart-box">
+        <div class="stock-detail-header-chart">
+          <Line ref="lineChart" :data="data" :options="options"/>
+        </div>
+        <div class="stock-detail-header-chart-buttons">
+          <button @click="fetchLastMinutes(1)">
+            1 min
+          </button>
+          <button @click="fetchLastMinutes(5)">
+            5 min
+          </button>
+          <button @click="fetchLastMinutes(10)">
+            10 min
+          </button>
+        </div>
       </div>
     </div>
 
@@ -84,20 +97,20 @@ ChartJS.register(
   Legend
 )
 
-interface DataPoint {
-  content: number;
-}
-
-const numDataPoints = 60
-const dataPoints = []
-const labels = []
+let numDataPoints = 60
+let dataPoints = []
+let labels = []
 
 const data = {
   labels: labels,
   datasets: [
     {
       label: '',
-      backgroundColor: '#f87979',
+      backgroundColor: 'transparent',
+      borderColor: 'grey',
+      borderWidth: 1,
+      pointBorderWidth: 0,
+      stepped: false,
       data: dataPoints
     }
   ]
@@ -184,10 +197,12 @@ onBeforeMount(async () => {
     console.error(e);
   }
 
+  fetchLastMinutes(1)
+
   if (pollingIntervalID) {
     clearInterval(pollingIntervalID);
   }
-  pollingIntervalID = setInterval(poll, 3000)
+  pollingIntervalID = setInterval(poll, 1000)
 })
 
 onUnmounted(() => {
@@ -210,24 +225,86 @@ function purchase(symbol: string) {
   router.push({name: 'order-management-buy', params: {symbol, investmentAccountId}});
 }
 
+async function fetchLastMinutes(min: number) {
+  const route = useRoute()
+  const stockSymbol = route.params.symbol
+
+  try {
+    const url = `/api/stock/history/symbol?symbol=${stockSymbol}&from=${getDateTimeByOffset(min)}&to=${getDateTimeByOffset(0)}`
+    console.log(url)
+    const response = await fetch(url );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const history = await response.json() as Quote[]
+    console.log(history)
+    numDataPoints = history.length
+    console.log("Data Points: " + numDataPoints)
+    const prices = history.map(quote => quote.currentPrice);
+    for(let price of prices) {
+      while(dataPoints.length >= numDataPoints) {
+        dataPoints.shift();
+        labels.shift();
+      }
+      dataPoints.push(price);
+      labels.push('0')
+    }
+    console.log(labels.length)
+    if (lineChart.value) {
+      lineChart.value.chart.update();
+    } else {
+
+    }
+    console.log(prices)
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function getDateTimeByOffset(m: number) {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - m);
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+}
+
 </script>
 
 <style lang="scss">
 @use "./style.scss";
 
 .stock-detail-header {
+  position: relative;
   display: flex;
   align-content: center;
   justify-content: space-between;
+  padding-top: 3%;
 }
 
 .stock-detail-header-info {
   width: 40%;
 }
 
-.stock-detail-header-chart {
+.stock-detail-header-chart-box {
+  flex: 1;
   width: 50%;
-  padding: 5% 0 5% 5%;
+}
+
+.stock-detail-header-chart {
+  flex: 1;
+  height: 80%;
+}
+
+.stock-detail-header-chart-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 </style>
 
