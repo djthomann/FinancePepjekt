@@ -18,6 +18,7 @@ import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Duration
+import java.time.LocalDateTime
 
 @Component
 class ScheduledApiCall(
@@ -34,7 +35,7 @@ class ScheduledApiCall(
 
     @PostConstruct
     fun scheduleApiCall() {
-        Flux.interval(Duration.ofSeconds(2))
+        Flux.interval(Duration.ofSeconds(1))
             .flatMap {
                 callFinnhub()
             }
@@ -72,6 +73,7 @@ class ScheduledApiCall(
             .flatMap { stock ->
                 finnhubHandler.fetchStockQuote(stock.symbol)
                     .flatMap { quote ->
+                        quote.timeStamp = LocalDateTime.now()
                         stockService.saveStockQuote(quote)
                             .doOnTerminate {
                                 // Warten bis garantiert gespeichert ist. WICHTIG
