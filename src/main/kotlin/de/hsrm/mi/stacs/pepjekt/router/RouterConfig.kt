@@ -21,6 +21,9 @@ class RouterConfig {
      * @param investmentAccountHandler Handler for investment account related operations.
      * @param stockHandler Handler for stock related operations.
      * @param orderHandler Handler for order related operations.
+     * @param cryptoHandler Handler for crypto related operations.
+     * @param metalHandler Handler for metal related operations.
+     * @param favoriteHandler Handler for favorite related operations.
      * @return Configured main router with all nested routes.
      */
     @Bean
