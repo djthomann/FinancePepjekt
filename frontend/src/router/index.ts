@@ -50,7 +50,7 @@ const router = createRouter({
       component: MetalDetail,
     },
     {
-      path: '/asset-uebersicht',
+      path: '/asset-uebersicht/:investmentAccountId',
       name: 'asset-uebersicht',
       component: AssetOverview,
     },
