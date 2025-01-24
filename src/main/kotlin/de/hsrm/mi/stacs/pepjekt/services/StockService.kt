@@ -142,7 +142,7 @@ class StockService(
      */
     override fun getStockHistoryBySymbol(symbol: String, from: LocalDateTime, to: LocalDateTime): Flux<StockQuote> {
         return stockQuoteRepository.findByStockSymbol(symbol)
-            .filter { quote -> quote.timeStamp.isAfter(to) && quote.timeStamp.isBefore(from) }
+            .filter { quote -> quote.timeStamp.isAfter(from) && quote.timeStamp.isBefore(to) }
 
     }
 

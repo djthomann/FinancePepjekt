@@ -54,12 +54,15 @@ const data = {
   datasets: [
     {
       label: '',
-      backgroundColor: '#f87979',
+      backgroundColor: 'transparent',
+      borderColor: 'grey',
+      borderWidth: 1,
+      pointBorderWidth: 0,
+      stepped: false,
       data: dataPoints
     }
   ]
 }
-
 const options = {
   maintainAspectRatio: false,
   scales: {
