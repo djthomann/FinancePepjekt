@@ -118,8 +118,9 @@ class StockServiceTest {
                 previousClosePrice = BigDecimal(110)
             )
         )
-        stockQuoteLatest = StockQuoteLatest(stockSymbol = stock.symbol, quote_id = 1L)
-        portfolioEntry = PortfolioEntry(investmentAccountId = investmentAccount.id!!, stockSymbol = stock.symbol, id = 1L, quantity = 10.0)
+        stockQuoteLatest = StockQuoteLatest(stockSymbol = stock.symbol, quoteId = 1L)
+        portfolioEntry = PortfolioEntry(investmentAccountId = investmentAccount.id!!, stockSymbol = stock.symbol, id
+        = 1L, quantity = 10.0, totalInvestAmount = 1000.0.toBigDecimal())
 
         stockService = StockService(stockRepository, stockQuoteRepository, stockQuoteLatestRepository, databaseClient, investmentAccountRepository, portfolioEntryRepository)
 
@@ -128,7 +129,7 @@ class StockServiceTest {
         `when`(stockRepository.findAll()).thenReturn(Flux.fromIterable(stocks))
 
         `when`(stockQuoteRepository.findByStockSymbol(stock.symbol)).thenReturn(Flux.fromIterable(stockQuotes))
-        `when`(stockQuoteRepository.findById(stockQuoteLatest.quote_id)).thenReturn(Mono.just(stockQuotes[0]))
+        `when`(stockQuoteRepository.findById(stockQuoteLatest.quoteId)).thenReturn(Mono.just(stockQuotes[0]))
 
         `when`(stockQuoteLatestRepository.findById(stock.symbol)).thenReturn(Mono.just(stockQuoteLatest))
 
