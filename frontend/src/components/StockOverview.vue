@@ -28,8 +28,8 @@
           <td>{{ favStock.symbol }}</td>
           <td>{{ favStock.currency }}</td>
           <td>{{ favStock.latestQuote.currentPrice }}</td>
-          <td :class="{ 'positive': favStock.change >= 0, 'negative': favStock.change < 0 }">
-            {{ favStock.change }} € ({{ favStock.changePercentage }}%)
+          <td :class="{ 'positive': favStock.latestQuote.change >= 0, 'negative': favStock.latestQuote.change < 0 }">
+            {{ favStock.latestQuote.change }} ({{ favStock.latestQuote.percentChange }}%)
           </td>
         </tr>
         </tbody>
