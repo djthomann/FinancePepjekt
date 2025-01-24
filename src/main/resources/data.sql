@@ -130,3 +130,9 @@ INSERT INTO exchange (symbol, description)
 VALUES ('NYSE', 'New York Stock Exchange'),
        ('NASDAQ', 'NASDAQ Stock Market'),
        ('LSE', 'London Stock Exchange');
+
+-- Favorite Stocks
+INSERT INTO favorite (investment_account_id, stock_symbol)
+VALUES (1, 'AAPL'),
+       (1, 'NVDA'),
+       (2, 'TSLA');

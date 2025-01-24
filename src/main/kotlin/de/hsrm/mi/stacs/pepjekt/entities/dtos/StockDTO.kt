@@ -11,11 +11,13 @@ class StockDTO(
     val figi: String,
     val currency: Currency,
     val latestQuote: QuoteDTO,
+    val isFavorite: Boolean? = null,
 ) {
     companion object {
         fun mapToDto(
             stock: Stock,
-            stockQuote: StockQuote
+            stockQuote: StockQuote,
+            isFavorite: Boolean? = null
         ): StockDTO {
             return StockDTO(
                 symbol = stock.symbol,
@@ -23,7 +25,8 @@ class StockDTO(
                 figi = stock.figi,
                 currency = stock.currency,
                 name = stock.name,
-                latestQuote = QuoteDTO.mapToDto(stockQuote)
+                latestQuote = QuoteDTO.mapToDto(stockQuote),
+                isFavorite = isFavorite
             )
         }
     }

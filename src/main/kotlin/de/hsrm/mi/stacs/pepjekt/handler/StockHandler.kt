@@ -2,14 +2,13 @@ package de.hsrm.mi.stacs.pepjekt.handler
 
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.QuoteDTO
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDTO
-import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDetailsDTO
+import de.hsrm.mi.stacs.pepjekt.services.IFavoriteService
 import de.hsrm.mi.stacs.pepjekt.services.IStockService
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import java.math.BigDecimal
+import reactor.core.scheduler.Schedulers
 import java.time.LocalDateTime
 
 /**
@@ -18,10 +17,10 @@ import java.time.LocalDateTime
  *
  * @param stockService The service responsible for interacting with stock data, such as fetching stock details,
  *                     stock history, and calculating average prices.
- * @param orderService The service for interacting with stock orders (this is injected but currently not used).
+ * @param favoriteService The service for interacting with favorite stocks
  */
 @Component
-class StockHandler(private val stockService: IStockService) {
+class StockHandler(private val stockService: IStockService, private val favoriteService: IFavoriteService) {
 
     /**
      * Handles a request to retrieve all stocks from the database.
@@ -32,10 +31,17 @@ class StockHandler(private val stockService: IStockService) {
      * TODO return StockDT0
      */
     fun getStocks(request: ServerRequest): Mono<ServerResponse> {
+        val investmentAccountId = request.queryParam("investmentAccountId")
+            .orElseThrow { IllegalArgumentException("investmentAccountId is required") }
+
         return stockService.getAllStocks()
             .flatMap { stock ->
-                stockService.getLatestQuoteBySymbol(stock.symbol)
-                    .map { quote -> StockDTO.mapToDto(stock, quote) }
+                Mono.zip(
+                    stockService.getLatestQuoteBySymbol(stock.symbol),
+                    favoriteService.isFavorite(investmentAccountId.toLong(), stock.symbol)
+                ).map { tuple ->
+                    StockDTO.mapToDto(stock, tuple.t1, tuple.t2)
+                }
             }
             .collectList()
             .flatMap { stockDtos ->
@@ -46,7 +52,6 @@ class StockHandler(private val stockService: IStockService) {
                 }
             }
     }
-
 
     /**
      * Handles a request to retrieve stock data by its symbol.
@@ -61,7 +66,8 @@ class StockHandler(private val stockService: IStockService) {
      */
     fun getStockDetailsBySymbol(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
-        val investmentAccountId = request.queryParam("investmentAccountId").orElseThrow { IllegalArgumentException("investmentAccountId") }
+        val investmentAccountId =
+            request.queryParam("investmentAccountId").orElseThrow { IllegalArgumentException("investmentAccountId") }
 
         return stockService.getStockDetails(symbol, investmentAccountId.toLong())
             .flatMap {
@@ -84,12 +90,15 @@ class StockHandler(private val stockService: IStockService) {
     fun getStockBySymbol(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol")
             .orElseThrow { IllegalArgumentException("symbol is required") }
+        val investmentAccountId = request.queryParam("investmentAccountId")
+            .orElseThrow { IllegalArgumentException("symbol is required") }
 
         return stockService.getStockBySymbol(symbol)
             .flatMap { stock ->
                 stockService.getLatestQuoteBySymbol(symbol)
+                    .publishOn(Schedulers.boundedElastic())
                     .map { quote ->
-                        StockDTO.mapToDto(stock, quote)
+                        StockDTO.mapToDto(stock, quote, favoriteService.isFavorite(investmentAccountId.toLong(), stock.symbol).block())
                     }
                     .flatMap { stockDto ->
                         ServerResponse.ok().bodyValue(stockDto)
