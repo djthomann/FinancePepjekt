@@ -1,6 +1,6 @@
 <template>
   <div class="overview-flexbox">
-    <div cla>
+    <div>
       <StockOverview></StockOverview>
     </div>
     <div>
@@ -22,10 +22,10 @@ import StockOverview from "@/components/StockOverview.vue";
 <style scoped lang="scss">
 .overview-flexbox {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: 1fr;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(3, 1fr);
   grid-column-gap: 0px;
   grid-row-gap: 0px;
-
+  flex-wrap: wrap;
 }
 </style>
