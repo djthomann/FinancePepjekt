@@ -53,6 +53,7 @@
             </button>
           </th>
           <th>Heutige Bilanz</th>
+          <th></th>
         </tr>
         </thead>
         <tbody>
