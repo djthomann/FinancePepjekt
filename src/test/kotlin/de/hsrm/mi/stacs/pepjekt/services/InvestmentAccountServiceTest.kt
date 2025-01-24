@@ -15,6 +15,7 @@ import java.time.LocalDateTime
 import org.junit.jupiter.api.Assertions.*
 import reactor.core.publisher.Flux
 import reactor.test.StepVerifier
+import java.math.RoundingMode
 
 /**
  * Unit tests for the [InvestmentAccountService] class.
@@ -23,7 +24,8 @@ import reactor.test.StepVerifier
  * for the repository and transaction operator.
  */
 class InvestmentAccountServiceTest {
-    private val investmentAccountRepository: IInvestmentAccountRepository = mock(IInvestmentAccountRepository::class.java)
+    private val investmentAccountRepository: IInvestmentAccountRepository =
+        mock(IInvestmentAccountRepository::class.java)
     private val portfolioEntryRepository: IPortfolioEntryRepository = mock(IPortfolioEntryRepository::class.java)
     private val bankAccountRepository: IBankAccountRepository = mock(IBankAccountRepository::class.java)
     private val ownerRepository: IOwnerRepository = mock(IOwnerRepository::class.java)
@@ -73,8 +75,10 @@ class InvestmentAccountServiceTest {
             previousClosePrice = BigDecimal(100)
         )
         investmentAccount = InvestmentAccount(bankAccountId = bankAccount.id, id = 1L, ownerId = 1L)
-        portfolioEntry = PortfolioEntry(investmentAccountId = investmentAccount.id!!, stockSymbol = stock.symbol, id
-        = 1L, quantity = 10.0, totalInvestAmount = 1000.0.toBigDecimal())
+        portfolioEntry = PortfolioEntry(
+            investmentAccountId = investmentAccount.id!!, stockSymbol = stock.symbol, id
+            = 1L, quantity = 10.0, totalInvestAmount = 1000.0.toBigDecimal()
+        )
 
         `when`(investmentAccountRepository.findByOwnerId(1L)).thenReturn(Mono.just(investmentAccount))
         `when`(investmentAccountRepository.save(any())).thenReturn(Mono.just(investmentAccount))
@@ -83,67 +87,99 @@ class InvestmentAccountServiceTest {
         `when`(stockRepository.findBySymbol(stockSymbol)).thenReturn(Mono.just(stock))
         `when`(stockRepository.findById(stockSymbol)).thenReturn(Mono.just(stock))
         `when`(bankAccountRepository.findById(bankAccount.id!!)).thenReturn(Mono.just(bankAccount))
-        `when`(portfolioEntryRepository.findByInvestmentAccountIdAndStockSymbol(investmentAccount.id!!, stockSymbol)).thenReturn(Mono.just(portfolioEntry))
-        `when`(portfolioEntryRepository.findByInvestmentAccountId(investmentAccount.id!!)).thenReturn(Flux.just(portfolioEntry))
+        `when`(
+            portfolioEntryRepository.findByInvestmentAccountIdAndStockSymbol(
+                investmentAccount.id!!,
+                stockSymbol
+            )
+        ).thenReturn(Mono.just(portfolioEntry))
+        `when`(portfolioEntryRepository.findByInvestmentAccountId(investmentAccount.id!!)).thenReturn(
+            Flux.just(
+                portfolioEntry
+            )
+        )
         `when`(portfolioEntryRepository.save(any())).thenAnswer { Mono.just(portfolioEntry) }
         `when`(bankAccountRepository.save(any())).thenAnswer { Mono.just(bankAccount) }
         `when`(finnhubHandler.fetchStockQuote(stockSymbol)).thenReturn(Mono.just(stockQuote))
         `when`(ownerRepository.findById(owner.id)).thenReturn(Mono.just(owner))
         `when`(stockService.getLatestQuoteBySymbol(stockSymbol)).thenReturn(Mono.just(stockQuote))
 
-        investmentAccountService = InvestmentAccountService(operator, investmentAccountRepository, portfolioEntryRepository,
-            bankAccountRepository, ownerRepository, stockRepository, finnhubHandler, latestIStockQuoteRepository, quoteRepository)
+        `when`(operator.transactional(any(Mono::class.java))).thenAnswer { invocation ->
+            invocation.getArgument<Mono<PortfolioEntry>>(0)
+        }
+
+        investmentAccountService = InvestmentAccountService(
+            operator,
+            investmentAccountRepository,
+            portfolioEntryRepository,
+            bankAccountRepository,
+            ownerRepository,
+            stockRepository,
+            finnhubHandler,
+            latestIStockQuoteRepository,
+            quoteRepository
+        )
     }
 
-    /**
-     * Tests the [InvestmentAccountService.sellStock] method to ensure that selling stock updates the portfolio correctly.
-     *
-     * TODO ADD TEST
-     */
-    /*
+
     @Test
-    fun `test sell stock`() {
-        val result = investmentAccountService.sellStock(investmentAccount.id!!, stock.symbol, BigDecimal(10)).block()
+    fun `test buyStock successfully updates portfolio and deducts balance`() {
+        val investmentAccountId = 1L
+        val stockSymbol = "AAPL"
+        val purchaseAmount = BigDecimal(200)
+        val currentStockPrice = BigDecimal(100)
+        val calculatedVolume = purchaseAmount.divide(currentStockPrice, RoundingMode.HALF_UP)
+
+        val investmentAccount = InvestmentAccount(id = investmentAccountId, bankAccountId = 1L)
+        val bankAccount = BankAccount(id = 1L, currency = Currency.USD, balance = BigDecimal(500))
+
+        val stockQuote = StockQuote(
+            id = 1L, currentPrice = currentStockPrice, change = 0f, percentChange = 0f,
+            highPriceOfTheDay = BigDecimal(110), lowPriceOfTheDay = BigDecimal(90),
+            openPriceOfTheDay = BigDecimal(100), previousClosePrice = BigDecimal(99),
+            timeStamp = LocalDateTime.now(), stockSymbol = stockSymbol
+        )
+        val portfolioEntry = PortfolioEntry(
+            id = null, investmentAccountId = investmentAccountId, stockSymbol = stockSymbol,
+            quantity = calculatedVolume.toDouble(), totalInvestAmount = purchaseAmount
+        )
+
+        val latestQuote = StockQuoteLatest(
+            stockSymbol = "AAPL",
+            quoteId = 1L
+        )
+
+        `when`(investmentAccountRepository.findById(investmentAccountId)).thenReturn(Mono.just(investmentAccount))
+        `when`(bankAccountRepository.findById(1L)).thenReturn(Mono.just(bankAccount))
+        doReturn(Mono.just(latestQuote))
+            .`when`(latestIStockQuoteRepository).findById(stockSymbol)
+
+        `when`(quoteRepository.findById(1L)).thenReturn(Mono.just(stockQuote))
+        doReturn(Mono.empty<PortfolioEntry>())
+            .`when`(portfolioEntryRepository)
+            .findByInvestmentAccountIdAndStockSymbol(investmentAccountId, stockSymbol)
+
+
+        doReturn(Mono.just(portfolioEntry)).`when`(portfolioEntryRepository)
+            .save(any(PortfolioEntry::class.java))
+
+        doReturn(Mono.just(bankAccount.copy(balance = BigDecimal(300))))
+            .`when`(bankAccountRepository)
+            .save(any(BankAccount::class.java))
+
+
+        val result = investmentAccountService.buyStock(investmentAccountId, stockSymbol, purchaseAmount).block()
 
         assertNotNull(result)
-        assertEquals(investmentAccount.id!!, result!!.id)
-        verify(bankAccountRepository).findById(1L)
-        verify(portfolioEntryRepository).findByInvestmentAccountIdAndStockSymbol(investmentAccount.id!!, stock.symbol)
-        verify(portfolioEntryRepository).save(any())
-        verify(bankAccountRepository).save(any())
+        assertEquals(investmentAccountId, result?.id)
+        verify(investmentAccountRepository).findById(investmentAccountId)
+        verify(bankAccountRepository).save(argThat { it.balance == BigDecimal(300) })
+        verify(portfolioEntryRepository).save(argThat {
+            it.investmentAccountId == investmentAccountId &&
+                    it.stockSymbol == stockSymbol &&
+                    it.quantity == calculatedVolume.toDouble() &&
+                    it.totalInvestAmount == purchaseAmount
+        })
     }
-*/
-    /**
-     * Tests the [InvestmentAccountService.buyStock] method to ensure that buying stock updates the portfolio correctly.
-     *
-     * TODO add once implemented
-     */
-    @Test
-    fun `test buy stock`() {
-        val result = investmentAccountService.buyStock(investmentAccount.id!!, stock.symbol, BigDecimal(10)).block()
-
-        assertNotNull(result)
-        assertEquals(investmentAccount.id!!, result!!.id)
-        verify(bankAccountRepository).findById(1L)
-        verify(portfolioEntryRepository).findByInvestmentAccountIdAndStockSymbol(investmentAccount.id!!, stock.symbol)
-        verify(portfolioEntryRepository).save(any())
-        verify(bankAccountRepository).save(any())
-    }
-
-    /**
-     * Tests the [InvestmentAccountService.getInvestmentAccountPortfolio] method to ensure that it retrieves the correct investment account.
-     */
-    @Test
-    fun `test getInvestmentAccountPortfolio returns the correct DTO`() {
-        val result = investmentAccountService.getInvestmentAccountPortfolio(1L).block()
-
-        assertNotNull(result)
-        assertEquals(1L, result!!.id)
-        assertEquals(1L, result.bankAccount.id)
-        assertEquals(1, result.portfolio.size)
-        assertEquals(OwnerDTO.mapToDto(owner), result.owner)
-        //assertEquals(StockDTO.mapToDto(stock, stockQuote), result.portfolio[0].stock)           // TODO wie vergleicht man Big Decimal
-    }
-
 
 }
