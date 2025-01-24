@@ -7,6 +7,8 @@
         <p><strong>FIGI:</strong> {{ stockDetails.stock.figi }}</p>
         <p :class="{ 'just-changed': stockDetails.stock.justChanged}"><strong>Aktueller Wert:</strong>
           {{ stockDetails.stock.latestQuote.currentPrice }} {{ stockDetails.stock.currency }}</p>
+        <p><strong>Durchschnittlicher Wert:</strong>
+          {{ averagePrice }}</p>
         <p><strong>Beschreibung:</strong> {{ stockDetails.stock.description }}</p>
 
         <div class="purchase-buttons">
@@ -81,7 +83,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onBeforeMount, onUnmounted, ref} from 'vue';
+import {onBeforeMount, onUnmounted, ref} from 'vue';
 import {useRoute, useRouter} from "vue-router";
 import type {StockDetails} from '@/types/types.ts'
 import {CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Title, Tooltip} from 'chart.js'
@@ -98,8 +100,13 @@ ChartJS.register(
 )
 
 let numDataPoints = 60
-let dataPoints = []
+let dataPoints: number[] = []
+let averagePriceData = []
 let labels = []
+const lineChart = ref(null)
+const stockDetails = ref<StockDetails>({})
+const averagePrice = ref<number>(0)
+let pollingIntervalID: number
 
 const data = {
   labels: labels,
@@ -112,6 +119,15 @@ const data = {
       pointBorderWidth: 0,
       stepped: false,
       data: dataPoints
+    },
+    {
+      label: '',
+      backgroundColor: 'red',
+      borderColor: 'grey',
+      borderWidth: 1,
+      pointBorderWidth: 0,
+      stepped: false,
+      data: averagePriceData
     }
   ]
 }
@@ -133,14 +149,14 @@ const options = {
   }
 }
 
-const lineChart = ref(null)
-const stockDetails = ref<StockDetails>({})
-let pollingIntervalID: number
-
 async function poll() {
+
   const route = useRoute()
   const stockSymbol = route.params.symbol
   const investmentAccountId = route.params.investmentAccountId
+
+  const minutes = dataPoints.length / 60
+  await fetchAveragePrice(minutes, 0, 0, 0)
 
   try {
     const response = await
@@ -191,13 +207,14 @@ onBeforeMount(async () => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     stockDetails.value = await response.json() as StockDetails
-    console.log(stockDetails.value)
 
   } catch (e) {
     console.error(e);
   }
 
-  fetchLastMinutes(1)
+  await fetchLastMinutes(1)
+  const minutes = dataPoints.length / 60
+  await fetchAveragePrice(minutes, 0, 0, 0)
 
   if (pollingIntervalID) {
     clearInterval(pollingIntervalID);
@@ -230,17 +247,14 @@ async function fetchLastMinutes(min: number) {
   const stockSymbol = route.params.symbol
 
   try {
-    const url = `/api/stock/history/symbol?symbol=${stockSymbol}&from=${getDateTimeByOffset(min)}&to=${getDateTimeByOffset(0)}`
-    console.log(url)
-    const response = await fetch(url );
+    const response = await fetch(`/api/stock/history/symbol?symbol=${stockSymbol}&from=${getDateTimeByOffset(min, 0)}&to=${getDateTimeByOffset(0, 0)}` );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const history = await response.json() as Quote[]
-    console.log(history)
     numDataPoints = history.length
-    console.log("Data Points: " + numDataPoints)
     const prices = history.map(quote => quote.currentPrice);
+
     for(let price of prices) {
       while(dataPoints.length >= numDataPoints) {
         dataPoints.shift();
@@ -249,20 +263,43 @@ async function fetchLastMinutes(min: number) {
       dataPoints.push(price);
       labels.push('0')
     }
-    console.log(labels.length)
     if (lineChart.value) {
       lineChart.value.chart.update();
-    } else {
-
     }
-    console.log(prices)
+  } catch (e) {
+    console.error(e);
+  }
+  const seconds = dataPoints.length
+  const minutes = seconds / 60
+  for(let data in dataPoints) {
+    fetchAveragePrice(minutes, seconds - data, 0, seconds - data)
+  }
+}
+
+async function fetchAveragePrice(m: number, s: number, m1: number, s1: number) {
+
+  const route = useRoute()
+  const stockSymbol = route.params.symbol
+
+  try {
+    const response = await fetch(`/api/stock/average-price?symbol=${stockSymbol}&from=${getDateTimeByOffset(m, s)}&to=${getDateTimeByOffset(m1, s1)}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const averagePriceText = await response.text();
+    averagePrice.value = parseFloat(averagePriceText)
+    while(averagePriceData.length >= numDataPoints) {
+      averagePriceData.shift()
+    }
+    averagePriceData.push(averagePrice.value)
   } catch (e) {
     console.error(e);
   }
 }
 
-function getDateTimeByOffset(m: number) {
+function getDateTimeByOffset(m: number, s: number) {
   const now = new Date();
+  now.setSeconds(now.getSeconds() - s);
   now.setMinutes(now.getMinutes() - m);
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
