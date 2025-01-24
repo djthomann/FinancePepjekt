@@ -35,11 +35,11 @@ class FavoriteHandler(
             .orElseThrow { IllegalArgumentException("investmentAccountId is required") }
 
         return favoriteService.getFavoritesOfInvestmentAccount(investmentAccountId.toLong())
-            .flatMap { favorite -> stockService.getStockBySymbol(favorite.stockSymbol) }
+            .flatMap { favorites -> stockService.getStockBySymbol(favorites.stockSymbol) }
             .collectList()
             .flatMap { stocks ->
                 if (stocks.isEmpty()) {
-                    ServerResponse.notFound().build()
+                    ServerResponse.ok().bodyValue(emptyList<StockDTO>())
                 } else {
                     Flux.fromIterable(stocks)
                         .flatMap { stock ->
@@ -48,11 +48,7 @@ class FavoriteHandler(
                         }
                         .collectList()
                         .flatMap { stockDtos ->
-                            if (stockDtos.isNotEmpty()) {
-                                ServerResponse.ok().bodyValue(stockDtos)
-                            } else {
-                                ServerResponse.notFound().build()
-                            }
+                            ServerResponse.ok().bodyValue(stockDtos)
                         }
                 }
             }

@@ -8,7 +8,7 @@
       </div>
     </div>
 
-    <div>
+    <div v-if="favoriteStocks.length != 0">
       <h3>Deine Favoriten</h3>
       <table>
         <thead>
