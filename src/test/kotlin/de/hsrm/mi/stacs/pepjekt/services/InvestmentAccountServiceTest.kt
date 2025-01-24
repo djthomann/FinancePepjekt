@@ -82,6 +82,9 @@ class InvestmentAccountServiceTest {
 
     private fun createStock(symbol: String) = Stock(symbol, "Apple Inc.", "BBG000B9XRY4", "figi", Currency.USD)
 
+    /**
+     * Create a [StockQuote]
+     */
     private fun createStockQuote(stockSymbol: String, price: BigDecimal) = StockQuote(
         currentPrice = price,
         timeStamp = LocalDateTime.now().minusDays(1),
@@ -105,6 +108,9 @@ class InvestmentAccountServiceTest {
         totalInvestAmount = 1000.0.toBigDecimal()
     )
 
+    /**
+     * Mocks the needed repositories for [InvestmentAccountService]
+     */
     private fun mockRepositories() {
         `when`(investmentAccountRepository.findByOwnerId(1L)).thenReturn(Mono.just(investmentAccount))
         `when`(investmentAccountRepository.save(any())).thenReturn(Mono.just(investmentAccount))
@@ -135,6 +141,10 @@ class InvestmentAccountServiceTest {
         }
     }
 
+
+    /**
+     * Tests the [InvestmentAccountService.buyStock] method to ensure stocks are bought and saved correctly.
+     */
     @Test
     fun `test buyStock successfully updates portfolio and deducts balance`() {
         val investmentAccountId = 1L
@@ -178,11 +188,10 @@ class InvestmentAccountServiceTest {
 
     @Test
     fun `test sellStock successfully updates portfolio and credits bank account`() {
-        // Arrange
         val investmentAccountId = 1L
         val stockSymbol = "AAPL"
         val volume = 5.0
-        val currentStockPrice = BigDecimal(100) // Stock price per unit
+        val currentStockPrice = BigDecimal(100)
 
         val bankAccount = BankAccount(id = 1L, currency = Currency.USD, balance = BigDecimal(300))
         val investmentAccount = InvestmentAccount(id = investmentAccountId, bankAccountId = 1L)
@@ -221,10 +230,8 @@ class InvestmentAccountServiceTest {
         doReturn(Mono.just(stockQuote)).`when`(quoteRepository).findById(1L)
 
 
-        // Act
         val result = investmentAccountService.sellStock(investmentAccountId, stockSymbol, volume).block()
 
-        // Assert
         assertNotNull(result)
         assertEquals(investmentAccountId, result?.id)
 
