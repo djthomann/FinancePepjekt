@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import reactor.core.publisher.Mono
+import java.math.BigDecimal
 
 /**
  * Handler for managing bank account-related requests.
@@ -32,6 +33,27 @@ class BankAccountHandler(private val bankAccountService: IBankAccountService) {
                 ServerResponse.ok().bodyValue(balance)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
+    }
+
+    fun handleDeposit(request: ServerRequest): Mono<ServerResponse> {
+        return Mono.zip(
+            Mono.justOrEmpty(request.queryParam("bankAccountId"))
+                .switchIfEmpty(Mono.error(IllegalArgumentException("bankAccountId is required")))
+                .map(String::toLong),
+            Mono.justOrEmpty(request.queryParam("amount"))
+                .switchIfEmpty(Mono.error(IllegalArgumentException("amount is required")))
+                .map { BigDecimal(it) }
+        )
+            .flatMap { tuple ->
+                val bankAccountId = tuple.t1
+                val amount = tuple.t2
+                bankAccountService.deposit(bankAccountId, amount)
+            }
+            .then(ServerResponse.ok().build())
+            .onErrorResume { e ->
+                ServerResponse.badRequest().bodyValue("Error: ${e.message}") // Fehlerantwort erstellen
+            }
+
     }
 
 }

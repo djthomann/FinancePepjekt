@@ -90,4 +90,16 @@ class InvestmentAccountHandler(
                     }
             }
     }
+
+    fun getBankAccount(request: ServerRequest): Mono<ServerResponse> {
+        val investmentAccountId = request.queryParam("investmentAccountId")
+            .map { it.toLong() }
+            .orElseThrow { IllegalArgumentException("investmentAccountId is required") }
+
+        return investmentAccountService.getBankAccountId(investmentAccountId)
+            .flatMap { id ->
+                ServerResponse.ok().bodyValue(id)
+            }
+            .switchIfEmpty(ServerResponse.notFound().build())
+    }
 }
