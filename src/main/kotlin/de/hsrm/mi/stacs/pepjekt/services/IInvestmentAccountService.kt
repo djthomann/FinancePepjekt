@@ -13,9 +13,9 @@ import java.math.BigDecimal
  */
 interface IInvestmentAccountService {
 
-    fun buyStock(investmentAccountId: Long, stockSymbol: String, volume: BigDecimal): Mono<InvestmentAccount>
+    fun buyStock(investmentAccountId: Long, stockSymbol: String, purchaseAmount: BigDecimal): Mono<InvestmentAccount>
 
-    fun sellStock(investmentAccountId: Long, stockSymbol: String, volume: BigDecimal): Mono<InvestmentAccount>
+    fun sellStock(investmentAccountId: Long, stockSymbol: String, volume: Double): Mono<InvestmentAccount>
 
     fun getInvestmentAccountPortfolio(investmentAccountId: Long): Mono<InvestmentAccountDTO>
 

@@ -52,7 +52,7 @@
               Aktueller Wert
             </button>
           </th>
-          <th>Gewinn/Verlust</th>
+          <th>Heutige Bilanz</th>
         </tr>
         </thead>
         <tbody>
@@ -63,8 +63,8 @@
           <td>{{ stock.symbol }}</td>
           <td>{{ stock.currency }}</td>
           <td>{{ stock.latestQuote.currentPrice }}</td>
-          <td :class="{ 'positive': stock.change >= 0, 'negative': stock.change < 0 }">
-            {{ stock.change }} € ({{ stock.changePercentage }}%)
+          <td :class="{ 'positive': stock.latestQuote.change >= 0, 'negative': stock.latestQuote.change < 0 }">
+            {{ stock.latestQuote.change }} ({{ stock.latestQuote.percentChange }}%)
           </td>
           <td>
             <img
@@ -125,6 +125,8 @@ async function poll() {
 
       if (stock.latestQuote.currentPrice !== stockData.latestQuote.currentPrice) {
         stock.latestQuote.currentPrice = stockData.latestQuote.currentPrice
+        stock.latestQuote.percentChange = stockData.latestQuote.percentChange
+        stock.latestQuote.change = stockData.latestQuote.change
         stock.justChanged = true
 
         setTimeout(() => {
@@ -163,7 +165,6 @@ async function pollFavoriteStocks() {
     }
   }
 }
-
 
 function sortByPrice() {
   priceDescending.value = !priceDescending.value

@@ -48,9 +48,9 @@ Have fun!
 # Rahmenbedingungen {#section-rahmenbedingungen}
 
 - **Beginn**: Dienstag, 03.12.2024
-- **Code Freeze**: Sonntag, 19.01.2024, 23:59
-- **Abgabe Gesamtpaket** (Code + Dokumentation + Präsentation): Montag, 20.01.2024, 23:59
-- **Präsentation**: Dienstag, 21.01.2024
+- **Code Freeze**: Sonntag, 26.01.2024, 23:59
+- **Abgabe Gesamtpaket** (Code + Dokumentation + Präsentation): Montag, 26.01.2024, 23:59
+- **Präsentation**: Dienstag, 28.01.2024
 
 # Projekt-Mindestumfang {#section-projekt-mindestumfang}
 

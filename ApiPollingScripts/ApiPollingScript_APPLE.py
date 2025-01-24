@@ -1,10 +1,11 @@
 import requests
 import time
 import json
+import os
 
 # Konfigurationen
 API_URL = "https://finnhub.io/api/v1/quote"  # Ersetze durch die tatsächliche URL
-TOKEN = "ct2r2bhr01qiurr42bq0ct2r2bhr01qiurr42bqg"
+TOKEN = os.environ.get("FINNHUB_TOKEN")
 SYMBOL = "AAPL"  # Das Symbol, das du abrufen möchtest
 OUTPUT_FILE = f"stock_data_{SYMBOL}.json"  # Dateiname, in dem die Daten gespeichert werden
 INTERVAL = 5  # Abfrageintervall in Sekunden

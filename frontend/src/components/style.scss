@@ -27,6 +27,14 @@
         font-size: 18px;
         color: #333;
 
+        .positive {
+          color: #28a745;
+        }
+
+        .negative {
+          color: #dc3545;
+        }
+
         strong {
           font-size: 24px;
           color: #007bff;
@@ -116,6 +124,7 @@
 .stock-detail {
   max-width: 800px;
   margin: 0 auto;
+
   h2 {
     font-size: 24px;
     color: #333;
@@ -249,3 +258,12 @@
     }
   }
 }
+
+.positive {
+  color: #28a745 !important;
+}
+
+.negative {
+  color: #dc3545 !important;
+}
+

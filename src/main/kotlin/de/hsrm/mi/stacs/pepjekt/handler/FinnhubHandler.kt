@@ -48,7 +48,6 @@ class FinnhubHandler(
         } else {
             dummy_finnhub_webClient
         }
-        webClient = dummy_finnhub_webClient
 
         logger.info(
             "Fetching Stock: {} from {}",

@@ -16,7 +16,6 @@
           <th>Symbol</th>
           <th>Währung</th>
           <th><button :class="{ 'sorting-button-down': priceDescending}" class="sorting-button" @click="sortByPrice">Aktueller Wert</button></th>
-          <th>Gewinn/Verlust</th>
         </tr>
         </thead>
         <tbody>
@@ -25,9 +24,6 @@
           <td>{{ coin.symbol }}</td>
           <td>USD</td>
           <td>{{ coin.currentPrice }}</td>
-          <td :class="{ 'positive': coin.change >= 0, 'negative': coin.change < 0 }">
-            {{ coin.change }} € ({{ coin.changePercentage }}%)
-          </td>
         </tr>
         </tbody>
       </table>
@@ -137,41 +133,6 @@ const navigateToCryptoDetail = (symbol: string) => {
 
 </script>
 
-<style scoped lang="scss">
-.just-changed {
-  background-color: var(--main-color-light);
-}
-
-.table-row {
-  transition: background-color 200ms;
-}
-
-.sorting-button {
-  display: flex;
-  align-items: center;
-  background: 0;
-  border: none;
-  font-weight: bold;
-  font-size: 15px;
-  color: #333;
-}
-
-.sorting-button:hover {
-  cursor: pointer;
-}
-
-.sorting-button::before {
-  margin-right: 10px;
-  width: 10px;
-  height: 10px;
-  content: '';
-  background: url('@/assets/arrow_down.svg') no-repeat center center;
-  background-size: contain;
-  transition: transform 200ms;
-  transform: rotate(180deg);
-}
-.sorting-button-down::before {
-  transform: rotate(0deg);
-}
-
+<style lang="scss">
+@use "./style.scss";
 </style>

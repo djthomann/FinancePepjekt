@@ -46,14 +46,15 @@ class BankAccountService(
      * @throws NoSuchElementException if no bank account exists for the given ID
      * @throws IllegalStateException if the bank account or its balance is null
      */
-    override fun deposit(bankAccountId: Long, amount: BigDecimal) {
-        bankAccountRepository.findById(bankAccountId)
+    override fun deposit(bankAccountId: Long, amount: BigDecimal): Mono<Void> {
+        return bankAccountRepository.findById(bankAccountId)
             .switchIfEmpty(Mono.error(NoSuchElementException("No bank account found for ID $bankAccountId")))
             .flatMap { bankAccount ->
                 val updatedBalance = bankAccount.balance.plus(amount)
                 val updatedBankAccount = bankAccount.copy(balance = updatedBalance)
                 bankAccountRepository.save(updatedBankAccount)
             }
+            .then()
     }
 
     /**
@@ -64,16 +65,8 @@ class BankAccountService(
      * @throws NoSuchElementException if no bank account exists for the given ID
      * @throws IllegalStateException if the bank account or its balance is null
      */
-    /**
-     * Withdraws an amount from a bank account by its ID.
-     *
-     * @param bankAccountId the ID of the bank account to withdraw the amount from
-     * @param amount the amount to withdraw
-     * @throws NoSuchElementException if no bank account exists for the given ID
-     * @throws IllegalStateException if the bank account or its balance is null
-     */
-    override fun withdraw(bankAccountId: Long, amount: BigDecimal) {
-        bankAccountRepository.findById(bankAccountId)
+    override fun withdraw(bankAccountId: Long, amount: BigDecimal): Mono<Void> {
+        return bankAccountRepository.findById(bankAccountId)
             .switchIfEmpty(Mono.error(NoSuchElementException("No bank account found for ID $bankAccountId")))
             .flatMap { bankAccount ->
                 var updatedBalance = bankAccount.balance.minus(amount)
@@ -84,5 +77,9 @@ class BankAccountService(
                 val updatedBankAccount = bankAccount.copy(balance = updatedBalance)
                 bankAccountRepository.save(updatedBankAccount)
             }
+            .then()
     }
+
+
+
 }
