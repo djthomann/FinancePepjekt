@@ -1,5 +1,6 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
+import de.hsrm.mi.stacs.pepjekt.ROUNDING_NUMBER_TO_DECIMAL_PLACE
 import de.hsrm.mi.stacs.pepjekt.entities.*
 import de.hsrm.mi.stacs.pepjekt.handler.FinnhubHandler
 import de.hsrm.mi.stacs.pepjekt.repositories.*
@@ -13,6 +14,7 @@ import java.math.RoundingMode
 import java.time.LocalDateTime
 import org.junit.jupiter.api.Assertions.*
 import reactor.core.publisher.Flux
+import reactor.test.StepVerifier
 
 /**
  * Unit tests for the [InvestmentAccountService] class.
@@ -172,5 +174,104 @@ class InvestmentAccountServiceTest {
         verify(portfolioEntryRepository).save(argThat {
             it.investmentAccountId == investmentAccountId && it.stockSymbol == stockSymbol && it.quantity == calculatedVolume.toDouble() && it.totalInvestAmount == purchaseAmount
         })
+    }
+
+    @Test
+    fun `test sellStock successfully updates portfolio and credits bank account`() {
+        // Arrange
+        val investmentAccountId = 1L
+        val stockSymbol = "AAPL"
+        val volume = 5.0
+        val currentStockPrice = BigDecimal(100) // Stock price per unit
+
+        val bankAccount = BankAccount(id = 1L, currency = Currency.USD, balance = BigDecimal(300))
+        val investmentAccount = InvestmentAccount(id = investmentAccountId, bankAccountId = 1L)
+
+        val portfolioEntry = PortfolioEntry(
+            id = 1L,
+            investmentAccountId = investmentAccountId,
+            stockSymbol = stockSymbol,
+            quantity = 10.0,
+            totalInvestAmount = BigDecimal(500)
+        )
+
+        val updatedPortfolioEntry = portfolioEntry.copy(quantity = portfolioEntry.quantity - volume)
+
+        val investReduction = portfolioEntry.totalInvestAmount.multiply(
+            volume.toBigDecimal().divide(
+                portfolioEntry.quantity.toBigDecimal(), ROUNDING_NUMBER_TO_DECIMAL_PLACE, RoundingMode.HALF_UP
+            )
+        )
+
+        val newTotalInvestAmount = portfolioEntry.totalInvestAmount.subtract(investReduction)
+
+        val latestQuote = StockQuoteLatest(stockSymbol = stockSymbol, quoteId = 1L)
+
+        val saleProceeds = currentStockPrice.multiply(volume.toBigDecimal()) // 5 * 100 = 500
+
+        // Mocking repository methods
+        doReturn(Mono.just(investmentAccount)).`when`(investmentAccountRepository).findById(investmentAccountId)
+        doReturn(Mono.just(bankAccount)).`when`(bankAccountRepository).findById(1L)
+        doReturn(Mono.just(portfolioEntry)).`when`(portfolioEntryRepository)
+            .findByInvestmentAccountIdAndStockSymbol(investmentAccountId, stockSymbol)
+        doReturn(Mono.just(updatedPortfolioEntry)).`when`(portfolioEntryRepository).save(updatedPortfolioEntry)
+        doReturn(Mono.just(updatedPortfolioEntry)).`when`(portfolioEntryRepository).findById(updatedPortfolioEntry.id!!)
+        doReturn(Mono.just(bankAccount)).`when`(bankAccountRepository).save(any(BankAccount::class.java))
+        doReturn(Mono.just(latestQuote)).`when`(latestIStockQuoteRepository).findById(stockSymbol)
+        doReturn(Mono.just(stockQuote)).`when`(quoteRepository).findById(1L)
+
+
+        // Act
+        val result = investmentAccountService.sellStock(investmentAccountId, stockSymbol, volume).block()
+
+        // Assert
+        assertNotNull(result)
+        assertEquals(investmentAccountId, result?.id)
+
+
+        verify(bankAccountRepository).save(argThat {
+            it.balance == bankAccount.balance.add(saleProceeds) // 300 + 500 = 800
+        })
+
+        verify(portfolioEntryRepository).save(argThat {
+            it.investmentAccountId == investmentAccountId && it.stockSymbol == stockSymbol && it.quantity == 5.0 && it.totalInvestAmount == newTotalInvestAmount
+        })
+    }
+
+
+    @Test
+    fun `test sellStock throws error when stock not found in portfolio`() {
+        // Arrange
+        val investmentAccountId = 1L
+        val stockSymbol = "AAPL"
+        val volume = 5.0
+
+        val investmentAccount = InvestmentAccount(id = investmentAccountId, bankAccountId = 1L)
+
+        // Mocking repository methods
+        `when`(investmentAccountRepository.findById(investmentAccountId)).thenReturn(Mono.just(investmentAccount))
+        `when`(
+            portfolioEntryRepository.findByInvestmentAccountIdAndStockSymbol(
+                investmentAccountId, stockSymbol
+            )
+        ).thenReturn(Mono.empty())
+
+        // Act & Assert
+        StepVerifier.create(investmentAccountService.sellStock(investmentAccountId, stockSymbol, volume))
+            .expectError(IllegalArgumentException::class.java).verify()
+    }
+
+    @Test
+    fun `test sellStock throws error when no bank account linked`() {
+        val investmentAccountId = 1L
+        val stockSymbol = "AAPL"
+        val volume = 5.0
+
+        val investmentAccount = InvestmentAccount(id = investmentAccountId, bankAccountId = null)
+
+        `when`(investmentAccountRepository.findById(investmentAccountId)).thenReturn(Mono.just(investmentAccount))
+
+        StepVerifier.create(investmentAccountService.sellStock(investmentAccountId, stockSymbol, volume))
+            .expectError(IllegalArgumentException::class.java).verify()
     }
 }
