@@ -9,6 +9,7 @@ import CryptoOverview from "@/components/CryptoOverview.vue";
 import CryptoDetail from "@/components/CryptoDetail.vue";
 import MetalOverview from "@/components/MetalOverview.vue";
 import MetalDetail from "@/components/MetalDetail.vue";
+import AssetOverview from "@/components/AssetOverview.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -47,6 +48,11 @@ const router = createRouter({
       path: '/metall-detail/:symbol',
       name: 'metall-detail',
       component: MetalDetail,
+    },
+    {
+      path: '/asset-uebersicht',
+      name: 'asset-uebersicht',
+      component: AssetOverview,
     },
     {
       path: '/order-management-sell/:symbol/:investmentAccountId',
