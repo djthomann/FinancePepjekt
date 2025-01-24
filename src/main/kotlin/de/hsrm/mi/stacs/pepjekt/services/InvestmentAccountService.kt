@@ -225,9 +225,12 @@ class InvestmentAccountService(
         return portfolioEntryRepository.findByInvestmentAccountIdAndStockSymbol(investmentAccount.id!!, stockSymbol)
             .switchIfEmpty(Mono.error(IllegalArgumentException("Stock not found in portfolio")))
             .flatMap { existingEntry ->
-                validateSufficientStock(existingEntry, volume).flatMap {
-                    performStockSale(existingEntry, investmentAccount, volume)
-                }
+                fetchStockQuote(existingEntry.stockSymbol)
+                    .flatMap { quote ->
+                        validateSufficientStock(existingEntry, volume).flatMap {
+                            performStockSale(existingEntry, investmentAccount, volume, quote)
+                        }
+                    }
             }
     }
 
@@ -246,7 +249,7 @@ class InvestmentAccountService(
      * Performs the stock sale by updating the portfolio and linked bank account.
      */
     private fun performStockSale(
-        existingEntry: PortfolioEntry, investmentAccount: InvestmentAccount, volume: Double
+        existingEntry: PortfolioEntry, investmentAccount: InvestmentAccount, volume: Double, quote: StockQuote
     ): Mono<InvestmentAccount> {
         val newQuantity = existingEntry.quantity - volume
         val investReduction = calculateInvestReduction(existingEntry, volume)
@@ -262,8 +265,10 @@ class InvestmentAccountService(
             portfolioEntryRepository.delete(existingEntry).then(Mono.empty())
         }
 
+        val soldAmount = quote.currentPrice.multiply(volume.toBigDecimal())
+
         return portfolioUpdate
-            .then(updateBankAccount(investmentAccount, volume))
+            .then(updateBankAccount(investmentAccount, soldAmount))
     }
 
     /**
@@ -282,10 +287,13 @@ class InvestmentAccountService(
     /**
      * Updates the linked bank account by adding the sale proceeds.
      */
-    private fun updateBankAccount(investmentAccount: InvestmentAccount, volume: Double): Mono<InvestmentAccount> {
+    private fun updateBankAccount(
+        investmentAccount: InvestmentAccount,
+        soldAmount: BigDecimal
+    ): Mono<InvestmentAccount> {
         return bankAccountRepository.findById(investmentAccount.bankAccountId!!)
             .flatMap { bankAccount ->
-                val updatedBalance = bankAccount.balance.add(volume.toBigDecimal())
+                val updatedBalance = bankAccount.balance.add(soldAmount)
                 val updatedBankAccount = bankAccount.copy(balance = updatedBalance)
                 bankAccountRepository.save(updatedBankAccount)
             }
