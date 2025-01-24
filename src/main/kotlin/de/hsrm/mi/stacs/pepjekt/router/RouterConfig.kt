@@ -21,6 +21,9 @@ class RouterConfig {
      * @param investmentAccountHandler Handler for investment account related operations.
      * @param stockHandler Handler for stock related operations.
      * @param orderHandler Handler for order related operations.
+     * @param cryptoHandler Handler for crypto related operations.
+     * @param metalHandler Handler for metal related operations.
+     * @param favoriteHandler Handler for favorite related operations.
      * @return Configured main router with all nested routes.
      */
     @Bean
@@ -31,7 +34,8 @@ class RouterConfig {
         stockHandler: StockHandler,
         orderHandler: OrderHandler,
         cryptoHandler: CryptoHandler,
-        metalHandler: MetalHandler,)
+        metalHandler: MetalHandler,
+        favoriteHandler: FavoriteHandler)
     = router {
         add(bankAccountRouter(bankAccountHandler))
         add(investmentAccountRouter(investmentAccountHandler))
@@ -39,6 +43,7 @@ class RouterConfig {
         add(orderRouter(orderHandler))
         add(cryptoRouter(cryptoHandler))
         add(metalRouter(metalHandler))
+        add(favoriteRouter(favoriteHandler))
     }
 
     /**
@@ -137,6 +142,20 @@ class RouterConfig {
             POST("/placeBuyOrder", orderHandler::placeBuyOrder)
             POST("/placeSellOrder", orderHandler::placeSellOrder)
             GET("/orders", orderHandler::getOrders)
+        }
+    }
+
+    /**
+     * Defines the routes for saving and editing favorite stocks for an investment account.
+     *
+     * @param favoriteHandler Handler for favorite stock operations.
+     * @return Router with favorite endpoints.
+     */
+    fun favoriteRouter(favoriteHandler: FavoriteHandler) = router {
+        "/api".nest {
+            GET("/favorites", favoriteHandler::getFavorites)
+            POST("/add-favorites", favoriteHandler::addFavorites)
+            POST("/delete-favorites", favoriteHandler::deleteFavorites)
         }
     }
 }
