@@ -7,6 +7,15 @@ import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
+/**
+ * Service class to handle operations related to managing favorite stocks.
+ * Provides methods to add, remove, check, and retrieve favorites associated with investment accounts.
+ *
+ * @property operator The [TransactionalOperator] for managing reactive transactions.
+ * @property favoriteRepository Repository interface for accessing favorite entities.
+ * @property stockService Service for stock-related operations.
+ * @property investmentAccountService Service for investment account operations.
+ */
 @Service
 class FavoriteService(
     val operator: TransactionalOperator, // injected by spring
@@ -15,10 +24,25 @@ class FavoriteService(
     val investmentAccountService: IInvestmentAccountService,
 ) : IFavoriteService {
 
+    /**
+     * Retrieves all favorites associated with a specific investment account.
+     *
+     * @param investmentAccountId The ID of the investment account.
+     * @return A [Flux] emitting all [Favorite] entities for the investment account.
+     */
     override fun getFavoritesOfInvestmentAccount(investmentAccountId: Long): Flux<Favorite> {
         return favoriteRepository.findAllByInvestmentAccountId(investmentAccountId)
     }
 
+    /**
+     * Adds a favorite stock to a specific investment account.
+     *
+     * @param investmentAccountId The ID of the investment account.
+     * @param stockSymbol The symbol of the stock to be added as a favorite.
+     * @return A [Mono] indicating completion or emitting an error if the operation fails.
+     * @throws NoSuchElementException If the stock or investment account does not exist.
+     * @throws IllegalStateException If the favorite already exists.
+     */
     override fun addFavoriteToInvestmentAccount(investmentAccountId: Long, stockSymbol: String): Mono<Void> {
         return stockService.getStockBySymbol(stockSymbol)
             .switchIfEmpty(Mono.error(NoSuchElementException("Stock not found by stockSymbol $stockSymbol")))
@@ -42,6 +66,14 @@ class FavoriteService(
             }
     }
 
+    /**
+     * Removes a favorite stock from a specific investment account.
+     *
+     * @param investmentAccountId The ID of the investment account.
+     * @param stockSymbol The symbol of the stock to be removed from favorites.
+     * @return A [Mono] indicating completion or emitting an error if the operation fails.
+     * @throws NoSuchElementException If the favorite does not exist.
+     */
     override fun removeFavoriteFromInvestmentAccount(investmentAccountId: Long, stockSymbol: String): Mono<Void> {
         return favoriteRepository.findByInvestmentAccountIdAndStockSymbol(investmentAccountId, stockSymbol)
             .switchIfEmpty(Mono.error(NoSuchElementException("Favorite not found by stock symbol $stockSymbol and investmentAccountId $investmentAccountId")))
@@ -49,6 +81,13 @@ class FavoriteService(
             .then()
     }
 
+    /**
+     * Checks if a stock is marked as a favorite for a specific investment account.
+     *
+     * @param investmentAccountId The ID of the investment account.
+     * @param stockSymbol The symbol of the stock to check.
+     * @return A [Mono] emitting `true` if the stock is a favorite, or `false` otherwise.
+     */
     override fun isFavorite(investmentAccountId: Long, stockSymbol: String): Mono<Boolean> {
         return favoriteRepository.findByInvestmentAccountIdAndStockSymbol(investmentAccountId, stockSymbol)
             .map { true }
