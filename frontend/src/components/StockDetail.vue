@@ -112,7 +112,7 @@ const data = {
   labels: labels,
   datasets: [
     {
-      label: '',
+      label: 'data',
       backgroundColor: 'transparent',
       borderColor: 'grey',
       borderWidth: 1,
@@ -121,7 +121,7 @@ const data = {
       data: dataPoints
     },
     {
-      label: '',
+      label: 'average',
       backgroundColor: 'red',
       borderColor: 'grey',
       borderWidth: 1,
@@ -141,7 +141,7 @@ const options = {
   },
   plugins: {
     legend: {
-      display: false, // Deaktiviert die Legende (farbiger Button)
+      display: true, // Deaktiviert die Legende (farbiger Button)
     },
     tooltip: {
       enabled: false, // Deaktiviert die Tooltips
