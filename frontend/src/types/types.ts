@@ -13,7 +13,6 @@ export enum OrderType {
   SELL = 'SELL'
 }
 
-
 export interface Stock {
   symbol: string,
   name: string,
@@ -69,11 +68,11 @@ export interface Quote {
 }
 
 export interface Coin {
-  symbol: string;
+  symbol: string,
   name: string,
-  description: string;
-  currency: Currency;
-  currentPrice: number;
+  description: string,
+  currency: Currency,
+  currentPrice: number,
 
   justChanged: boolean //Just for frontend
 }

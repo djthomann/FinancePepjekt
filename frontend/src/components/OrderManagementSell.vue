@@ -47,17 +47,17 @@
 </template>
 
 <script lang="ts" setup>
-import {onBeforeMount, ref} from 'vue';
-import {useRoute} from "vue-router";
-import type {Stock, StockDetails} from "@/types/types.ts";
+import {onBeforeMount, ref} from 'vue'
+import {useRoute} from "vue-router"
+import type {StockDetails} from "@/types/types.ts"
 
 const stockDetail = ref<StockDetails>({})
 
-const volume = ref(0);
+const volume = ref(0)
 const serverResponse = ref<string>()
 
-const date = ref(getTodayDate());
-const time = ref("00:00");
+const date = ref(getTodayDate())
+const time = ref("00:00")
 
 const url = "/api/sell/stock"
 
@@ -68,7 +68,7 @@ onBeforeMount(async () => {
 
   try {
     const response = await
-      fetch(`/api/stock-details/symbol?symbol=${stockSymbol}&investmentAccountId=${investmentAccountId}`);
+      fetch(`/api/stock-details/symbol?symbol=${stockSymbol}&investmentAccountId=${investmentAccountId}`)
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
@@ -83,34 +83,33 @@ async function sell() {
   const stockSymbol = route.params.symbol
   const investmentAccountId = route.params.investmentAccountId
 
-  const executionTime = `${date.value}T${time.value}`;
+  const executionTime = `${date.value}T${time.value}`
 
   console.log(volume.value + ' Stück verkaufen zum Zeitpunkt: ' + executionTime)
-  const baseUrl = "/api/placeSellOrder";
-  const requestUrl =
-    `${baseUrl}?investmentAccountId=${investmentAccountId}&stockSymbol=${stockSymbol}&volume=${volume.value}&executionTime=${executionTime}`;
+  const baseUrl = "/api/placeSellOrder"
+  const requestUrl = `${baseUrl}?investmentAccountId=${investmentAccountId}&stockSymbol=${stockSymbol}&volume=${volume.value}&executionTime=${executionTime}`
   try {
     const response = await fetch(requestUrl, {
       method: "POST"
-    });
+    })
 
     if (!response.ok) {
       serverResponse.value = "Error: Order invalid"
-      throw new Error("Network response was not ok");
+      throw new Error("Network response was not ok")
     }
     serverResponse.value = "Success: Sell Order Placed"
   } catch (error) {
     serverResponse.value = "Server Error: Order Not Placed"
-    console.error("Error: Order Not Placed", error);
+    console.error("Error: Order Not Placed", error)
   }
 }
 
 function getTodayDate() {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 </script>

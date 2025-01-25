@@ -2,14 +2,14 @@ import { createRouter, createWebHistory } from 'vue-router'
 import DepotUebersicht from '@/components/PortfolioOverview.vue'
 import WertpapierUebersicht from '@/components/StockOverview.vue'
 import WertpapierDetail from '@/components/StockDetail.vue'
-import OrderManagementSell from "@/components/OrderManagementSell.vue";
-import OrderManagementBuy from "@/components/OrderManagementBuy.vue";
-import OrderManagementOverview from "@/components/OrderManagementOverview.vue";
-import CryptoOverview from "@/components/CryptoOverview.vue";
-import CryptoDetail from "@/components/CryptoDetail.vue";
-import MetalOverview from "@/components/MetalOverview.vue";
-import MetalDetail from "@/components/MetalDetail.vue";
-import AssetOverview from "@/components/AssetOverview.vue";
+import OrderManagementSell from "@/components/OrderManagementSell.vue"
+import OrderManagementBuy from "@/components/OrderManagementBuy.vue"
+import OrderManagementOverview from "@/components/OrderManagementOverview.vue"
+import CryptoOverview from "@/components/CryptoOverview.vue"
+import CryptoDetail from "@/components/CryptoDetail.vue"
+import MetalOverview from "@/components/MetalOverview.vue"
+import MetalDetail from "@/components/MetalDetail.vue"
+import AssetOverview from "@/components/AssetOverview.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
