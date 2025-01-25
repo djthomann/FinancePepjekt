@@ -11,5 +11,4 @@ interface IStockQuoteRepository : R2dbcRepository<StockQuote, Long> {
 
     fun findByStockSymbol(stockSymbol: String): Flux<StockQuote>
 
-    fun findTopByStockSymbolOrderByTimeStampDesc(symbol: String): Mono<StockQuote>
 }
