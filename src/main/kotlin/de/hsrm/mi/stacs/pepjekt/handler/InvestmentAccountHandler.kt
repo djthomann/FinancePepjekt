@@ -37,7 +37,7 @@ class InvestmentAccountHandler(
      *
      */
     fun getPortfolio(request: ServerRequest): Mono<ServerResponse> {
-        val investmentAccountId = request.queryParam("investmentAccountId").orElseThrow { IllegalArgumentException(" " +
+        val investmentAccountId = request.queryParam("investmentAccountId").orElseThrow { IllegalArgumentException(
                 "investmentaccountId is required") }.toLong()
 
         logger.info("Fetch InvestmentAccountDTO with investmentAccountId: $investmentAccountId")
