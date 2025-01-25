@@ -54,8 +54,9 @@ class RouterConfig {
      */
     @Bean
     fun bankAccountRouter(bankAccountHandler: BankAccountHandler) = router {
-        "/api".nest {
+        "/api/bankaccount".nest {
             GET("/balance", bankAccountHandler::getBalance)
+            POST("/deposit", bankAccountHandler::handleDeposit)
         }
     }
 
@@ -70,6 +71,7 @@ class RouterConfig {
         "/api".nest {
             GET("/portfolio", investmentAccountHandler::getPortfolio)
             GET("/portfolio/totalValue", investmentAccountHandler::getPortfolioTotalValue)
+            GET("/bankaccount", investmentAccountHandler::getBankAccount)
         }
     }
 

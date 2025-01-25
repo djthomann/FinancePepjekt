@@ -2,6 +2,7 @@
   <div class="invest-depot">
     <div>
       <h1>Edelmetalle</h1>
+      <div><!--Leeres Element für Grid--></div>
       <div id="searchField">
         <input v-model="search" placeholder="Symbol/Name" />
         <button class="details-button" @click="resetSearch">Reset</button>

@@ -16,7 +16,7 @@
             <RouterLink to="/metall-uebersicht" class="buttons">Edelmetalle</RouterLink>
           </li>
         <li>
-          <RouterLink to="/asset-uebersicht" class="buttons">Assets</RouterLink>
+          <RouterLink :to="`/asset-uebersicht/${investmentAccountId}`" class="buttons">Assets</RouterLink>
         </li>
           <li>
             <RouterLink :to="`/order-management-overview/${investmentAccountId}`" class="buttons">Orders</RouterLink>    <!--TODO replace the hardcoded investmentAccountId-->

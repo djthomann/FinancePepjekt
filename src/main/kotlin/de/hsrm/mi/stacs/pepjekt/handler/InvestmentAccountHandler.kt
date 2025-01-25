@@ -90,4 +90,25 @@ class InvestmentAccountHandler(
                     }
             }
     }
+
+    /**
+     * Handles a request to get the bank account linked with an investment account.
+     *
+     * If the investmentAccountId is not provided an error response will be returned.
+     *
+     * @param request The incoming server request containing query parameters.
+     * @return A Mono containing the server response with the id of the bank account or a 404 if the portfolio is empty.
+     * @throws IllegalArgumentException If the investmentAccountId is missing in the query parameters.
+     */
+    fun getBankAccount(request: ServerRequest): Mono<ServerResponse> {
+        val investmentAccountId = request.queryParam("investmentAccountId")
+            .map { it.toLong() }
+            .orElseThrow { IllegalArgumentException("investmentAccountId is required") }
+
+        return investmentAccountService.getBankAccountId(investmentAccountId)
+            .flatMap { id ->
+                ServerResponse.ok().bodyValue(id)
+            }
+            .switchIfEmpty(ServerResponse.notFound().build())
+    }
 }

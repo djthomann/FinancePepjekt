@@ -367,6 +367,16 @@ class InvestmentAccountService(
         return investmentAccountRepository.findById(investmentAccountId)
     }
 
+    /**
+     * Returns the id of the bank account connected to the investment account
+     */
+    override fun getBankAccountId(investmentAccountId: Long): Mono<Long> {
+        return getInvestmentAccount(investmentAccountId)
+            .flatMap { account ->
+                Mono.just(account.bankAccountId!!)
+            }
+    }
+
     private fun calculateInvestmentAccountTotalValueAsync(portfolioMono: Mono<List<PortfolioEntryDTO>>): Mono<BigDecimal> {
         return portfolioMono.flatMap { portfolioEntries ->
             Flux.fromIterable(portfolioEntries).flatMap { entry ->
