@@ -35,6 +35,14 @@ class BankAccountHandler(private val bankAccountService: IBankAccountService) {
             .switchIfEmpty(ServerResponse.notFound().build())
     }
 
+    /**
+     * Handles a request to deposit money into a bank account.
+     *
+     * If the bank account ID is not provided or the balance cannot be found, an error response will be returned.
+     *
+     * @param request The incoming server request containing query parameters.
+     * @return A Mono containing the server response with a 404 not found if the deposit was unsuccessful.
+     */
     fun handleDeposit(request: ServerRequest): Mono<ServerResponse> {
         return Mono.zip(
             Mono.justOrEmpty(request.queryParam("bankAccountId"))
@@ -51,7 +59,7 @@ class BankAccountHandler(private val bankAccountService: IBankAccountService) {
             }
             .then(ServerResponse.ok().build())
             .onErrorResume { e ->
-                ServerResponse.badRequest().bodyValue("Error: ${e.message}") // Fehlerantwort erstellen
+                ServerResponse.badRequest().bodyValue("Error: ${e.message}")
             }
 
     }
