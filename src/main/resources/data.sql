@@ -96,7 +96,7 @@ VALUES
 
 INSERT INTO bankaccount (currency, balance)
 VALUES ('USD', 10000.50),
-       ('USD', 3000.00),
+       ('USD', 15000.00),
        ('USD', 500000.00),
        ('USD', 123.45);
 
@@ -108,11 +108,23 @@ VALUES (1, 1), -- Verknüpft mit Bankkonto ID 1 und Benutzer ID 1
        (3, 3);
 -- Verknüpft mit Bankkonto ID 3 und Benutzer ID 3
 
--- Portfolio
+-- Portfolio - Alice Smith
 INSERT INTO portfolio_entry (investment_account_id, stock_symbol, quantity, total_invest_amount)
-VALUES (1, 'AAPL', 50.5, 13600.0),
+VALUES (1, 'AAPL', 5.0, 500.0),
        (1, 'TSLA', 10.0, 4500.0),
        (1, 'NVDA', 5.0, 600.0);
+
+-- Portfolio - Bob Johnson
+INSERT INTO portfolio_entry (investment_account_id, stock_symbol, quantity, total_invest_amount)
+VALUES (2, 'TSLA', 10.0, 4500.0),
+       (2, 'NVDA', 10.0, 2500.0);
+
+-- Portfolio - Charlie Brown
+INSERT INTO portfolio_entry (investment_account_id, stock_symbol, quantity, total_invest_amount)
+VALUES (3, 'TSLA', 20.0, 4500.0),
+       (3, 'SAP', 10.0, 4500.0),
+       (3, 'AAPL', 5.0, 600.0),
+       (3, 'NVDA', 15.0, 600.0);
 
 -- Order
 --INSERT INTO stock_order (purchase_amount, purchase_volume, type, execution_timestamp, investment_account_id,
