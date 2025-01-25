@@ -54,7 +54,7 @@ class FinnhubHandler(
             dummy_finnhub_webClient
         }
 
-        logger.info(
+        logger.debug(
             "Fetching Stock: {} from {}",
             symbol,
             if (isMarketOpen) "finnhub_webclient" else "dummy_finnhub_webClient"
@@ -86,7 +86,7 @@ class FinnhubHandler(
      * @return A Mono emitting the MarketStatusDTD object containing the market's open/closed status.
      */
     fun fetchMarketStatus(exchange: String): Mono<MarketStatusDTD> {
-        logger.info("Fetching market status for exchange: $exchange")
+        logger.debug("Fetching market status for exchange: $exchange")
 
         return finnhub_webClient.get()
             .uri { uriBuilder: UriBuilder ->
