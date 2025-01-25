@@ -1,7 +1,7 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
-import de.hsrm.mi.stacs.pepjekt.controller.MarketStatusDTD
-import de.hsrm.mi.stacs.pepjekt.controller.StockQuoteDTD
+import de.hsrm.mi.stacs.pepjekt.entities.dtds.MarketStatusDTD
+import de.hsrm.mi.stacs.pepjekt.entities.dtds.StockQuoteDTD
 import de.hsrm.mi.stacs.pepjekt.entities.StockQuote
 import jakarta.annotation.PostConstruct
 import org.slf4j.LoggerFactory

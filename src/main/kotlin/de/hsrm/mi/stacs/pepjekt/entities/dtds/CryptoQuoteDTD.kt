@@ -1,4 +1,4 @@
-package de.hsrm.mi.stacs.pepjekt.controller
+package de.hsrm.mi.stacs.pepjekt.entities.dtds
 
 import de.hsrm.mi.stacs.pepjekt.entities.Currency
 import java.math.BigDecimal

@@ -1,7 +1,7 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.hsrm.mi.stacs.pepjekt.controller.CryptoQuoteDTD
+import de.hsrm.mi.stacs.pepjekt.entities.dtds.CryptoQuoteDTD
 import de.hsrm.mi.stacs.pepjekt.entities.CryptoQuote
 import de.hsrm.mi.stacs.pepjekt.entities.Currency
 import org.slf4j.LoggerFactory

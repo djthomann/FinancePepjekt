@@ -1,9 +1,7 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.hsrm.mi.stacs.pepjekt.controller.CryptoQuoteDTD
-import de.hsrm.mi.stacs.pepjekt.controller.MetalQuoteDTD
-import de.hsrm.mi.stacs.pepjekt.entities.CryptoQuote
+import de.hsrm.mi.stacs.pepjekt.entities.dtds.MetalQuoteDTD
 import de.hsrm.mi.stacs.pepjekt.entities.MetalQuote
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
