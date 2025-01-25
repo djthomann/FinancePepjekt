@@ -39,12 +39,13 @@ const date = ref(getTodayDate());
 const time = ref("00:00");
 
 const route = useRoute();
+const investmentAccountId = route.params.investmentAccountId
 
 onBeforeMount(async () => {
   const symbol = route.params.symbol;
 
   try {
-    const response = await fetch(`/api/stock/by/symbol?symbol=${symbol}`);
+    const response = await fetch(`/api/stock/by/symbol?symbol=${symbol}&investmentAccountId=${investmentAccountId}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
