@@ -17,7 +17,6 @@ import java.math.BigDecimal
 class BankAccountService(
     val operator: TransactionalOperator, // injected by spring
     val bankAccountRepository: IBankAccountRepository,
-    val investmentAccountRepository: IInvestmentAccountRepository
 ) : IBankAccountService {
 
     /**
