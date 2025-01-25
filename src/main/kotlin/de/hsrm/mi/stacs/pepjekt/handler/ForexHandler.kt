@@ -13,6 +13,12 @@ import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
+/**
+ * Component responsible for fetching metal price data from a forex data provider.
+ * The data fetched includes the current bid price for a given metal symbol.
+ *
+ * @param webClientBuilder The builder to create WebClient instances for making HTTP requests.
+ */
 @Component
 class ForexHandler(
     webClientBuilder: WebClient.Builder
@@ -21,7 +27,11 @@ class ForexHandler(
     private final val forex_webclient = webClientBuilder.baseUrl("https://forex-data-feed.swissquote.com/public-quotes").build()
 
     /**
-     * Fetches the current bidding price for a given metal symbol
+     * Fetches the current bidding price for a given metal symbol.
+     * The request is made to the forex data provider API, and the current bid price is retrieved.
+     *
+     * @param symbol The metal symbol for which the bidding price is to be fetched.
+     * @return A Mono emitting the MetalQuote object with the current price of the metal and the timestamp.
      */
     fun fetchMetalPrice(symbol: String): Mono<MetalQuote> {
 
@@ -44,7 +54,11 @@ class ForexHandler(
     }
 
     /**
-     * Map the API DTD to a MetalQuote Object
+     * Maps the data transfer object (DTD) to a MetalQuote object.
+     *
+     * @param symbol The metal symbol.
+     * @param metalQuoteDTD The data transfer object containing the metal price details.
+     * @return A MetalQuote object representing the fetched metal price and timestamp.
      */
     fun mapToQuote(symbol: String, metalQuoteDTD: MetalQuoteDTD): MetalQuote {
         return MetalQuote(

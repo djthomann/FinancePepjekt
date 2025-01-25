@@ -37,7 +37,6 @@ class InvestmentAccountHandler(
      *
      */
     fun getPortfolio(request: ServerRequest): Mono<ServerResponse> {
-
         val investmentAccountId = request.queryParam("investmentAccountId").orElseThrow { IllegalArgumentException(" " +
                 "investmentaccountId is required") }.toLong()
 
@@ -48,6 +47,9 @@ class InvestmentAccountHandler(
                 ServerResponse.ok().bodyValue(portfolio)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
+            .onErrorResume { e ->
+                ServerResponse.badRequest().bodyValue("Error: ${e.message}")
+            }
     }
 
     /**
@@ -58,8 +60,6 @@ class InvestmentAccountHandler(
      * @param request The incoming server request containing query parameters.
      * @return A Mono containing the server response with the total value of the portfolio or a 404 if the portfolio is empty.
      * @throws IllegalArgumentException If the investmentAccountId is missing in the query parameters.
-     *
-     * TODO -> has to be done, already in use
      */
     fun getPortfolioTotalValue(request: ServerRequest): Mono<ServerResponse> {
         val investmentAccountId = request.queryParam("investmentAccountId")
@@ -89,6 +89,9 @@ class InvestmentAccountHandler(
                         ServerResponse.ok().bodyValue(totalValue)
                     }
             }
+            .onErrorResume { e ->
+                ServerResponse.badRequest().bodyValue("Error: ${e.message}")
+            }
     }
 
     /**
@@ -110,5 +113,8 @@ class InvestmentAccountHandler(
                 ServerResponse.ok().bodyValue(id)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
+            .onErrorResume { e ->
+                ServerResponse.badRequest().bodyValue("Error: ${e.message}")
+            }
     }
 }

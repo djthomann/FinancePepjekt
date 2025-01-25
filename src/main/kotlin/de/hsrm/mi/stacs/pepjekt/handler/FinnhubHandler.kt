@@ -16,7 +16,12 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 
 /**
- * Component that handles the connection and dataflow between finnhub ot the dummy one. Finnhub token is needed.
+ * Component responsible for handling communication with the Finnhub API or a dummy service
+ * to retrieve stock market data such as stock quotes and market status.
+ * The actual API to be used depends on whether the market is open or not.
+ * A Finnhub token is needed, when fetching data from Finnhub.
+ *
+ * @param webClientBuilder The builder to create WebClient instances for making HTTP requests.
  */
 @Component
 class FinnhubHandler(
@@ -30,17 +35,17 @@ class FinnhubHandler(
     private var finnhubDummyIsTaken: Boolean = false
 
     private final val exchange = "US"
-
     private final val finnhub_webClient = webClientBuilder.baseUrl("https://finnhub.io/api/v1").build()
     private final val dummy_finnhub_webClient = webClientBuilder.baseUrl("http://localhost:8081/api").build()
-
-    private var isMarketOpen = true;
-
+    private var isMarketOpen = true
     private val logger = LoggerFactory.getLogger(FinnhubHandler::class.java)
 
     /**
-     * Fetches the Quote, depending on if the market is open or not. Is the market closed, the dummy finnhub webclient
-     * will be triggered. If the market is open then finnhub itself.
+     * Fetches the stock quote for a given symbol. If the market is open, the actual Finnhub API is used.
+     * If the market is closed, a dummy web client will be used to simulate the response.
+     *
+     * @param symbol The stock symbol for which the quote is to be fetched.
+     * @return A Mono emitting the fetched StockQuote object.
      */
     fun fetchStockQuote(symbol: String): Mono<StockQuote> {
         var webClient = if (isMarketOpen) {
@@ -73,10 +78,16 @@ class FinnhubHandler(
             .map { quoteDTD -> mapToQuote(symbol, quoteDTD) }
     }
 
+
     /**
-     * Fetches the market Status
+     * Fetches the market status for a specific exchange.
+     *
+     * @param exchange The exchange for which the market status is to be fetched (e.g., "US").
+     * @return A Mono emitting the MarketStatusDTD object containing the market's open/closed status.
      */
     fun fetchMarketStatus(exchange: String): Mono<MarketStatusDTD> {
+        logger.info("Fetching market status for exchange: $exchange")
+
         return finnhub_webClient.get()
             .uri { uriBuilder: UriBuilder ->
                 uriBuilder.path("/stock/market-status")
@@ -90,9 +101,15 @@ class FinnhubHandler(
     }
 
     /**
-     * Maps the API DTD to a StockQuote Object
+     * Maps the data transfer object (DTD) to a StockQuote object.
+     *
+     * @param symbol The stock symbol.
+     * @param stockQuoteDTD The data transfer object containing the stock quote details.
+     * @return A StockQuote object representing the stock quote.
      */
     fun mapToQuote(symbol: String, stockQuoteDTD: StockQuoteDTD): StockQuote {
+        logger.debug("Mapping StockQuoteDTD to StockQuote for symbol: {}", symbol)
+
         return StockQuote(
             currentPrice = BigDecimal.valueOf(stockQuoteDTD.c.toDouble()),
             change = stockQuoteDTD.d,
@@ -107,20 +124,22 @@ class FinnhubHandler(
     }
 
     /**
-     * On Application start there is a marketOpen check.
-     * If variable takeFinnhubDummyClient is set to true then it will alwqys take the dummy cient.
-     * If not it depends if the market is open or not.
-     * */
+     * Initializes the component on application startup. This method checks if the market is open
+     * and sets the appropriate flag. If the configuration `takeFinnhubDummyClient` is true, the dummy
+     * client is always used regardless of market status.
+     */
     @PostConstruct
     fun init() {
-
+        logger.info("Initializing FinnhubHandler...")
         //Check if marketStatus is open and then choose between finnhub or the dummy one
         if (!finnhubDummyIsTaken) {
             fetchMarketStatus(exchange).doOnNext { marketStatus ->
                 isMarketOpen = marketStatus.isOpen
+                logger.info("Market open status: {}", isMarketOpen)
             }.subscribe()
         } else {
-            isMarketOpen = false;
+            isMarketOpen = false
+            logger.info("Dummy Finnhub client is used, market considered closed.")
         }
 
     }
