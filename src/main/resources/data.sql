@@ -120,9 +120,9 @@ VALUES (1, 1), -- Verknüpft mit Bankkonto ID 1 und Benutzer ID 1
 ---------------------- Einfügen von Default-Daten in die 'portfolio_entry'-Tabelle ----------------------
 -- Portfolio - Alice Smith
 INSERT INTO portfolio_entry (investment_account_id, stock_symbol, quantity, total_invest_amount)
-VALUES (1, 'AAPL', 5.0, 500.0),
-       (1, 'TSLA', 10.0, 4500.0),
-       (1, 'NVDA', 5.0, 600.0);
+VALUES (1, 'AAPL', 5.0, 1350.0),
+       (1, 'TSLA', 10.0, 4350.0),
+       (1, 'NVDA', 5.0, 580.0);
 
 -- Portfolio - Bob Johnson
 INSERT INTO portfolio_entry (investment_account_id, stock_symbol, quantity, total_invest_amount)
