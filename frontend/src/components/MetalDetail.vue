@@ -5,11 +5,6 @@
         <h2>{{ metal.name }} - Detailansicht</h2>
         <p><strong>Symbol:</strong> {{ metal.symbol }}</p>
         <p><strong>Aktueller Wert:</strong> {{ metal.currentPrice }} $</p>
-
-        <div class="purchase-buttons">
-          <button class="purchase-button" @click="purchase(metal.symbol)">Kaufen</button>
-          <button class="purchase-button" @click="sell(metal.symbol)">Verkaufen</button>
-        </div>
       </div>
       <div class="stock-detail-header-chart">
         <Line ref="lineChart"  :data="data" :options="options" />
