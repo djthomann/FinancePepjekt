@@ -153,12 +153,12 @@ async function deposit() {
     const url = `/api/bankaccount/deposit?bankAccountId=${bankAccountId.value}&amount=${depositAmount.value}`
     const response = await fetch(url, {method: "POST"})
 
-    if (!response.ok) {
-      serverResponse.value = "Error: Order invalid"
-      throw new Error("Network response was not ok")
+    if(!response.ok) {
+      depositServerAnswer.value = await response.text()
+    } else {
+      depositServerAnswer.value = "Success: Deposit done"
     }
 
-    depositServerAnswer.value = "Success: Deposit done"
   } catch (error) {
     depositServerAnswer.value = "Error: Deposit failed"
     console.error("Error: Order not placed", error)

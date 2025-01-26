@@ -218,6 +218,20 @@ Mehrere Nutzer können das System verwenden, mit jeweils eigenen Depots und indi
 
 Als CRUD Repository verwenden wir R2DBC.
 
+# Tech-Stack
+Frontend: 
+- Vue.js
+- TypeScript
+
+Backend: 
+- Kotlin
+- SpringWebFlux
+
+Datenhaltung: 
+- R2DBC
+- Postgres
+- Docker
+
 # Glossar {#section-glossary}
 
 Die wesentlichen fachlichen und technischen Begriffe, die Stakeholder im

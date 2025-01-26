@@ -5,11 +5,6 @@
         <h2>{{ coin.name }} - Detailansicht</h2>
         <p><strong>Symbol:</strong> {{ coin.symbol }}</p>
         <p><strong>Aktueller Wert:</strong> {{ coin.currentPrice }} $</p>
-
-        <div class="purchase-buttons">
-          <button class="purchase-button" @click="purchase(coin.symbol)">Kaufen</button>
-          <button class="purchase-button" @click="sell(coin.symbol)">Verkaufen</button>
-        </div>
       </div>
       <div class="stock-detail-header-chart">
         <Line ref="lineChart"  :data="data" :options="options" />

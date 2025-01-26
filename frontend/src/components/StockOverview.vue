@@ -278,35 +278,6 @@ async function toggleFavorite(stock: Stock) {
   transition: background-color 200ms;
 }
 
-.sorting-button {
-  display: flex;
-  align-items: center;
-  background: 0;
-  border: none;
-  font-weight: bold;
-  font-size: 15px;
-  color: #333;
-}
-
-.sorting-button:hover {
-  cursor: pointer;
-}
-
-.sorting-button::before {
-  margin-right: 10px;
-  width: 10px;
-  height: 10px;
-  content: '';
-  background: url('@/assets/arrow_down.svg') no-repeat center center;
-  background-size: contain;
-  transition: transform 200ms;
-  transform: rotate(180deg);
-}
-
-.sorting-button-down::before {
-  transform: rotate(0deg);
-}
-
 .favorite-icon {
   width: 24px;
   height: 24px;
