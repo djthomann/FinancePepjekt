@@ -10,4 +10,5 @@ import reactor.core.publisher.Mono
 interface IStockQuoteRepository : R2dbcRepository<StockQuote, Long> {
 
     fun findByStockSymbol(stockSymbol: String): Flux<StockQuote>
+
 }
