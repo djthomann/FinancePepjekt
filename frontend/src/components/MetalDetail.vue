@@ -20,8 +20,8 @@
 </template>
 
 <script setup lang="ts">
-import {onBeforeMount, onUnmounted, ref} from 'vue';
-import {useRoute, useRouter} from "vue-router";
+import {onBeforeMount, onUnmounted, ref} from 'vue'
+import {useRoute, useRouter} from "vue-router"
 import {type Metal} from '@/types/types.ts'
 import {
   Chart as ChartJS,
@@ -90,51 +90,51 @@ async function poll() {
   console.log("polling")
 
   try {
-    const response = await fetch(`/api/metal?symbol=${metal.value.symbol}`);
+    const response = await fetch(`/api/metal?symbol=${metal.value.symbol}`)
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
-    const metalData = await response.json() as Metal;
+    const metalData = await response.json() as Metal
     if (metal.value.currentPrice !== metalData.currentPrice) {
       metal.value.currentPrice = metalData.currentPrice
       metal.value.justChanged = true
 
       setTimeout(() => {
-        metal.value.justChanged = false;
-      }, 200);
+        metal.value.justChanged = false
+      }, 200)
     }
     if(dataPoints.length >= numDataPoints) {
-      dataPoints.shift();
-      labels.shift();
+      dataPoints.shift()
+      labels.shift()
     }
     dataPoints.push(metalData.currentPrice)
     labels.push('0')
     if (lineChart.value) {
-      lineChart.value.chart.update();
+      lineChart.value.chart.update()
     } else {
       console.log("Instanz ist null")
     }
   } catch (e) {
-    console.error(e);
+    console.error(e)
   }
 
 }
 
 onBeforeMount(async () => {
 
-  const route = useRoute();
+  const route = useRoute()
 
-  const symbol = route.params.symbol;
+  const symbol = route.params.symbol
   console.log("Symbol", symbol)
 
   try {
-    const response = await fetch(`/api/metal?symbol=${symbol}`);
+    const response = await fetch(`/api/metal?symbol=${symbol}`)
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
-    metal.value = await response.json() as Metal;
+    metal.value = await response.json() as Metal
   } catch (e) {
-    console.error(e);
+    console.error(e)
   }
 
   pollingIntervalID = setInterval(poll, 1000)

@@ -34,14 +34,14 @@ class OrderService(
     val quoteRepository: IStockQuoteRepository
 ) : IOrderService {
 
-    val log: Logger = LoggerFactory.getLogger(this::class.java)
+    val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     /**
      * Places a buy order for a specific stock and associates it with an investment account.
      *
      * @param investmentAccountId the ID of the investment account placing the buy order
      * @param stockSymbol the symbol of the stock to purchase
-     * @param volume the volume of the stock to purchase
+     * @param purchaseAmount the amount of money to spend on the stock purchase
      * @param executionTime the time when the order is executed
      * @return a [Mono] emitting the created [Order], or an error if the operation fails
      */
@@ -51,6 +51,8 @@ class OrderService(
         purchaseAmount: BigDecimal,
         executionTime: LocalDateTime
     ): Mono<Order> {
+        logger.info("Placing buy order for stock: {} with amount: {}", stockSymbol, purchaseAmount)
+
         return Mono.zip(
             investmentAccountRepository.findById(investmentAccountId),
             stockRepository.findBySymbol(stockSymbol),
@@ -63,6 +65,7 @@ class OrderService(
             val calculatedVolume = if (quote.currentPrice != BigDecimal.ZERO) {
                 purchaseAmount.divide(quote.currentPrice, 10, RoundingMode.UP)
             } else {
+                logger.error("Current price for stock {} is zero, unable to calculate volume", stockSymbol)
                 return@flatMap Mono.error(IllegalArgumentException("Current price cannot be null or zero"))
             }
 
@@ -75,10 +78,10 @@ class OrderService(
                 executionTimestamp = executionTime
             )
 
+            logger.info("Created buy order: {}", order)
             orderRepository.save(order).`as`(operator::transactional)
         }
     }
-
 
     /**
      * Places a sell order for a specific stock and associates it with an investment account.
@@ -95,6 +98,8 @@ class OrderService(
         volume: Double,
         executionTime: LocalDateTime
     ): Mono<Order> {
+        logger.info("Placing sell order for stock: {} with volume: {}", stockSymbol, volume)
+
         return Mono.zip(
             investmentAccountRepository.findById(investmentAccountId),
             stockRepository.findBySymbol(stockSymbol),
@@ -114,10 +119,12 @@ class OrderService(
                 investmentAccountId = account.id!!,
                 stockSymbol = stock.symbol,
             )
+
+            logger.info("Created sell order: {}", order)
             orderRepository.save(order).`as`(operator::transactional)
+                .doOnError { error -> logger.error("Error placing sell order for stock: {}", stockSymbol, error) }
         }
     }
-
 
     /**
      * Retrieves all orders associated with a specific investment account.
@@ -126,7 +133,9 @@ class OrderService(
      * @return a [Flux] emitting the [Order] instances associated with the given investment account
      */
     override fun getOrdersByInvestmentAccountId(investmentAccountId: String): Flux<Order> {
+        logger.debug("Fetching orders for investment account ID: {}", investmentAccountId)
         return orderRepository.findByInvestmentAccountId(investmentAccountId.toLong())
+            .doOnError { error -> logger.error("Error fetching orders for investment account ID: {}", investmentAccountId, error) }
     }
 
     /**
@@ -134,48 +143,42 @@ class OrderService(
      * For buy orders, invokes the buyStock method to complete the purchase.
      */
     override fun processOrders(): Mono<Void> {
-        log.info("Starting to process Orders")
+        logger.debug("Starting to process Orders")
 
         val now = LocalDateTime.now()
 
         return orderRepository.findAll()
-            .doOnTerminate { log.info("Completed order fetching.") }
             .filter { order -> order.executionTimestamp.isBefore(now) || order.executionTimestamp.isEqual(now) }
             .flatMap { order ->
                 when (order.type) {
                     OrderType.BUY -> {
-                        log.info("BUY Order ${order.stockSymbol} processed")
+                        logger.info("Processing BUY order for stock: {}", order.stockSymbol)
                         investmentAccountService.buyStock(
                             order.investmentAccountId,
                             order.stockSymbol,
                             order.purchaseAmount
                         )
                             .then(Mono.just(order))
-                            .doOnTerminate { log.info("Completed BUY order processing for ${order.stockSymbol}") }
                     }
 
                     OrderType.SELL -> {
-                        log.info("SELL Order ${order.stockSymbol} processed")
+                        logger.info("Processing SELL order for stock: {}", order.stockSymbol)
                         investmentAccountService.sellStock(
                             order.investmentAccountId,
                             order.stockSymbol,
                             order.purchaseVolume
                         )
                             .then(Mono.just(order))
-                            .doOnTerminate { log.info("Completed SELL order processing for ${order.stockSymbol}") }
                     }
                 }
             }
             .flatMap { order ->
-                // Mark the order as processed, or delete it if completed
-                log.info("Deleting order ${order.stockSymbol} after processing.")
+                logger.info("Deleting order for stock: {} after processing.", order.stockSymbol)
                 orderRepository.delete(order)
             }.onErrorContinue { error, _ ->
-                log.error("Error during order processing: ${error.message}", error)
+                logger.error("Error during order processing: {}", error.message, error)
             }
             .then()
-            .doOnTerminate { log.info("Finished processing all orders.") }
+            .doOnTerminate { logger.debug("Finished processing all orders.") }
     }
-
-
 }

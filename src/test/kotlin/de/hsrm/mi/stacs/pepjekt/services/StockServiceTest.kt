@@ -3,14 +3,10 @@ package de.hsrm.mi.stacs.pepjekt.services
 import de.hsrm.mi.stacs.pepjekt.entities.*
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.PortfolioEntryDTO
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDTO
-import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDetailsDTO
-import de.hsrm.mi.stacs.pepjekt.handler.FinnhubHandler
 import de.hsrm.mi.stacs.pepjekt.repositories.*
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
-import org.springframework.r2dbc.core.DatabaseClient
-import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
@@ -30,7 +26,6 @@ class StockServiceTest {
     private val investmentAccountRepository: IInvestmentAccountRepository = mock(IInvestmentAccountRepository::class.java)
     private val stockQuoteLatestRepository: IStockQuoteLatestRepository = mock(IStockQuoteLatestRepository::class.java)
     private val portfolioEntryRepository: IPortfolioEntryRepository = mock(IPortfolioEntryRepository::class.java)
-    private val databaseClient: DatabaseClient = mock(DatabaseClient::class.java)
 
     private lateinit var stockService: StockService
     private lateinit var stock: Stock
@@ -122,7 +117,7 @@ class StockServiceTest {
         portfolioEntry = PortfolioEntry(investmentAccountId = investmentAccount.id!!, stockSymbol = stock.symbol, id
         = 1L, quantity = 10.0, totalInvestAmount = 1000.0.toBigDecimal())
 
-        stockService = StockService(stockRepository, stockQuoteRepository, stockQuoteLatestRepository, databaseClient, investmentAccountRepository, portfolioEntryRepository)
+        stockService = StockService(stockRepository, stockQuoteRepository, stockQuoteLatestRepository, investmentAccountRepository, portfolioEntryRepository)
 
         `when`(stockRepository.findBySymbol(stock.symbol)).thenReturn(Mono.just(stock))
         `when`(stockRepository.findByDescription(stock.description)).thenReturn(Mono.just(stock))

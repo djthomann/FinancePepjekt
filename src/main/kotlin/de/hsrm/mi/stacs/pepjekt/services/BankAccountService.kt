@@ -1,9 +1,9 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
 import de.hsrm.mi.stacs.pepjekt.repositories.IBankAccountRepository
-import de.hsrm.mi.stacs.pepjekt.repositories.IInvestmentAccountRepository
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
 
@@ -15,9 +15,10 @@ import java.math.BigDecimal
  */
 @Service
 class BankAccountService(
-    val operator: TransactionalOperator, // injected by spring
     val bankAccountRepository: IBankAccountRepository,
 ) : IBankAccountService {
+
+    private val logger: Logger = LoggerFactory.getLogger(BankAccountService::class.java)
 
     /**
      * Retrieves the balance of a bank account by its ID.
@@ -29,13 +30,14 @@ class BankAccountService(
      * @throws IllegalStateException if the bank account or its balance is null
      */
     override fun getBalance(bankAccountId: Long): Mono<BigDecimal> {
+        logger.info("Retrieving balance for bank account ID: $bankAccountId")
+
         return bankAccountRepository.findById(bankAccountId)
             .switchIfEmpty(Mono.error(NoSuchElementException("No bank account found for ID $bankAccountId")))
             .flatMap { bankAccount ->
                 Mono.justOrEmpty(bankAccount?.balance)
             }
     }
-
 
     /**
      * Deposits an amount into a bank account by its ID.
@@ -46,6 +48,8 @@ class BankAccountService(
      * @throws IllegalStateException if the bank account or its balance is null
      */
     override fun deposit(bankAccountId: Long, amount: BigDecimal): Mono<Void> {
+        logger.info("Depositing amount: $amount to bank account ID: $bankAccountId")
+
         return bankAccountRepository.findById(bankAccountId)
             .switchIfEmpty(Mono.error(NoSuchElementException("No bank account found for ID $bankAccountId")))
             .flatMap { bankAccount ->
@@ -65,6 +69,8 @@ class BankAccountService(
      * @throws IllegalStateException if the bank account or its balance is null
      */
     override fun withdraw(bankAccountId: Long, amount: BigDecimal): Mono<Void> {
+        logger.info("Withdrawing amount: $amount from bank account ID: $bankAccountId")
+
         return bankAccountRepository.findById(bankAccountId)
             .switchIfEmpty(Mono.error(NoSuchElementException("No bank account found for ID $bankAccountId")))
             .flatMap { bankAccount ->
@@ -78,7 +84,4 @@ class BankAccountService(
             }
             .then()
     }
-
-
-
 }

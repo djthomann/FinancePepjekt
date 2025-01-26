@@ -21,4 +21,6 @@ interface IInvestmentAccountService {
 
     fun getInvestmentAccount(investmentAccountId: Long): Mono<InvestmentAccount>
 
+    fun getBankAccountId(investmentAccountId: Long): Mono<Long>
+
 }

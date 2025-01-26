@@ -83,8 +83,8 @@
 </template>
 
 <script lang="ts" setup>
-import {onBeforeMount, onUnmounted, ref} from 'vue';
-import {useRoute, useRouter} from "vue-router";
+import {onBeforeMount, onUnmounted, ref} from 'vue'
+import {useRoute, useRouter} from "vue-router"
 import type {StockDetails} from '@/types/types.ts'
 import {CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Title, Tooltip} from 'chart.js'
 import {Line} from 'vue-chartjs'
@@ -160,11 +160,11 @@ async function poll() {
 
   try {
     const response = await
-      fetch(`/api/stock-details/symbol?symbol=${stockSymbol}&investmentAccountId=${investmentAccountId}`);
+      fetch(`/api/stock-details/symbol?symbol=${stockSymbol}&investmentAccountId=${investmentAccountId}`)
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
-    const stockData = await response.json() as StockDetails;
+    const stockData = await response.json() as StockDetails
     if (stockDetails.value.stock.latestQuote.currentPrice !== stockData.stock.latestQuote.currentPrice) {
       stockDetails.value.stock.latestQuote.currentPrice = stockData.stock.latestQuote.currentPrice
       stockDetails.value.portfolioEntry.totalValue = stockData.portfolioEntry.totalValue
@@ -176,22 +176,22 @@ async function poll() {
       stockDetails.value.stock.justChanged = true
 
       setTimeout(() => {
-        stockDetails.value.stock.justChanged = false;
-      }, 200);
+        stockDetails.value.stock.justChanged = false
+      }, 200)
     }
     if(dataPoints.length >= numDataPoints) {
-      dataPoints.shift();
-      labels.shift();
+      dataPoints.shift()
+      labels.shift()
     }
-    dataPoints.push(stockData.stock.latestQuote.currentPrice);
+    dataPoints.push(stockData.stock.latestQuote.currentPrice)
     labels.push('0')
     if (lineChart.value) {
-      lineChart.value.chart.update();
+      lineChart.value.chart.update()
     } else {
       console.log("Instanz ist null")
     }
   } catch (e) {
-    console.error(e);
+    console.error(e)
   }
 }
 
@@ -202,14 +202,14 @@ onBeforeMount(async () => {
 
   try {
     const response = await
-      fetch(`/api/stock-details/symbol?symbol=${stockSymbol}&investmentAccountId=${investmentAccountId}`);
+      fetch(`/api/stock-details/symbol?symbol=${stockSymbol}&investmentAccountId=${investmentAccountId}`)
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
     stockDetails.value = await response.json() as StockDetails
 
   } catch (e) {
-    console.error(e);
+    console.error(e)
   }
 
   await fetchLastMinutes(1)
@@ -233,13 +233,13 @@ function sell(symbol: string) {
   const route = useRoute()
   const investmentAccountId = route.params.investmentAccountId
 
-  router.push({name: 'order-management-sell', params: {symbol, investmentAccountId}});
+  router.push({name: 'order-management-sell', params: {symbol, investmentAccountId}})
 }
 
 function purchase(symbol: string) {
   const route = useRoute()
   const investmentAccountId = route.params.investmentAccountId
-  router.push({name: 'order-management-buy', params: {symbol, investmentAccountId}});
+  router.push({name: 'order-management-buy', params: {symbol, investmentAccountId}})
 }
 
 async function fetchLastMinutes(min: number) {
@@ -247,27 +247,27 @@ async function fetchLastMinutes(min: number) {
   const stockSymbol = route.params.symbol
 
   try {
-    const response = await fetch(`/api/stock/history/symbol?symbol=${stockSymbol}&from=${getDateTimeByOffset(min, 0)}&to=${getDateTimeByOffset(0, 0)}` );
+    const response = await fetch(`/api/stock/history/symbol?symbol=${stockSymbol}&from=${getDateTimeByOffset(min, 0)}&to=${getDateTimeByOffset(0, 0)}` )
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
     const history = await response.json() as Quote[]
     numDataPoints = history.length
-    const prices = history.map(quote => quote.currentPrice);
+    const prices = history.map(quote => quote.currentPrice)
 
     for(let price of prices) {
       while(dataPoints.length >= numDataPoints) {
-        dataPoints.shift();
-        labels.shift();
+        dataPoints.shift()
+        labels.shift()
       }
-      dataPoints.push(price);
+      dataPoints.push(price)
       labels.push('0')
     }
     if (lineChart.value) {
-      lineChart.value.chart.update();
+      lineChart.value.chart.update()
     }
   } catch (e) {
-    console.error(e);
+    console.error(e)
   }
   const seconds = dataPoints.length
   const minutes = seconds / 60
@@ -282,33 +282,33 @@ async function fetchAveragePrice(m: number, s: number, m1: number, s1: number) {
   const stockSymbol = route.params.symbol
 
   try {
-    const response = await fetch(`/api/stock/average-price?symbol=${stockSymbol}&from=${getDateTimeByOffset(m, s)}&to=${getDateTimeByOffset(m1, s1)}`);
+    const response = await fetch(`/api/stock/average-price?symbol=${stockSymbol}&from=${getDateTimeByOffset(m, s)}&to=${getDateTimeByOffset(m1, s1)}`)
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
-    const averagePriceText = await response.text();
+    const averagePriceText = await response.text()
     averagePrice.value = parseFloat(averagePriceText)
     while(averagePriceData.length >= numDataPoints) {
       averagePriceData.shift()
     }
     averagePriceData.push(averagePrice.value)
   } catch (e) {
-    console.error(e);
+    console.error(e)
   }
 }
 
 function getDateTimeByOffset(m: number, s: number) {
-  const now = new Date();
-  now.setSeconds(now.getSeconds() - s);
-  now.setMinutes(now.getMinutes() - m);
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const now = new Date()
+  now.setSeconds(now.getSeconds() - s)
+  now.setMinutes(now.getMinutes() - m)
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  const hours = String(now.getHours()).padStart(2, '0')
+  const minutes = String(now.getMinutes()).padStart(2, '0')
+  const seconds = String(now.getSeconds()).padStart(2, '0')
 
-  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`
 }
 
 </script>

@@ -2,6 +2,7 @@
   <div class="invest-depot">
     <div>
       <h1>Wertpapiere</h1>
+      <div><!--Leeres Element für Grid--></div>
       <div id="searchField">
         <input v-model="search" placeholder="Symbol/Name"/>
         <button class="details-button" @click="resetSearch">Reset</button>
@@ -85,9 +86,9 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, onUnmounted, ref} from 'vue';
-import {useRoute, useRouter} from "vue-router";
-import type {Stock} from "@/types/types.ts";
+import {computed, onMounted, onUnmounted, ref} from 'vue'
+import {useRoute, useRouter} from "vue-router"
+import type {Stock} from "@/types/types.ts"
 
 const router = useRouter()
 const route = useRoute()
@@ -107,22 +108,22 @@ const filteredStocks = computed(() =>
 const favoriteStocks = ref<Stock[]>([])
 
 function hoverFavorite(stock: Stock) {
-  stock.tempFavoriteIcon = stock.isFavorite ? '/favorite.png' : '/noFavorite.png';
+  stock.tempFavoriteIcon = stock.isFavorite ? '/favorite.png' : '/noFavorite.png'
 }
 
 function leaveFavorite(stock: Stock) {
-  stock.tempFavoriteIcon = "";
+  stock.tempFavoriteIcon = ""
 }
 
 async function poll() {
   // stocks
   for (const stock of stocks.value) {
     try {
-      const response = await fetch(`/api/stock/by/symbol?symbol=${stock.symbol}&investmentAccountId=${investmentAccountId}`);
+      const response = await fetch(`/api/stock/by/symbol?symbol=${stock.symbol}&investmentAccountId=${investmentAccountId}`)
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
-      const stockData = await response.json() as Stock;
+      const stockData = await response.json() as Stock
 
       if (stock.latestQuote.currentPrice !== stockData.latestQuote.currentPrice) {
         stock.latestQuote.currentPrice = stockData.latestQuote.currentPrice
@@ -131,11 +132,11 @@ async function poll() {
         stock.justChanged = true
 
         setTimeout(() => {
-          stock.justChanged = false;
-        }, 200);
+          stock.justChanged = false
+        }, 200)
       }
     } catch (e) {
-      console.error(e);
+      console.error(e)
     }
   }
 }
@@ -143,26 +144,26 @@ async function poll() {
 async function pollFavoriteStocks() {
   if (investmentAccountId) {
     try {
-      const response = await fetch(`/api/favorites?investmentAccountId=${investmentAccountId}`);
-      const newFavorites = await response.json() as Stock[];
+      const response = await fetch(`/api/favorites?investmentAccountId=${investmentAccountId}`)
+      const newFavorites = await response.json() as Stock[]
 
       // Remove favourites that are no longer included in the response
-      favoriteStocks.value = favoriteStocks.value.filter(favoriteStock => newFavorites.includes(favoriteStock));
+      favoriteStocks.value = favoriteStocks.value.filter(favoriteStock => newFavorites.includes(favoriteStock))
       // Update stocks
       for (const stock of newFavorites) {
-        const existingStock = favoriteStocks.value.find(oldFavoriteStock => oldFavoriteStock.symbol === stock.symbol);
-        const stockResponse = await fetch(`/api/stock/by/symbol?symbol=${stock.symbol}&investmentAccountId=${investmentAccountId}`);
-        const stockData = await stockResponse.json() as Stock;
+        const existingStock = favoriteStocks.value.find(oldFavoriteStock => oldFavoriteStock.symbol === stock.symbol)
+        const stockResponse = await fetch(`/api/stock/by/symbol?symbol=${stock.symbol}&investmentAccountId=${investmentAccountId}`)
+        const stockData = await stockResponse.json() as Stock
 
         if (existingStock) {
-          const index = favoriteStocks.value.indexOf(existingStock);
-          favoriteStocks.value[index] = stockData;
+          const index = favoriteStocks.value.indexOf(existingStock)
+          favoriteStocks.value[index] = stockData
         } else {
-          favoriteStocks.value.push(stockData);
+          favoriteStocks.value.push(stockData)
         }
       }
     } catch (error) {
-      console.error('Fehler beim Abrufen der Favoriten:', error);
+      console.error('Fehler beim Abrufen der Favoriten:', error)
     }
   }
 }
@@ -187,9 +188,9 @@ function sortByName() {
     priceDescending.value = false
   }
   if (nameDescending.value) {
-    stocks.value = [...stocks.value].sort((a, b) => a.name.localeCompare(b.name));
+    stocks.value = [...stocks.value].sort((a, b) => a.name.localeCompare(b.name))
   } else {
-    stocks.value = [...stocks.value].sort((a, b) => b.name.localeCompare(a.name));
+    stocks.value = [...stocks.value].sort((a, b) => b.name.localeCompare(a.name))
   }
 }
 
@@ -231,7 +232,7 @@ function resetSearch() {
 }
 
 const navigateToStockDetail = (symbol: string, investmentAccountId: string) => {
-  router.push({name: 'wertpapier-detail', params: {symbol, investmentAccountId}});
+  router.push({name: 'wertpapier-detail', params: {symbol, investmentAccountId}})
 }
 
 async function toggleFavorite(stock: Stock) {
@@ -254,12 +255,12 @@ async function toggleFavorite(stock: Stock) {
     })
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
 
-    stock.isFavorite = !stock.isFavorite;
+    stock.isFavorite = !stock.isFavorite
   } catch (error) {
-    console.error('Error toggling favorite:', error);
+    console.error('Error toggling favorite:', error)
   }
 }
 

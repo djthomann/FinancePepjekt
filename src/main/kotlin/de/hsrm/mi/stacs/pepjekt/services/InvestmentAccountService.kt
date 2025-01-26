@@ -2,12 +2,12 @@ package de.hsrm.mi.stacs.pepjekt.services
 
 import de.hsrm.mi.stacs.pepjekt.ROUNDING_NUMBER_TO_DECIMAL_PLACE
 import de.hsrm.mi.stacs.pepjekt.entities.InvestmentAccount
-import de.hsrm.mi.stacs.pepjekt.entities.Owner
 import de.hsrm.mi.stacs.pepjekt.entities.PortfolioEntry
 import de.hsrm.mi.stacs.pepjekt.entities.StockQuote
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.*
 import de.hsrm.mi.stacs.pepjekt.handler.FinnhubHandler
 import de.hsrm.mi.stacs.pepjekt.repositories.*
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.publisher.Flux
@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.util.function.*
 import java.math.BigDecimal
 import java.math.RoundingMode
+import kotlin.math.log
 
 /**
  * Service for managing investment accounts, including buying and selling stocks,
@@ -35,6 +36,8 @@ class InvestmentAccountService(
     val latestIStockQuoteRepository: IStockQuoteLatestRepository,
     val quoteRepository: IStockQuoteRepository
 ) : IInvestmentAccountService {
+
+    private val logger = LoggerFactory.getLogger(InvestmentAccountService::class.java)
 
     /**
      * Buys a stock and updates the investment account portfolio and linked bank account.
@@ -62,6 +65,8 @@ class InvestmentAccountService(
     override fun buyStock(
         investmentAccountId: Long, stockSymbol: String, purchaseAmount: BigDecimal
     ): Mono<InvestmentAccount> {
+        logger.info("Buying stock with symbol {} for investment account with id {} and amount {}", stockSymbol, investmentAccountId, purchaseAmount)
+
         return investmentAccountRepository.findById(investmentAccountId)
             .switchIfEmpty(Mono.error(IllegalArgumentException("Investment account not found")))
             .flatMap { investmentAccount ->
@@ -79,6 +84,8 @@ class InvestmentAccountService(
      * Fetches the stock quote for the given stock symbol.
      */
     private fun fetchStockQuote(stockSymbol: String): Mono<StockQuote> {
+        logger.debug("Fetching stock quote for stock with symbol")
+
         return latestIStockQuoteRepository.findById(stockSymbol)
             .switchIfEmpty(Mono.error(IllegalArgumentException("Stock quote not found")))
             .flatMap { latestStockQuote ->
@@ -96,7 +103,12 @@ class InvestmentAccountService(
         purchaseAmount: BigDecimal,
         quote: StockQuote
     ): Mono<PortfolioEntry> {
+        logger.info("Updating the portfolio of the investment account with id {} and stock with the symbol {}, purchase amount {} and quote {}", investmentAccountId, stockSymbol, purchaseAmount, quote)
+
         val calculatedVolume = calculateVolume(purchaseAmount, quote.currentPrice)
+
+        logger.info("Calculated volume for investment account {} update: {}", investmentAccountId, calculatedVolume)
+
         return portfolioEntryRepository.findByInvestmentAccountIdAndStockSymbol(investmentAccountId, stockSymbol)
             .flatMap { existingEntry ->
                 updateExistingPortfolioEntry(existingEntry, calculatedVolume, purchaseAmount)
@@ -119,6 +131,7 @@ class InvestmentAccountService(
         calculatedVolume: BigDecimal,
         purchaseAmount: BigDecimal
     ): Mono<PortfolioEntry> {
+        logger.info("Updating existing portfolio entry with id {}, volume {} and purchase amount {}", existingEntry.id, calculatedVolume, purchaseAmount)
         val updatedQuantity = existingEntry.quantity + calculatedVolume.toDouble()
         val updatedEntry = existingEntry.copy(
             quantity = updatedQuantity,
@@ -142,6 +155,7 @@ class InvestmentAccountService(
             quantity = calculatedVolume.toDouble(),
             totalInvestAmount = purchaseAmount
         )
+        logger.info("Created new portfolio entry with id {}, stock with the symbol {}, calculated volume {} and purchase amount {}: {}", investmentAccountId, stockSymbol, calculatedVolume, purchaseAmount, newEntry)
         return portfolioEntryRepository.save(newEntry).`as`(operator::transactional)
     }
 
@@ -152,6 +166,8 @@ class InvestmentAccountService(
         investmentAccount: InvestmentAccount,
         purchaseAmount: BigDecimal
     ): Mono<InvestmentAccount> {
+        logger.info("Updating bank account for purchase in investment account {} with purchase amount {}", investmentAccount, purchaseAmount)
+
         return bankAccountRepository.findById(investmentAccount.bankAccountId!!)
             .flatMap { bankAccount ->
                 val updatedBalance = bankAccount.balance.minus(purchaseAmount)
@@ -196,6 +212,8 @@ class InvestmentAccountService(
     override fun sellStock(
         investmentAccountId: Long, stockSymbol: String, volume: Double
     ): Mono<InvestmentAccount> {
+        logger.info("Selling stock volume {} in investment account id {} and for stock with symbol {}", volume, investmentAccountId, stockSymbol)
+
         return investmentAccountRepository.findById(investmentAccountId)
             .switchIfEmpty(Mono.error(IllegalArgumentException("Investment account not found")))
             .flatMap { investmentAccount ->
@@ -222,6 +240,8 @@ class InvestmentAccountService(
     private fun processStockSale(
         investmentAccount: InvestmentAccount, stockSymbol: String, volume: Double
     ): Mono<InvestmentAccount> {
+        logger.info("Processing stock sale for investment account {}", investmentAccount)
+
         return portfolioEntryRepository.findByInvestmentAccountIdAndStockSymbol(investmentAccount.id!!, stockSymbol)
             .switchIfEmpty(Mono.error(IllegalArgumentException("Stock not found in portfolio")))
             .flatMap { existingEntry ->
@@ -251,6 +271,7 @@ class InvestmentAccountService(
     private fun performStockSale(
         existingEntry: PortfolioEntry, investmentAccount: InvestmentAccount, volume: Double, quote: StockQuote
     ): Mono<InvestmentAccount> {
+        logger.info("Performing stock sale for investment account {} with portfolio entry {} and quote {}", investmentAccount, existingEntry, quote)
         val newQuantity = existingEntry.quantity - volume
         val investReduction = calculateInvestReduction(existingEntry, volume)
         val newTotalInvestAmount = existingEntry.totalInvestAmount.subtract(investReduction)
@@ -308,6 +329,8 @@ class InvestmentAccountService(
      * @return a [Mono] emitting the [InvestmentAccount] containing the portfolio, or an error if not found
      */
     override fun getInvestmentAccountPortfolio(investmentAccountId: Long): Mono<InvestmentAccountDTO> {
+        logger.debug("Fetching portfolio for InvestmentAccount with ID: {}", investmentAccountId)
+
         // 1. Load Investmentaccount
         val accountMono = investmentAccountRepository.findById(investmentAccountId)
             .switchIfEmpty(Mono.error(RuntimeException("InvestmentAccount not found")))
@@ -347,7 +370,14 @@ class InvestmentAccountService(
         val totalValue = calculateInvestmentAccountTotalValueAsync(portfolioMono)
 
         // Combine all and create InvestmentAccountDTO
-        return Mono.zip(accountMono, ownerMono, bankAccountMono, portfolioMono, totalValue).map { tuple ->
+        return Mono.zip(accountMono, ownerMono, bankAccountMono, portfolioMono, totalValue)
+            .doOnSuccess { tuple ->
+                logger.info("Successfully fetched data for InvestmentAccount with ID: {}", investmentAccountId)
+            }
+            .doOnError { error ->
+                logger.error("Error combining data for InvestmentAccount with ID: {}", investmentAccountId, error)
+            }
+            .map { tuple ->
             val account = tuple.component1()
             val owner = tuple.component2()
             val bankAccount = tuple.component3()
@@ -356,7 +386,7 @@ class InvestmentAccountService(
 
             val roundedPortfolioTotalValue = portfolioTotalValue.setScale(2, RoundingMode.HALF_UP)
 
-            InvestmentAccountDTO.mapToDto(account.id!!, bankAccount, owner, portfolio, roundedPortfolioTotalValue)
+                InvestmentAccountDTO.mapToDto(account.id!!, bankAccount, owner, portfolio, roundedPortfolioTotalValue)
         }
     }
 
@@ -367,6 +397,19 @@ class InvestmentAccountService(
         return investmentAccountRepository.findById(investmentAccountId)
     }
 
+    /**
+     * Returns the id of the bank account connected to the investment account
+     */
+    override fun getBankAccountId(investmentAccountId: Long): Mono<Long> {
+        return getInvestmentAccount(investmentAccountId)
+            .flatMap { account ->
+                Mono.just(account.bankAccountId!!)
+            }
+    }
+
+    /**
+     * Returns the calculated total value of an investment account's portfolio entries
+     */
     private fun calculateInvestmentAccountTotalValueAsync(portfolioMono: Mono<List<PortfolioEntryDTO>>): Mono<BigDecimal> {
         return portfolioMono.flatMap { portfolioEntries ->
             Flux.fromIterable(portfolioEntries).flatMap { entry ->

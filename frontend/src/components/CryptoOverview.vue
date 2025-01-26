@@ -2,6 +2,7 @@
   <div class="invest-depot">
     <div>
       <h1>Kryptowährungen</h1>
+      <div><!--Leeres Element für Grid--></div>
       <div id="searchField">
         <input v-model="search" placeholder="Symbol/Name" />
         <button class="details-button" @click="resetSearch">Reset</button>
@@ -32,9 +33,9 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, onUnmounted, ref} from "vue";
-import {Coin} from "@/types/types.ts";
-import {useRouter} from "vue-router";
+import {computed, onMounted, onUnmounted, ref} from "vue"
+import {Coin} from "@/types/types.ts"
+import {useRouter} from "vue-router"
 
 const router = useRouter()
 let pollingIntervalID: number
@@ -48,7 +49,7 @@ const filteredCoins = computed(() =>
   coins.value.filter(coin => {
     return coin.symbol.toLowerCase().includes(search.value.toLowerCase()) || coin.name.toLowerCase().includes(search.value.toLowerCase())
   })
-);
+)
 
 function resetSearch() {
   search.value = ''
@@ -60,21 +61,21 @@ async function poll() {
 
   for (const coin of coins.value) {
     try {
-      const response = await fetch(`/api/crypto?symbol=${coin.symbol}`);
+      const response = await fetch(`/api/crypto?symbol=${coin.symbol}`)
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
-      const cryptoData = await response.json() as Coin;
+      const cryptoData = await response.json() as Coin
       if(coin.currentPrice !== cryptoData.currentPrice) {
         coin.currentPrice = cryptoData.currentPrice
         coin.justChanged = true
 
         setTimeout(() => {
-          coin.justChanged = false;
-        }, 200);
+          coin.justChanged = false
+        }, 200)
       }
     } catch (e) {
-      console.error(e);
+      console.error(e)
     }
 
   }
@@ -100,9 +101,9 @@ function sortByName() {
     priceDescending.value = false
   }
   if(nameDescending.value) {
-    coins.value = [...coins.value].sort((a, b) => a.name.localeCompare(b.name));
+    coins.value = [...coins.value].sort((a, b) => a.name.localeCompare(b.name))
   } else {
-    coins.value = [...coins.value].sort((a, b) => b.name.localeCompare(a.name));
+    coins.value = [...coins.value].sort((a, b) => b.name.localeCompare(a.name))
   }
 }
 
@@ -128,7 +129,7 @@ onUnmounted( () => {
 
 const navigateToCryptoDetail = (symbol: string) => {
   console.log("Trying to navigate")
-  router.push({name: 'krypto-detail', params: {symbol}});
+  router.push({name: 'krypto-detail', params: {symbol}})
 }
 
 </script>

@@ -82,9 +82,6 @@ class InvestmentAccountServiceTest {
 
     private fun createStock(symbol: String) = Stock(symbol, "Apple Inc.", "BBG000B9XRY4", "figi", Currency.USD)
 
-    /**
-     * Create a [StockQuote]
-     */
     private fun createStockQuote(stockSymbol: String, price: BigDecimal) = StockQuote(
         currentPrice = price,
         timeStamp = LocalDateTime.now().minusDays(1),
@@ -135,6 +132,9 @@ class InvestmentAccountServiceTest {
         `when`(stockService.getLatestQuoteBySymbol("AAPL")).thenReturn(Mono.just(stockQuote))
     }
 
+    /**
+     * Mocks the transactional operator for [InvestmentAccountService]
+     */
     private fun mockTransactionalOperator() {
         `when`(operator.transactional(any(Mono::class.java))).thenAnswer { invocation ->
             invocation.getArgument<Mono<PortfolioEntry>>(0)
@@ -248,7 +248,6 @@ class InvestmentAccountServiceTest {
 
     @Test
     fun `test sellStock throws error when stock not found in portfolio`() {
-        // Arrange
         val investmentAccountId = 1L
         val stockSymbol = "AAPL"
         val volume = 5.0

@@ -54,8 +54,9 @@ class RouterConfig {
      */
     @Bean
     fun bankAccountRouter(bankAccountHandler: BankAccountHandler) = router {
-        "/api".nest {
+        "/api/bankaccount".nest {
             GET("/balance", bankAccountHandler::getBalance)
+            POST("/deposit", bankAccountHandler::handleDeposit)
         }
     }
 
@@ -69,7 +70,7 @@ class RouterConfig {
     fun investmentAccountRouter(investmentAccountHandler: InvestmentAccountHandler) = router {
         "/api".nest {
             GET("/portfolio", investmentAccountHandler::getPortfolio)
-            GET("/portfolio/totalValue", investmentAccountHandler::getPortfolioTotalValue)
+            GET("/bankaccount", investmentAccountHandler::getBankAccount)
         }
     }
 
@@ -85,10 +86,6 @@ class RouterConfig {
             GET("/stocks", stockHandler::getStocks)
             GET("/stock-details/symbol", stockHandler::getStockDetailsBySymbol)
             GET("/stock/by/symbol", stockHandler::getStockBySymbol)
-            //GET("/stock/by/name", stockHandler::getStockByName)
-            GET("/stock/current-value", stockHandler::getCurrentStockValue) // by stock symbol
-            GET("/stock/day-low", stockHandler::getStockDayLow)
-            GET("/stock/day-high", stockHandler::getStockDayHigh)
             GET("/stock/history/symbol", stockHandler::getStockHistoryBySymbol)
             GET("/stock/average-price", stockHandler::getStockAveragePrice)
         }

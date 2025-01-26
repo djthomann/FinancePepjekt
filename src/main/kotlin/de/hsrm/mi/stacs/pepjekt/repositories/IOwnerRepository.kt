@@ -6,5 +6,4 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface IOwnerRepository : R2dbcRepository<Owner, Long> {
-
 }

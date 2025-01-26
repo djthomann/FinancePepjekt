@@ -30,6 +30,9 @@ class CryptoServiceTest {
     private lateinit var cryptoQuote: CryptoQuote
     private lateinit var cryptoQuoteLatest: CryptoQuoteLatest
 
+    /**
+     * Initializes the test environment by setting up mock data and dependencies.
+     */
     @BeforeEach
     fun setUp() {
         crypto = Crypto(symbol = "BTC", name = "Bitcoin")

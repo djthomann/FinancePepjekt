@@ -16,26 +16,31 @@ import java.time.LocalDateTime
 @Component
 class ScheduledOrderExecutor(val orderService: IOrderService) {
 
-    val log: Logger = LoggerFactory.getLogger(ScheduledOrderExecutor::class.java)
+    val logger: Logger = LoggerFactory.getLogger(ScheduledOrderExecutor::class.java)
 
+    /**
+     * Schedules periodic execution of order processing tasks every 5 seconds.
+     * Logs the progress, success, and any error encountered during order processing.
+     * The process will continue even if there are errors, and these errors will be logged.
+     */
     @PostConstruct
     fun scheduleOrderExecution() {
         Flux.interval(Duration.ofSeconds(5))
             .flatMap {
-                log.info("Processing order...")
+                logger.debug("Processing order...")
 
                 orderService.processOrders()
-                    .doOnTerminate { log.info("Finished processing orders.") }
-                    .doOnError { error -> log.error("Error in processOrders: ${error.message}", error) }
+                    .doOnTerminate { logger.debug("Finished processing orders.") }
+                    .doOnError { error -> logger.error("Error in processOrders: ${error.message}", error) }
             }.onErrorContinue { error, _ ->
-                log.error("Error in scheduler: ${error.message}", error)
+                logger.error("Error in scheduler: ${error.message}", error)
             }
             .subscribe(
                 {
-                    log.info("Orders processed successfully at ${LocalDateTime.now()}")
+                    logger.debug("Orders processed successfully at {}", LocalDateTime.now())
                 },
                 { error ->
-                    log.error("Error processing orders: ${error.message}")
+                    logger.error("Error processing orders: ${error.message}")
                 }
             )
     }

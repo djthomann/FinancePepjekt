@@ -1,4 +1,4 @@
-package de.hsrm.mi.stacs.pepjekt.controller
+package de.hsrm.mi.stacs.pepjekt.entities.dtds
 
 data class MarketStatusDTD(
     var exchange: String,

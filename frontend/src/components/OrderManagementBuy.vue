@@ -26,74 +26,75 @@
 </template>
 
 <script lang="ts" setup>
-import {onBeforeMount, ref} from 'vue';
-import {useRoute} from 'vue-router';
-import type {Stock} from '@/types/types.ts';
+import {onBeforeMount, ref} from 'vue'
+import {useRoute} from 'vue-router'
+import type {Stock} from '@/types/types.ts'
 
 // Daten und Referenzen
-const stock = ref<Stock>({});
-const purchaseAmount = ref<number>();
-const serverResponse = ref<string>();
+const stock = ref<Stock>({})
+const purchaseAmount = ref<number>()
+const serverResponse = ref<string>()
 
-const date = ref(getTodayDate());
-const time = ref("00:00");
+const date = ref(getTodayDate())
+const time = ref("00:00")
 
-const route = useRoute();
+const route = useRoute()
+const investmentAccountId = route.params.investmentAccountId
 
 onBeforeMount(async () => {
-  const symbol = route.params.symbol;
+  const symbol = route.params.symbol
 
   try {
-    const response = await fetch(`/api/stock/by/symbol?symbol=${symbol}`);
+    const response = await fetch(`/api/stock/by/symbol?symbol=${symbol}&investmentAccountId=${investmentAccountId}`)
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
-    stock.value = await response.json() as Stock;
+    stock.value = await response.json() as Stock
   } catch (e) {
-    console.error(e);
+    console.error(e)
   }
-});
+})
 
 async function purchase() {
-  const route = useRoute();
-  const stockSymbol = Array.isArray(route.params.symbol) ? route.params.symbol[0] : route.params.symbol;
+  const route = useRoute()
+  const stockSymbol = Array.isArray(route.params.symbol) ? route.params.symbol[0] : route.params.symbol
   const investmentAccountId = Array.isArray(route.params.investmentAccountId)
     ? route.params.investmentAccountId[0]
-    : route.params.investmentAccountId;
+    : route.params.investmentAccountId
 
-  const executionTime = `${date.value}T${time.value}`;
+  const executionTime = `${date.value}T${time.value}`
 
-  const baseUrl = "/api/placeBuyOrder";
+  const baseUrl = "/api/placeBuyOrder"
   const queryParams = new URLSearchParams({
     investmentAccountId: investmentAccountId,
     stockSymbol: stockSymbol,
     purchaseAmount: purchaseAmount.value!.toString(),
     executionTime,
-  }).toString();
+  }).toString()
 
-  const requestUrl = `${baseUrl}?${queryParams}`;
+  const requestUrl = `${baseUrl}?${queryParams}`
 
   try {
-    const response = await fetch(requestUrl, {method: "POST"});
+    const response = await fetch(requestUrl, {method: "POST"})
 
     if (!response.ok) {
-      serverResponse.value = "Error: Order invalid";
-      throw new Error("Network response was not ok");
+      serverResponse.value = "Error: Order invalid"
+      throw new Error("Network response was not ok")
     }
 
-    serverResponse.value = "Success: Buy order placed";
+    serverResponse.value = "Success: Buy order placed"
   } catch (error) {
-    serverResponse.value = "Server Error: Order not placed";
-    console.error("Error: Order not placed", error);
+    serverResponse.value = "Server Error: Order not placed"
+    console.error("Error: Order not placed", error)
   }
 }
 
 function getTodayDate() {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 </script>
 

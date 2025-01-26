@@ -1,13 +1,21 @@
 <template>
   <div class="invest-depot">
+    <h1>Investment-Depot</h1>
     <div class="header">
-      <div class="title">
-        <h1>Investment-Depot</h1>
-        <p v-if="investmentAccount && investmentAccount.owner">{{ investmentAccount.owner.name }}</p>
+      <div class="info-box">
+        <h3>Kundeninformationen:</h3>
+        <p v-if="investmentAccount && investmentAccount.owner"><strong>{{ investmentAccount.owner.name }}</strong></p>
         <p v-if="investmentAccount && investmentAccount.owner">{{ investmentAccount.owner.mail }}</p>
       </div>
-      <div class="total-value" v-if="investmentAccount && investmentAccount.owner">
-        <p>Depotwert: <strong>{{ totalValue }} USD</strong></p>
+      <div class="info-box bankaccount-info">
+        <h3>Bankguthaben:</h3>
+        <p><strong>{{ bankAccountBalance }} USD</strong></p>
+        <input @keyup.enter="deposit" v-model="depositAmount" name="increase-balance" type="number" placeholder="Aufladen">
+        <p>{{depositServerAnswer}}</p>
+      </div>
+      <div class="info-box total-value" v-if="investmentAccount && investmentAccount.owner">
+        <h3>Depotwert:</h3>
+        <p><strong>{{ totalValue }} USD</strong></p>
         <p :class="{ 'positive':totalProfitAndLossPercent >= 0, 'negative': totalProfitAndLossPercent < 0 }">
           {{ totalProfitAndLoss }} ({{ totalProfitAndLossPercent }}%)
         </p>
@@ -47,9 +55,9 @@
 </template>
 
 <script lang="ts" setup>
-import {useRoute, useRouter} from "vue-router";
-import type {InvestmentAccount} from "@/types/types.ts";
-import {onBeforeMount, onUnmounted, ref} from 'vue';
+import {useRoute, useRouter} from "vue-router"
+import type {InvestmentAccount} from "@/types/types.ts"
+import {onBeforeMount, onUnmounted, ref} from 'vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -59,6 +67,10 @@ const totalProfitAndLoss = ref<number>(0)
 const totalProfitAndLossPercent = ref<number>(0)
 let pollingIntervalID: number
 const investmentAccountId = route.params.investmentAccountId as string
+const bankAccountId = ref<number>()
+const bankAccountBalance = ref<number>()
+const depositAmount = ref<number>()
+const depositServerAnswer = ref<string>('')
 
 onBeforeMount(async () => {
   try {
@@ -77,18 +89,33 @@ onBeforeMount(async () => {
     console.error(e)
   }
 
+  // Get corresponding bankAccountId for investment account
+  try {
+    const response = await fetch(`/api/bankaccount?investmentAccountId=${investmentAccountId}`)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    const result = await response.json() as number
+    bankAccountId.value = result
+  } catch (e) {
+    console.error(e)
+  }
+
+  // Get bankAccount balance
+  await fetchBankAccountBalance()
+
   pollingIntervalID = setInterval(poll, 3000)
 })
 
 async function poll() {
-  console.log("polling");
+  console.log("polling")
 
   try {
-    const response = await fetch(`/api/portfolio?investmentAccountId=${investmentAccountId}`);
+    const response = await fetch(`/api/portfolio?investmentAccountId=${investmentAccountId}`)
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
-    const investmentAccountData = (await response.json()) as InvestmentAccount;
+    const investmentAccountData = (await response.json()) as InvestmentAccount
     totalValue.value = investmentAccountData.totalValue
     totalProfitAndLoss.value = investmentAccountData.totalProfitAndLoss
     totalProfitAndLossPercent.value = investmentAccountData.totalProfitAndLossPercent
@@ -96,23 +123,60 @@ async function poll() {
     for (const portfolioEntry of investmentAccount.value!.portfolio) {
       const matchingEntry = investmentAccountData.portfolio.find(
         (entry) => portfolioEntry.id === entry.id
-      );
+      )
 
       if (matchingEntry && portfolioEntry.stock.latestQuote.currentPrice !== matchingEntry.stock.latestQuote.currentPrice) {
-        portfolioEntry.stock.latestQuote.currentPrice = matchingEntry.stock.latestQuote.currentPrice;
+        portfolioEntry.stock.latestQuote.currentPrice = matchingEntry.stock.latestQuote.currentPrice
         portfolioEntry.totalValue = matchingEntry.totalValue
         portfolioEntry.quantity = matchingEntry.quantity
         portfolioEntry.profitAndLoss = matchingEntry.profitAndLoss
         portfolioEntry.profitAndLossPercent = matchingEntry.profitAndLossPercent
-        portfolioEntry.stock.justChanged = true;
+        portfolioEntry.stock.justChanged = true
 
         setTimeout(() => {
-          portfolioEntry.stock.justChanged = false;
-        }, 200);
+          portfolioEntry.stock.justChanged = false
+        }, 200)
       }
     }
   } catch (e) {
-    console.error(e);
+    console.error(e)
+  }
+
+  await fetchBankAccountBalance()
+}
+
+async function deposit() {
+
+  console.log("Depositing: " + depositAmount.value)
+
+  try {
+    const url = `/api/bankaccount/deposit?bankAccountId=${bankAccountId.value}&amount=${depositAmount.value}`
+    const response = await fetch(url, {method: "POST"})
+
+    if (!response.ok) {
+      serverResponse.value = "Error: Order invalid"
+      throw new Error("Network response was not ok")
+    }
+
+    depositServerAnswer.value = "Success: Deposit done"
+  } catch (error) {
+    depositServerAnswer.value = "Error: Deposit failed"
+    console.error("Error: Order not placed", error)
+  }
+
+  await fetchBankAccountBalance()
+}
+
+async function fetchBankAccountBalance() {
+  try {
+    const response = await fetch(`/api/bankaccount/balance?bankAccountId=${bankAccountId.value}`)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    const result = await response.json() as number
+    bankAccountBalance.value = result
+  } catch (e) {
+    console.error(e)
   }
 }
 
@@ -123,7 +187,7 @@ onUnmounted(() => {
 
 
 const navigateToStockDetail = (symbol: string, investmentAccountId: string) => {
-  router.push({name: 'wertpapier-detail', params: {symbol, investmentAccountId}});
+  router.push({name: 'wertpapier-detail', params: {symbol, investmentAccountId}})
 }
 
 
@@ -139,4 +203,6 @@ const navigateToStockDetail = (symbol: string, investmentAccountId: string) => {
 .table-row {
   transition: background-color 200ms;
 }
+
+
 </style>

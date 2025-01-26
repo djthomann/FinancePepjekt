@@ -7,9 +7,20 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import reactor.core.publisher.Mono
+import org.slf4j.LoggerFactory
 
+/**
+ * Handler responsible for managing requests related to cryptocurrency operations.
+ *
+ * This component provides endpoints to fetch details about cryptocurrencies,
+ * such as retrieving a specific cryptocurrency by its symbol or fetching all available cryptocurrencies.
+ *
+ * @param cryptoService The service used to interact with cryptocurrency-related data.
+ */
 @Component
 class CryptoHandler(private val cryptoService: ICryptoService) {
+
+    private val logger = LoggerFactory.getLogger(CryptoHandler::class.java)
 
     /**
      * Handles a request to retrieve a crypto by its key (symbol)
@@ -23,8 +34,12 @@ class CryptoHandler(private val cryptoService: ICryptoService) {
     fun getCryptoBySymbol(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
 
+        logger.info("Received request to fetch crypto by symbol: $symbol")
+
         return cryptoService.getCryptoBySymbol(symbol)
             .flatMap { crypto ->
+                logger.info("Found crypto: ${crypto.symbol} - ${crypto.name}")
+
                 cryptoService.getLatestCryptoQuote(symbol)
                     .map { quote ->
                         CryptoDTO(crypto.symbol, crypto.name, quote.currentPrice)
@@ -46,7 +61,6 @@ class CryptoHandler(private val cryptoService: ICryptoService) {
      * @throws IllegalArgumentException If the investmentAccountId is missing.
      */
     fun getCryptos(request: ServerRequest): Mono<ServerResponse> {
-
         return ServerResponse.ok().body(cryptoService.getAllCryptos(), Crypto::class.java)
             .switchIfEmpty(ServerResponse.noContent().build())
     }
