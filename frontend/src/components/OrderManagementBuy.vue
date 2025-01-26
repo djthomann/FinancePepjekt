@@ -1,9 +1,19 @@
 <template>
   <div class="stock-order">
     <h2>{{ stock.name }} - Kaufansicht</h2>
-    <p><strong>FIGI:</strong> {{ stock.figi }}</p>
-    <p><strong>Aktueller Wert:</strong> {{ stock.latestQuote.currentPrice }} €</p>
+    <div id="info">
 
+      <div>
+        <p><strong>FIGI:</strong> {{ stock.figi }}</p>
+        <p><strong>Aktueller Wert:</strong> {{ stock.latestQuote.currentPrice }} €</p>
+
+      </div>
+      <div class="info-box bankaccount-info">
+        <h3>Bankguthaben:</h3>
+        <p><strong>{{ bankAccountBalance }} USD</strong></p>
+      </div>
+
+    </div>
     <div>
       <form @submit.prevent="purchase">
         <!--  <label for="amount">Anzahl</label>
@@ -28,7 +38,7 @@
 <script lang="ts" setup>
 import {onBeforeMount, ref} from 'vue'
 import {useRoute} from 'vue-router'
-import type {Stock} from '@/types/types.ts'
+import type {InvestmentAccount, Stock} from '@/types/types.ts'
 
 // Daten und Referenzen
 const stock = ref<Stock>({})
@@ -40,6 +50,9 @@ const time = ref("00:00")
 
 const route = useRoute()
 const investmentAccountId = route.params.investmentAccountId
+const investmentAccount = ref<InvestmentAccount>()
+const bankAccountId = ref<number>()
+const bankAccountBalance = ref<number>()
 
 onBeforeMount(async () => {
   const symbol = route.params.symbol
@@ -53,6 +66,20 @@ onBeforeMount(async () => {
   } catch (e) {
     console.error(e)
   }
+
+  // Get corresponding bankAccountId for investment account
+  try {
+    const response = await fetch(`/api/bankaccount?investmentAccountId=${investmentAccountId}`)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    bankAccountId.value = await response.json() as number
+  } catch (e) {
+    console.error(e)
+  }
+
+  // Get bankAccount balance
+  await fetchBankAccountBalance()
 })
 
 async function purchase() {
@@ -96,8 +123,26 @@ function getTodayDate() {
   const day = String(today.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
 }
+
+async function fetchBankAccountBalance() {
+  try {
+    const response = await fetch(`/api/bankaccount/balance?bankAccountId=${bankAccountId.value}`)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    const result = await response.json() as number
+    bankAccountBalance.value = result
+  } catch (e) {
+    console.error(e)
+  }
+}
 </script>
 
 <style lang="scss">
 @use "./style.scss";
+
+#info {
+  display: flex;
+  justify-content: space-between;
+}
 </style>
