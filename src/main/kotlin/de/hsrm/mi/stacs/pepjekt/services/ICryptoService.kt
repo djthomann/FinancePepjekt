@@ -5,8 +5,13 @@ import de.hsrm.mi.stacs.pepjekt.entities.CryptoQuote
 import de.hsrm.mi.stacs.pepjekt.entities.CryptoQuoteLatest
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import java.math.BigDecimal
 
+/**
+ * Interface for managing cryptocurrency operations.
+ *
+ * Provides methods for retrieving cryptocurrency information, saving quotes, and
+ * managing the latest cryptocurrency quotes in a reactive programming paradigm.
+ */
 interface ICryptoService {
 
     fun getCryptoBySymbol(symbol: String): Mono<Crypto>

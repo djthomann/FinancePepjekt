@@ -1,6 +1,7 @@
 package de.hsrm.mi.stacs.pepjekt.handler
 
 import de.hsrm.mi.stacs.pepjekt.services.IBankAccountService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -8,40 +9,49 @@ import reactor.core.publisher.Mono
 import java.math.BigDecimal
 
 /**
- * Handler for managing bank account-related requests.
- * This component handles requests to interact with bank accounts, such as retrieving the balance.
+ * Handler for managing bank account-related requests
  *
- * @param bankAccountService The service used to perform operations on bank accounts.
+ * This component processes incoming server requests related to bank account operations,
+ * such as retrieving the balance or making a deposit. It uses the `IBankAccountService`
+ * to perform the necessary operations and generates appropriate server responses.
+ *
+ * @property bankAccountService The service used to interact with bank accounts
  */
 @Component
 class BankAccountHandler(private val bankAccountService: IBankAccountService) {
 
+    private val logger = LoggerFactory.getLogger(CryptoHandler::class.java)
+
     /**
-     * Handles a request to get the balance of a bank account.
+     * Handles a request to retrieve the balance of a bank account.
      *
-     * If the bank account ID is not provided or the balance cannot be found, an error response will be returned.
-     *
-     * @param request The incoming server request containing query parameters.
-     * @return A Mono containing the server response with the balance or a 404 not found if no balance is found.
-     * @throws IllegalArgumentException If the bank account ID is missing in the query parameters.
+     * @param request The incoming `ServerRequest` containing query parameters.
+     * @return A `Mono` emitting a `ServerResponse`:
+     * - Returns an HTTP 200 status with the balance if successful.
+     * - Returns an HTTP 400 status with an error message if the request is invalid.
+     * @throws IllegalArgumentException If the `bankAccountId` query parameter is missing.
      */
     fun getBalance(request: ServerRequest): Mono<ServerResponse> {
         val bankAccountId = request.queryParam("bankAccountId").orElseThrow { IllegalArgumentException("bankAccountId is required") }.toLong()
+
+        logger.info("Getting balance for bankaccount with id: {}", bankAccountId)
 
         return bankAccountService.getBalance(bankAccountId)
             .flatMap { balance ->
                 ServerResponse.ok().bodyValue(balance)
             }
-            .switchIfEmpty(ServerResponse.notFound().build())
+            .onErrorResume { e ->
+                ServerResponse.badRequest().bodyValue("Error: ${e.message}")
+            }
     }
 
     /**
-     * Handles a request to deposit money into a bank account.
+     * Handles a request to deposit money into a bank account
      *
-     * If the bank account ID is not provided or the balance cannot be found, an error response will be returned.
-     *
-     * @param request The incoming server request containing query parameters.
-     * @return A Mono containing the server response with a 404 not found if the deposit was unsuccessful.
+     * @param request The incoming `ServerRequest` containing query parameters.
+     * @return A `Mono` emitting a `ServerResponse`:
+     * - Returns an HTTP 200 status if the deposit is successful.
+     * - Returns an HTTP 400 status with an error message if the request is invalid or fails.
      */
     fun handleDeposit(request: ServerRequest): Mono<ServerResponse> {
         return Mono.zip(

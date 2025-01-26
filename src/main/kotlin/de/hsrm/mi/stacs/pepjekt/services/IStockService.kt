@@ -37,16 +37,6 @@ interface IStockService {
 
     fun getLatestQuoteBySymbol(symbol: String): Mono<StockQuote>
 
-    fun getDayLow(stockSymbol: String, timeStamp: LocalDateTime): Mono<StockQuote>
-
-    fun getDayHigh(stockSymbol: String, timeStamp: LocalDateTime): Mono<StockQuote>
-
     fun getStocks(): Flux<Stock>
-
-    fun getCurrentValueBySymbol(symbol: String): Mono<BigDecimal>
-
-    fun getChangeBySymbol(symbol: String): Mono<BigDecimal>
-
-    fun getChangePercentageBySymbol(symbol: String): Mono<BigDecimal>
 
 }

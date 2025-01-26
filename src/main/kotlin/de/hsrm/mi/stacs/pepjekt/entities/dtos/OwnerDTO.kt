@@ -1,7 +1,6 @@
 package de.hsrm.mi.stacs.pepjekt.entities.dtos
 
 import de.hsrm.mi.stacs.pepjekt.entities.Owner
-import org.springframework.data.annotation.Id
 
 data class OwnerDTO(
     val id: Long,

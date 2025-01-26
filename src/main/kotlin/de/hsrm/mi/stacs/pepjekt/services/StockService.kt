@@ -1,17 +1,13 @@
 package de.hsrm.mi.stacs.pepjekt.services
 
-import de.hsrm.mi.stacs.pepjekt.entities.CryptoQuoteLatest
 import de.hsrm.mi.stacs.pepjekt.entities.StockQuote
 import de.hsrm.mi.stacs.pepjekt.entities.Stock
-import de.hsrm.mi.stacs.pepjekt.entities.dtos.QuoteDTO
 import de.hsrm.mi.stacs.pepjekt.entities.StockQuoteLatest
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDetailsDTO
 import de.hsrm.mi.stacs.pepjekt.repositories.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.server.ServerResponse
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
@@ -29,12 +25,11 @@ class StockService(
     val stockRepository: IStockRepository,
     val stockQuoteRepository: IStockQuoteRepository,
     val stockQuoteLatestRepository: IStockQuoteLatestRepository,
-    val databaseClient: DatabaseClient,
     val investmentAccountRepository: IInvestmentAccountRepository,
     val portfolioEntryRepository: IPortfolioEntryRepository,
 ) : IStockService {
 
-    val log: Logger = LoggerFactory.getLogger(StockService::class.java)
+    val logger: Logger = LoggerFactory.getLogger(StockService::class.java)
 
     /**
      * Retrieves a stock by its symbol.
@@ -43,13 +38,21 @@ class StockService(
      * @return a [Mono] emitting the [Stock] corresponding to the symbol, or an error if not found
      */
     override fun getStockBySymbol(symbol: String): Mono<Stock> {
+        logger.info("Retrieving stock with symbol: $symbol")
         return stockRepository.findBySymbol(symbol)
+            .doOnError { error -> logger.error("Error retrieving stock with symbol: $symbol", error) }
     }
 
-
-    //TODO Add kdoc
+    /**
+     * Retrieves detailed information about a stock, including current quotes and portfolio information
+     * for a specific investment account.
+     *
+     * @param symbol the symbol of the stock
+     * @param investmentAccountId the ID of the investment account
+     * @return a [Mono] emitting the [StockDetailsDTO] containing stock details, or an error if not found
+     */
     override fun getStockDetails(symbol: String, investmentAccountId: Long): Mono<StockDetailsDTO> {
-        log.info("Getting stockdetails by symbol $symbol and investmentAccountId $investmentAccountId")
+        logger.info("Getting stock details for symbol: $symbol and investment account ID: $investmentAccountId")
 
         val stockMono = getStockBySymbol(symbol)
         val quoteMono = getLatestQuoteBySymbol(symbol)
@@ -58,7 +61,7 @@ class StockService(
             .switchIfEmpty(Mono.error(RuntimeException("InvestmentAccount not found")))
             .flatMap { account ->
                 portfolioEntryRepository.findByInvestmentAccountIdAndStockSymbol(account.id!!, symbol)
-                    .map { portfolioEntry -> // Wenn ein Eintrag gefunden wurde
+                    .map { portfolioEntry ->
                         Mono.zip(stockMono, quoteMono).map { tuple ->
                             StockDetailsDTO.mapToDto(tuple.t1, tuple.t2, portfolioEntry)
                         }
@@ -70,7 +73,6 @@ class StockService(
             }
     }
 
-
     /**
      * Retrieves a stock by its description.
      *
@@ -78,10 +80,17 @@ class StockService(
      * @return a [Mono] emitting the [Stock] corresponding to the description, or an error if not found
      */
     override fun getStockByDescription(description: String): Mono<Stock> {
+        logger.info("Retrieving stock with description: $description")
         return stockRepository.findByDescription(description)
     }
 
+    /**
+     * Retrieves all stocks in the database.
+     *
+     * @return a [Flux] emitting all [Stock] instances in the database
+     */
     override fun getStocks(): Flux<Stock> {
+        logger.debug("Retrieving all stocks")
         return stockRepository.findAll()
     }
 
@@ -94,19 +103,34 @@ class StockService(
      * @return a [Mono] emitting the average price as a [BigDecimal], or zero if no quotes are found
      */
     override fun calculateAveragePrice(symbol: String, from: LocalDateTime, to: LocalDateTime): Mono<BigDecimal> {
-        return getStockHistoryBySymbol(symbol, from, to)
-                .collectList()
-                .map { quotes ->
-                    if (quotes.isEmpty()) {
-                        BigDecimal.ZERO
-                    } else {
-                        val sum = quotes.fold(BigDecimal.ZERO) { acc, quote -> acc.add(quote.currentPrice) }
-                        sum.divide(BigDecimal(quotes.size), 2, RoundingMode.HALF_UP)
-                    }
-                }
-        }
+        logger.info("Calculating average price for stock symbol: $symbol from $from to $to")
 
+        return getStockHistoryBySymbol(symbol, from, to)
+            .collectList()
+            .map { quotes ->
+                if (quotes.isEmpty()) {
+                    BigDecimal.ZERO
+                } else {
+                    val sum = quotes.fold(BigDecimal.ZERO) { acc, quote -> acc.add(quote.currentPrice) }
+                    sum.divide(BigDecimal(quotes.size), 2, RoundingMode.HALF_UP)
+                }
+            }
+            .doOnError { error -> logger.error("Error calculating average price for $symbol", error) }
+    }
+
+    /**
+     * Calculates the average price of a stock based on its historical quote data.
+     *
+     * This method retrieves all historical quotes for a given stock symbol and calculates
+     * the average price by summing the prices and dividing by the total number of quotes.
+     *
+     * @param symbol the symbol of the stock
+     * @return a [Mono] emitting the average price of the stock as a [BigDecimal],
+     *         or [BigDecimal.ZERO] if no quotes are found
+     */
     override fun calculateAveragePrice(symbol: String): Mono<BigDecimal> {
+        logger.info("Calculating average price for stock symbol: $symbol")
+
         return getStockHistoryBySymbol(symbol)
             .collectList()
             .map { quotes ->
@@ -126,6 +150,7 @@ class StockService(
      * @return a [Flux] emitting the [StockQuote] instances associated with the stock
      */
     override fun getStockHistoryBySymbol(symbol: String): Flux<StockQuote> {
+        logger.info("Retrieving stock history for symbol: $symbol")
         return stockRepository.findBySymbol(symbol)
             .flatMapMany {
                 stockQuoteRepository.findByStockSymbol(symbol)
@@ -141,23 +166,40 @@ class StockService(
      * @return a [Flux] emitting the [StockQuote] instances within the specified time range
      */
     override fun getStockHistoryBySymbol(symbol: String, from: LocalDateTime, to: LocalDateTime): Flux<StockQuote> {
+        logger.info("Retrieving stock history for symbol: $symbol from $from to $to")
         return stockQuoteRepository.findByStockSymbol(symbol)
             .filter { quote -> quote.timeStamp.isAfter(from) && quote.timeStamp.isBefore(to) }
-
     }
 
     /**
-     * @return all stocks in the database
+     * Retrieves the latest quote for a stock by its symbol.
+     *
+     * @param symbol the symbol of the stock
+     * @return a [Mono] emitting the latest [StockQuote] instance, or an error if not found
      */
     override fun getAllStocks(): Flux<Stock> {
         return stockRepository.findAll()
     }
 
+    /**
+     * Saves a stock quote into the repository.
+     *
+     * @param stockQuote the [StockQuote] to save
+     * @return a [Mono] emitting the saved [StockQuote]
+     */
     override fun saveStockQuote(stockQuote: StockQuote): Mono<StockQuote> {
+        logger.debug("Saving stock quote for stock symbol: ${stockQuote.stockSymbol}")
         return stockQuoteRepository.save(stockQuote)
     }
 
+    /**
+     * Saves the latest stock quote in the repository.
+     *
+     * @param stockQuote the [StockQuote] to save as the latest quote
+     * @return a [Mono] emitting the saved [StockQuoteLatest]
+     */
     override fun saveLatestQuote(stockQuote: StockQuote): Mono<StockQuoteLatest> {
+        logger.debug("Saving latest stock quote for stock symbol: ${stockQuote.stockSymbol}")
         val quote = StockQuoteLatest(stockQuote.stockSymbol, stockQuote.id!!)
 
         return stockQuoteLatestRepository.findById(stockQuote.stockSymbol)
@@ -183,83 +225,4 @@ class StockService(
             }
     }
 
-    override fun getDayLow(stockSymbol: String, timeStamp: LocalDateTime): Mono<StockQuote> {
-        return databaseClient.sql(
-            """
-        SELECT * FROM quote o
-        WHERE o.stock_symbol = :stockSymbol
-        AND DATE(o.time_stamp) = DATE(:timeStamp)
-        AND o.low_price_of_the_day = (
-            SELECT MIN(low_price_of_the_day) 
-            FROM quote 
-            WHERE stock_symbol = :stockSymbol 
-            AND DATE(time_stamp) = DATE(:timeStamp)
-        )
-        LIMIT 1
-    """
-        )
-            .bind("stockSymbol", stockSymbol)
-            .bind("timeStamp", timeStamp)
-            .map { row, metadata ->
-                StockQuote(
-                    id = row.get("id", Long::class.java) ?: 0L,
-                    stockSymbol = row.get("stock_symbol", String::class.java) ?: "",
-                    timeStamp = row.get("time_stamp", LocalDateTime::class.java) ?: LocalDateTime.now(),
-                    highPriceOfTheDay = row.get("high_price_of_the_day", BigDecimal::class.java) ?: BigDecimal.ZERO,
-                    currentPrice = row.get("current_price", BigDecimal::class.java) ?: BigDecimal.ZERO,
-                    change = row.get("change", Float::class.java) ?: 0.0f,
-                    percentChange = row.get("percent_change", Float::class.java) ?: 0.0f,
-                    lowPriceOfTheDay = row.get("low_price_of_the_day", BigDecimal::class.java) ?: BigDecimal.ZERO,
-                    openPriceOfTheDay = row.get("open_price_of_the_day", BigDecimal::class.java) ?: BigDecimal.ZERO,
-                    previousClosePrice = row.get("previous_close_price", BigDecimal::class.java) ?: BigDecimal.ZERO,
-                )
-            }
-            .one()
-    }
-
-    override fun getDayHigh(stockSymbol: String, timeStamp: LocalDateTime): Mono<StockQuote> {
-        return databaseClient.sql(
-            """
-        SELECT * FROM quote o
-        WHERE o.stock_symbol = :stockSymbol
-        AND DATE(o.time_stamp) = DATE(:timeStamp)
-        AND o.high_price_of_the_day = (
-            SELECT MAX(high_price_of_the_day) 
-            FROM quote 
-            WHERE stock_symbol = :stockSymbol 
-            AND DATE(time_stamp) = DATE(:timeStamp)
-        )
-        LIMIT 1
-    """
-        )
-            .bind("stockSymbol", stockSymbol)
-            .bind("timeStamp", timeStamp)
-            .map { row, metadata ->
-                StockQuote(
-                    id = row.get("id", Long::class.java) ?: 0L,
-                    stockSymbol = row.get("stock_symbol", String::class.java) ?: "",
-                    timeStamp = row.get("time_stamp", LocalDateTime::class.java) ?: LocalDateTime.now(),
-                    highPriceOfTheDay = row.get("high_price_of_the_day", BigDecimal::class.java) ?: BigDecimal.ZERO,
-                    currentPrice = row.get("current_price", BigDecimal::class.java) ?: BigDecimal.ZERO,
-                    change = row.get("change", Float::class.java) ?: 0.0f,
-                    percentChange = row.get("percent_change", Float::class.java) ?: 0.0f,
-                    lowPriceOfTheDay = row.get("low_price_of_the_day", BigDecimal::class.java) ?: BigDecimal.ZERO,
-                    openPriceOfTheDay = row.get("open_price_of_the_day", BigDecimal::class.java) ?: BigDecimal.ZERO,
-                    previousClosePrice = row.get("previous_close_price", BigDecimal::class.java) ?: BigDecimal.ZERO,
-                )
-            }
-            .one()
-    }
-
-    override fun getCurrentValueBySymbol(symbol: String): Mono<BigDecimal> {
-        TODO("Not yet implemented")
-    }
-
-    override fun getChangeBySymbol(symbol: String): Mono<BigDecimal> {
-        TODO("Not yet implemented")
-    }
-
-    override fun getChangePercentageBySymbol(symbol: String): Mono<BigDecimal> {
-        TODO("Not yet implemented")
-    }
 }

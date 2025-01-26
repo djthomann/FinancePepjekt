@@ -30,6 +30,9 @@ class MetalServiceTest {
     private lateinit var metalQuote: MetalQuote
     private lateinit var metalQuoteLatest: MetalQuoteLatest
 
+    /**
+     * Initializes the test environment by setting up mock data and dependencies.
+     */
     @BeforeEach
     fun setUp() {
         metal = Metal(symbol = "GOLD", name = "Gold")

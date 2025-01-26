@@ -14,9 +14,9 @@
 
 <script setup lang="ts">
 
-import CryptoOverview from "@/components/CryptoOverview.vue";
-import MetalOverview from "@/components/MetalOverview.vue";
-import StockOverview from "@/components/StockOverview.vue";
+import CryptoOverview from "@/components/CryptoOverview.vue"
+import MetalOverview from "@/components/MetalOverview.vue"
+import StockOverview from "@/components/StockOverview.vue"
 </script>
 
 <style scoped lang="scss">

@@ -4,6 +4,7 @@ import de.hsrm.mi.stacs.pepjekt.entities.dtos.QuoteDTO
 import de.hsrm.mi.stacs.pepjekt.entities.dtos.StockDTO
 import de.hsrm.mi.stacs.pepjekt.services.IFavoriteService
 import de.hsrm.mi.stacs.pepjekt.services.IStockService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -22,17 +23,19 @@ import java.time.LocalDateTime
 @Component
 class StockHandler(private val stockService: IStockService, private val favoriteService: IFavoriteService) {
 
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     /**
      * Handles a request to retrieve all stocks from the database.
      *
      * @param request The incoming server request.
      * @return all stocks in the database
-     *
-     * TODO return StockDT0
      */
     fun getStocks(request: ServerRequest): Mono<ServerResponse> {
         val investmentAccountId = request.queryParam("investmentAccountId")
             .orElseThrow { IllegalArgumentException("investmentAccountId is required") }
+
+        logger.info("Getting stocks for investment account with id $investmentAccountId")
 
         return stockService.getAllStocks()
             .flatMap { stock ->
@@ -51,6 +54,9 @@ class StockHandler(private val stockService: IStockService, private val favorite
                     ServerResponse.notFound().build()
                 }
             }
+            .onErrorResume { e ->
+                ServerResponse.badRequest().bodyValue("Error: ${e.message}")
+            }
     }
 
     /**
@@ -61,19 +67,22 @@ class StockHandler(private val stockService: IStockService, private val favorite
      * @param request The incoming server request containing the stock symbol.
      * @return A Mono containing the server response with the stock data or a 404 Not Found if the stock is not found.
      * @throws IllegalArgumentException If the stock symbol is not provided in the request.
-     *
-     * TODO return StockDetailsDTO
      */
     fun getStockDetailsBySymbol(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
         val investmentAccountId =
             request.queryParam("investmentAccountId").orElseThrow { IllegalArgumentException("investmentAccountId") }
 
+        logger.info("Getting stock details for investment account with id $investmentAccountId and stock with symbol $symbol")
+
         return stockService.getStockDetails(symbol, investmentAccountId.toLong())
             .flatMap {
                 ServerResponse.ok().bodyValue(it)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
+            .onErrorResume { e ->
+                ServerResponse.badRequest().bodyValue("Error: ${e.message}")
+            }
     }
 
     /**
@@ -84,14 +93,14 @@ class StockHandler(private val stockService: IStockService, private val favorite
      * @param request The incoming server request containing the stock symbol.
      * @return A Mono containing the server response with the stock data or a 404 Not Found if the stock is not found.
      * @throws IllegalArgumentException If the stock symbol is not provided in the request.
-     *
-     * TODO return StockDTO
      */
     fun getStockBySymbol(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol")
             .orElseThrow { IllegalArgumentException("symbol is required") }
         val investmentAccountId = request.queryParam("investmentAccountId")
             .orElseThrow { IllegalArgumentException("symbol is required") }
+
+        logger.info("Getting stock by symbol $symbol and investmentAccountId $investmentAccountId")
 
         return stockService.getStockBySymbol(symbol)
             .flatMap { stock ->
@@ -105,101 +114,9 @@ class StockHandler(private val stockService: IStockService, private val favorite
                     }
             }
             .switchIfEmpty(ServerResponse.notFound().build())
-    }
-
-
-    /**
-     * Handles a request to retrieve stock data by its description/name.
-     *
-     * Extracts the stock symbol from the request's query parameters and retrieves the stock data for the given description/name.
-     *
-     * @param request The incoming server request containing the stock symbol.
-     * @return A Mono containing the server response with the stock data or a 404 Not Found if the stock is not found.
-     * @throws IllegalArgumentException If the stock symbol is not provided in the request.
-     *
-     * TODO return StockDTO
-     */
-    /*
-    fun getStockByName(request: ServerRequest): Mono<ServerResponse> {
-        val name = request.queryParam("name").orElseThrow { IllegalArgumentException("name is required") }
-
-        return stockService.getStockByDescription(name)
-            .flatMap { stock ->
-                val stockDetails =
-                    StockDetailsDTO.mapToDto(stock, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
-                ServerResponse.ok().bodyValue(stockDetails)
+            .onErrorResume { e ->
+                ServerResponse.badRequest().bodyValue("Error: ${e.message}")
             }
-            .switchIfEmpty(ServerResponse.notFound().build())
-    }
-
-     */
-
-    /**
-     * Handles a request to retrieve the latest stock value by its symbol.
-     *
-     * Extracts the stock symbol from the request's query parameters and retrieves the latest stock quote for the specified symbol.
-     * Returns a 404 Not Found response if no stock data is available for the provided symbol.
-     *
-     * @param request The incoming server request containing the stock symbol as a query parameter.
-     * @return A Mono containing the server response with the latest stock value, or a 404 Not Found if the stock is not found.
-     * @throws IllegalArgumentException If the stock symbol is not provided in the request.
-     *
-     * TODO return QuoteDTO oder wo anders rein da QuoteDTO noch nicht existiert?
-     */
-    fun getCurrentStockValue(request: ServerRequest): Mono<ServerResponse> {
-        val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
-
-        return stockService.getLatestQuoteBySymbol(symbol)
-            .flatMap {
-                ServerResponse.ok().bodyValue(QuoteDTO.mapToDto(it))
-            }
-            .switchIfEmpty(ServerResponse.notFound().build())
-    }
-
-    /**
-     * Handles a request to retrieve the lowest stock value of the day for a given symbol.
-     *
-     * Extracts the stock symbol from the request's query parameters and retrieves the lowest stock value of the day
-     * for the specified symbol as of the current date and time.
-     * Returns a 404 Not Found response if no data is available for the provided symbol.
-     *
-     * @param request The incoming server request containing the stock symbol as a query parameter.
-     * @return A Mono containing the server response with the day's lowest stock value, or a 404 Not Found if no data is found.
-     * @throws IllegalArgumentException If the stock symbol is not provided in the request.
-     *
-     * TODO return QuoteDTO oder wo anders rein da QuoteDTO noch nicht existiert?
-     */
-    fun getStockDayLow(request: ServerRequest): Mono<ServerResponse> {
-        val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
-
-        return stockService.getDayLow(symbol, LocalDateTime.now())
-            .flatMap {
-                ServerResponse.ok().bodyValue(QuoteDTO.mapToDto(it))
-            }
-            .switchIfEmpty(ServerResponse.notFound().build())
-    }
-
-    /**
-     * Handles a request to retrieve the highest stock value of the day for a given symbol.
-     *
-     * Extracts the stock symbol from the request's query parameters and retrieves the highest stock value of the day
-     * for the specified symbol as of the current date and time.
-     * Returns a 404 Not Found response if no data is available for the provided symbol.
-     *
-     * @param request The incoming server request containing the stock symbol as a query parameter.
-     * @return A Mono containing the server response with the day's highest stock value, or a 404 Not Found if no data is found.
-     * @throws IllegalArgumentException If the stock symbol is not provided in the request.
-     *
-     * TODO return QuoteDTO oder wo anders rein da QuoteDTO noch nicht existiert?
-     */
-    fun getStockDayHigh(request: ServerRequest): Mono<ServerResponse> {
-        val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
-
-        return stockService.getDayHigh(symbol, LocalDateTime.now())
-            .flatMap {
-                ServerResponse.ok().bodyValue(QuoteDTO.mapToDto(it))
-            }
-            .switchIfEmpty(ServerResponse.notFound().build())
     }
 
     /**
@@ -212,13 +129,13 @@ class StockHandler(private val stockService: IStockService, private val favorite
      * @param request The incoming server request containing the stock symbol and optional time range parameters.
      * @return A Mono containing the server response with the stock history or a 404 Not Found if no history is found.
      * @throws IllegalArgumentException If the stock symbol is not provided in the request.
-     *
-     * TODO return QuoteDTO oder wo anders rein da QuoteDTO noch nicht existiert?
      */
     fun getStockHistoryBySymbol(request: ServerRequest): Mono<ServerResponse> {
         val symbol = request.queryParam("symbol").orElseThrow { IllegalArgumentException("symbol is required") }
         val fromParam = request.queryParam("from")
         val toParam = request.queryParam("to")
+
+        logger.info("Getting stock history by symbol $symbol, from $fromParam to $toParam")
 
         return if (fromParam.isPresent && toParam.isPresent) {
             val from = LocalDateTime.parse(fromParam.get())
@@ -231,6 +148,9 @@ class StockHandler(private val stockService: IStockService, private val favorite
                     ServerResponse.ok().bodyValue(historyDtos)
                 }
                 .switchIfEmpty(ServerResponse.notFound().build())
+                .onErrorResume { e ->
+                    ServerResponse.badRequest().bodyValue("Error: ${e.message}")
+                }
         } else {
             stockService.getStockHistoryBySymbol(symbol)
                 .collectList()
@@ -239,6 +159,9 @@ class StockHandler(private val stockService: IStockService, private val favorite
                     ServerResponse.ok().bodyValue(historyDtos)
                 }
                 .switchIfEmpty(ServerResponse.notFound().build())
+                .onErrorResume { e ->
+                    ServerResponse.badRequest().bodyValue("Error: ${e.message}")
+                }
         }
     }
 
@@ -257,6 +180,8 @@ class StockHandler(private val stockService: IStockService, private val favorite
         val fromParam = request.queryParam("from")
         val toParam = request.queryParam("to")
 
+        logger.info("Getting stock average price for symbol $symbol, from $fromParam to $toParam")
+
         return if (fromParam.isPresent && toParam.isPresent) {
             val from = LocalDateTime.parse(fromParam.get())
             val to = LocalDateTime.parse(toParam.get())
@@ -266,12 +191,18 @@ class StockHandler(private val stockService: IStockService, private val favorite
                     ServerResponse.ok().bodyValue(averagePrice)
                 }
                 .switchIfEmpty(ServerResponse.notFound().build())
+                .onErrorResume { e ->
+                    ServerResponse.badRequest().bodyValue("Error: ${e.message}")
+                }
         } else {
             stockService.calculateAveragePrice(symbol)
                 .flatMap { averagePrice ->
                     ServerResponse.ok().bodyValue(averagePrice)
                 }
                 .switchIfEmpty(ServerResponse.notFound().build())
+                .onErrorResume { e ->
+                    ServerResponse.badRequest().bodyValue("Error: ${e.message}")
+                }
         }
     }
 

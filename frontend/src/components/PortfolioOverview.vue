@@ -55,9 +55,9 @@
 </template>
 
 <script lang="ts" setup>
-import {useRoute, useRouter} from "vue-router";
-import type {InvestmentAccount} from "@/types/types.ts";
-import {onBeforeMount, onUnmounted, ref} from 'vue';
+import {useRoute, useRouter} from "vue-router"
+import type {InvestmentAccount} from "@/types/types.ts"
+import {onBeforeMount, onUnmounted, ref} from 'vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -108,14 +108,14 @@ onBeforeMount(async () => {
 })
 
 async function poll() {
-  console.log("polling");
+  console.log("polling")
 
   try {
-    const response = await fetch(`/api/portfolio?investmentAccountId=${investmentAccountId}`);
+    const response = await fetch(`/api/portfolio?investmentAccountId=${investmentAccountId}`)
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
-    const investmentAccountData = (await response.json()) as InvestmentAccount;
+    const investmentAccountData = (await response.json()) as InvestmentAccount
     totalValue.value = investmentAccountData.totalValue
     totalProfitAndLoss.value = investmentAccountData.totalProfitAndLoss
     totalProfitAndLossPercent.value = investmentAccountData.totalProfitAndLossPercent
@@ -123,23 +123,23 @@ async function poll() {
     for (const portfolioEntry of investmentAccount.value!.portfolio) {
       const matchingEntry = investmentAccountData.portfolio.find(
         (entry) => portfolioEntry.id === entry.id
-      );
+      )
 
       if (matchingEntry && portfolioEntry.stock.latestQuote.currentPrice !== matchingEntry.stock.latestQuote.currentPrice) {
-        portfolioEntry.stock.latestQuote.currentPrice = matchingEntry.stock.latestQuote.currentPrice;
+        portfolioEntry.stock.latestQuote.currentPrice = matchingEntry.stock.latestQuote.currentPrice
         portfolioEntry.totalValue = matchingEntry.totalValue
         portfolioEntry.quantity = matchingEntry.quantity
         portfolioEntry.profitAndLoss = matchingEntry.profitAndLoss
         portfolioEntry.profitAndLossPercent = matchingEntry.profitAndLossPercent
-        portfolioEntry.stock.justChanged = true;
+        portfolioEntry.stock.justChanged = true
 
         setTimeout(() => {
-          portfolioEntry.stock.justChanged = false;
-        }, 200);
+          portfolioEntry.stock.justChanged = false
+        }, 200)
       }
     }
   } catch (e) {
-    console.error(e);
+    console.error(e)
   }
 
   await fetchBankAccountBalance()
@@ -151,17 +151,17 @@ async function deposit() {
 
   try {
     const url = `/api/bankaccount/deposit?bankAccountId=${bankAccountId.value}&amount=${depositAmount.value}`
-    const response = await fetch(url, {method: "POST"});
+    const response = await fetch(url, {method: "POST"})
 
     if (!response.ok) {
-      serverResponse.value = "Error: Order invalid";
-      throw new Error("Network response was not ok");
+      serverResponse.value = "Error: Order invalid"
+      throw new Error("Network response was not ok")
     }
 
-    depositServerAnswer.value = "Success: Deposit done";
+    depositServerAnswer.value = "Success: Deposit done"
   } catch (error) {
-    depositServerAnswer.value = "Error: Deposit failed";
-    console.error("Error: Order not placed", error);
+    depositServerAnswer.value = "Error: Deposit failed"
+    console.error("Error: Order not placed", error)
   }
 
   await fetchBankAccountBalance()
@@ -187,7 +187,7 @@ onUnmounted(() => {
 
 
 const navigateToStockDetail = (symbol: string, investmentAccountId: string) => {
-  router.push({name: 'wertpapier-detail', params: {symbol, investmentAccountId}});
+  router.push({name: 'wertpapier-detail', params: {symbol, investmentAccountId}})
 }
 
 

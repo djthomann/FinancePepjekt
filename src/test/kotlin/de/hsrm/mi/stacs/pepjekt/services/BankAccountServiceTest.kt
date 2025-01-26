@@ -4,12 +4,10 @@ import de.hsrm.mi.stacs.pepjekt.entities.BankAccount
 import de.hsrm.mi.stacs.pepjekt.entities.Currency
 import de.hsrm.mi.stacs.pepjekt.entities.InvestmentAccount
 import de.hsrm.mi.stacs.pepjekt.repositories.IBankAccountRepository
-import de.hsrm.mi.stacs.pepjekt.repositories.IInvestmentAccountRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
-import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
 import kotlin.test.Test
@@ -21,9 +19,7 @@ import kotlin.test.Test
  * for the repository and transaction operator.
  */
 class BankAccountServiceTest {
-    private val investmentAccountRepository: IInvestmentAccountRepository = mock(IInvestmentAccountRepository::class.java)
     private val bankAccountRepository: IBankAccountRepository = mock(IBankAccountRepository::class.java)
-    private val operator: TransactionalOperator = mock(TransactionalOperator::class.java)
 
     private lateinit var bankAccountService: BankAccountService
     private lateinit var bankAccount: BankAccount
@@ -41,10 +37,7 @@ class BankAccountServiceTest {
         )
         investmentAccount = InvestmentAccount(bankAccountId = bankAccount.id, id = 2L, ownerId = 1L)
 
-        `when`(investmentAccountRepository.findByBankAccountId(bankAccount.id!!)).thenReturn(Mono.just(investmentAccount))
-        `when`(investmentAccountRepository.save(any())).thenReturn(Mono.just(investmentAccount))
-
-        bankAccountService = BankAccountService(operator, bankAccountRepository, investmentAccountRepository)
+        bankAccountService = BankAccountService(bankAccountRepository)
 
         `when`(bankAccountRepository.findById(bankAccount.id!!)).thenReturn(Mono.just(bankAccount))
         `when`(bankAccountRepository.save(any())).thenAnswer { invocation ->

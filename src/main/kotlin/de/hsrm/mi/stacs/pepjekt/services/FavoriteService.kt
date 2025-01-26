@@ -2,6 +2,7 @@ package de.hsrm.mi.stacs.pepjekt.services
 
 import de.hsrm.mi.stacs.pepjekt.entities.Favorite
 import de.hsrm.mi.stacs.pepjekt.repositories.IFavoriteRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.reactive.TransactionalOperator
 import reactor.core.publisher.Flux
@@ -24,6 +25,8 @@ class FavoriteService(
     val investmentAccountService: IInvestmentAccountService,
 ) : IFavoriteService {
 
+    private val logger = LoggerFactory.getLogger(FavoriteService::class.java)
+
     /**
      * Retrieves all favorites associated with a specific investment account.
      *
@@ -31,6 +34,7 @@ class FavoriteService(
      * @return A [Flux] emitting all [Favorite] entities for the investment account.
      */
     override fun getFavoritesOfInvestmentAccount(investmentAccountId: Long): Flux<Favorite> {
+        logger.debug("Fetching all favorites for investment account ID: $investmentAccountId")
         return favoriteRepository.findAllByInvestmentAccountId(investmentAccountId)
     }
 
@@ -44,6 +48,8 @@ class FavoriteService(
      * @throws IllegalStateException If the favorite already exists.
      */
     override fun addFavoriteToInvestmentAccount(investmentAccountId: Long, stockSymbol: String): Mono<Void> {
+        logger.debug("Adding favorite stock $stockSymbol to investment account ID: $investmentAccountId")
+
         return stockService.getStockBySymbol(stockSymbol)
             .switchIfEmpty(Mono.error(NoSuchElementException("Stock not found by stockSymbol $stockSymbol")))
             .flatMap { investmentAccountService.getInvestmentAccount(investmentAccountId) }
@@ -75,6 +81,8 @@ class FavoriteService(
      * @throws NoSuchElementException If the favorite does not exist.
      */
     override fun removeFavoriteFromInvestmentAccount(investmentAccountId: Long, stockSymbol: String): Mono<Void> {
+        logger.debug("Removing favorite stock $stockSymbol from investment account ID: $investmentAccountId")
+
         return favoriteRepository.findByInvestmentAccountIdAndStockSymbol(investmentAccountId, stockSymbol)
             .switchIfEmpty(Mono.error(NoSuchElementException("Favorite not found by stock symbol $stockSymbol and investmentAccountId $investmentAccountId")))
             .flatMap { favoriteRepository.removeByInvestmentAccountIdAndStockSymbol(investmentAccountId, stockSymbol) }
@@ -89,11 +97,10 @@ class FavoriteService(
      * @return A [Mono] emitting `true` if the stock is a favorite, or `false` otherwise.
      */
     override fun isFavorite(investmentAccountId: Long, stockSymbol: String): Mono<Boolean> {
+        logger.debug("Checking if stock $stockSymbol is a favorite for investment account ID: $investmentAccountId")
+
         return favoriteRepository.findByInvestmentAccountIdAndStockSymbol(investmentAccountId, stockSymbol)
             .map { true }
             .defaultIfEmpty(false)
     }
-
-
-
 }

@@ -1,6 +1,6 @@
-package de.hsrm.mi.stacs.pepjekt.controller
+package de.hsrm.mi.stacs.pepjekt.entities.dtds
 
-//variables are defined from finnhub
+//variables are defined by the finnhub api
 data class StockQuoteDTD(
     var c: Float,   // current Price
     var d: Float,   // change

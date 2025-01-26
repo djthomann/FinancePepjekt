@@ -1,3 +1,4 @@
+-- Löscht bestehende Tabellen, falls sie bereits existieren, um die Erstellung der neuen Tabellen zu ermöglichen
 DROP TABLE If EXISTS investment_portfolio;
 DROP TABLE IF EXISTS portfolio_entry;
 DROP TABLE IF EXISTS stock_order;
@@ -27,7 +28,7 @@ CREATE TABLE stock
     currency    VARCHAR(3)   NOT NULL -- ISO 4217
 );
 
----------------------------------------Crypto-------------------------------------------------------
+---------------------------------------Crypto (Kryptowährungen)------------------------------------
 
 CREATE TABLE crypto
 (

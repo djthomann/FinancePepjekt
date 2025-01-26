@@ -10,7 +10,6 @@ import org.springframework.web.reactive.function.server.ServerResponse
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 /**
@@ -21,6 +20,7 @@ import java.time.LocalDateTime
  */
 @Component
 class OrderHandler(private val orderService: IOrderService, private val stockService: IStockService) {
+
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     /**
@@ -52,9 +52,13 @@ class OrderHandler(private val orderService: IOrderService, private val stockSer
             "Place BUY Order to time $executionTime for $purchaseAmount $ of $stockSymbol for investmentAccount"
                     + " $investmentAccountId"
         )
+
         return orderService.placeBuyOrder(investmentAccountId, stockSymbol, purchaseAmount, executionTime)
             .flatMap { createdOrder ->
                 ServerResponse.ok().bodyValue(createdOrder)
+            }
+            .onErrorResume { e ->
+                ServerResponse.badRequest().bodyValue("Error: ${e.message}")
             }
     }
 
@@ -90,6 +94,9 @@ class OrderHandler(private val orderService: IOrderService, private val stockSer
                 ServerResponse.ok().bodyValue(order)
             }
             .switchIfEmpty(ServerResponse.notFound().build())
+            .onErrorResume { e ->
+                ServerResponse.badRequest().bodyValue("Error: ${e.message}")
+            }
     }
 
 
@@ -132,6 +139,9 @@ class OrderHandler(private val orderService: IOrderService, private val stockSer
                     .flatMap { orderDTOs ->
                         ServerResponse.ok().bodyValue(orderDTOs)
                     }
+            }
+            .onErrorResume { e ->
+                ServerResponse.badRequest().bodyValue("Error: ${e.message}")
             }
     }
 }
