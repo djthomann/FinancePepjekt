@@ -204,8 +204,15 @@ Mehrere Nutzer können das System verwenden, mit jeweils eigenen Depots und indi
 
 ![Das ist ein Titel](diagrams/domaenenmodell.png)
 
-# Komponentenmodell {#section-komponentenmodell}
-![Komponentenmodell](diagrams/STACS_Finance_ComponentDiagramm.png)
+# Komponentenmodell (Handler-Services) {#section-komponentenmodell1}
+![Komponentenmodell](diagrams/STACS_Finance_ComponentDiagramm_Handler-Services.png)
+
+# Komponentenmodell (Services-Repositories) {#section-komponentenmodell2}
+![Komponentenmodell](diagrams/STACS_Finance_ComponentDiagramm_Services-Repositories.png)
+
+# Komponentenmodell (Scheduled API Call) {#section-komponentenmodell3}
+![Komponentenmodell](diagrams/STACS_Finance_ComponentDiagramm_Scheduler-Handler-Services.png)
+
 
 ![Komponentenmodell_Interfaces](diagrams/STACS_Finance_Interfaces.png)
 
