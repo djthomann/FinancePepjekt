@@ -61,6 +61,13 @@ class BankAccountHandler(private val bankAccountService: IBankAccountService) {
             Mono.justOrEmpty(request.queryParam("amount"))
                 .switchIfEmpty(Mono.error(IllegalArgumentException("amount is required")))
                 .map { BigDecimal(it) }
+                .flatMap { amount ->
+                    if (amount < BigDecimal.ZERO) {
+                        Mono.error(IllegalArgumentException("Deposit amount must not be negative"))
+                    } else {
+                        Mono.just(amount)
+                    }
+                }
         )
             .flatMap { tuple ->
                 val bankAccountId = tuple.t1
@@ -71,7 +78,6 @@ class BankAccountHandler(private val bankAccountService: IBankAccountService) {
             .onErrorResume { e ->
                 ServerResponse.badRequest().bodyValue("Error: ${e.message}")
             }
-
     }
 
 }
