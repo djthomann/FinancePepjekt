@@ -9,6 +9,11 @@ The Finance Project focuses on creating a platform for managing financial assets
 4. **Portfolio Overview**: A dashboard displays purchased stocks with details
 5. **Search for Stocks**: Users can search for stocks
 
+# Screenshots
+![Depotübersicht](/documentation/screenshots/depot.png)
+
+![Assets](/documentation/screenshots/assets.png)
+
 # How to Execute
 
 ## 1. Prepare Environment
@@ -27,7 +32,12 @@ The Finance Project focuses on creating a platform for managing financial assets
 ## 2. Install and Run Backend
 1. **Create .env file**
     - Create in root an .env file
-    - Insert the given credentials
+    - Insert these properties:
+   
+      DB_NAME=mydb
+      DB_USERNAME=my_user
+      DB_PASSWORD=my_password
+      FINNHUB_TOKEN=ct2r2bhr01qiurr42bq0ct2r2bhr01qiurr42bqg
 
 2. **Start Backend**
     - Use the following command:
